@@ -1,0 +1,12 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.env*
+!.env.example
+.browser-profile/
+*.tsbuildinfo
+
+# Lokaal bronmateriaal; niet nodig om de app te bouwen en deels te groot voor GitHub.
+*.pdf
+*.xlsx
