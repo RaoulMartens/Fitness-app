@@ -31,6 +31,11 @@ op dat toestel en in die browser bewaard.
 
 ## Wat werkt
 
+Voor de volgende bouwstap staat een [M2-ontwerpvoorstel](m2-ontwerpvoorstel.md) klaar. Open
+`/m2-voorstel/` op de lokale preview of de [publieke preview](https://raoulmartens.github.io/Fitness-app/m2-voorstel/).
+Dit is een apart klikmodel; het gebruikt alleen tijdelijke tabbladopslag en schrijft niets
+naar de trainingsdatabase. Het persoonlijke programma en de schermwijzigingen zijn ter beoordeling.
+
 - Gewicht (ook 12 of 12,5 kg) en gehele herhalingen invoeren en stapsgewijs wijzigen.
 - Conceptinvoer per toetsaanslag in IndexedDB bewaren, ook lege of halve invoer zoals '12,'.
 - Valideren bij bevestiging; een set en de bijbehorende uitgaande opdracht atomair opslaan.
@@ -69,8 +74,8 @@ npm run test:e2e:webkit
 
 Op de huidige Windows-machine blokkeert Application Control het laden van `harfbuzz.dll` uit
 de WebKit-testbrowser. Dat is een omgevingsblokkade, geen geslaagde WebKit-test. Beveiligingsbeleid
-is niet aangepast. Voer deze controle uit op een geschikte omgeving; echte iPhone-installatie,
-toetsenbord en heropenen moeten ook op het toestel worden gecontroleerd.
+is niet aangepast. De WebKit-controle blijft open. Raoul heeft de M1-telefoontest op
+16 september 2026 bevestigd; nieuwe M2-interacties krijgen later hun eigen iPhone-test.
 
 ## Bewuste grenzen
 

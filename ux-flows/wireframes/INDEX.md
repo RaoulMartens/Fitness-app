@@ -1,5 +1,9 @@
 # Schermoverzicht
 
+Aanvullend, ter beoordeling: [M2-ontwerpvoorstel](../../m2-ontwerpvoorstel.md) en het klikmodel
+in `public/m2-voorstel/`. De 33 schermen hieronder zijn de oorspronkelijke PPL-baseline.
+Het voorstel bevat een aparte scherm- en use-casematrix; er is nog geen programmakeuze vastgelegd.
+
 Drieëndertig schermen in vier groepen. Startpunt voor een nieuwe gebruiker is **start.html**, voor
 een terugkerende **today.html**. 375px, geen JavaScript.
 

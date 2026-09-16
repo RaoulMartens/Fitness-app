@@ -80,6 +80,15 @@ sessie-overzicht is een zijpad voor wie eerst wil zien wat er komt, geen verplic
 De warming-up is begeleid maar niet administratief. De algemene warming-up staat er als lijstje;
 alleen de warming-upsets uit het programma zijn afvinkbaar, en ook dat is optioneel.
 
+## M2-voorstel na de persoonlijke intake
+
+De bestaande PPL-schermen hieronder blijven de oorspronkelijke referentie. Het afzonderlijke
+[M2-ontwerpvoorstel](../m2-ontwerpvoorstel.md) werkt Vandaag, sessie, rust, hervatten, afronden en
+de samenhangende planvoorbeelden uit voor het voorgestelde full-bodyprogramma. Het klikmodel in
+`public/m2-voorstel/` is ter beoordeling; het vervangt deze baseline pas na vaststelling.
+De beloofde Live Activity en het gegarandeerde rustsignaal op het vergrendelscherm uit de oude
+interactiecheck zijn geen geldige PWA-eisen: zie bouwvoorstel.md hoofdstuk 5 en het M2-voorstel.
+
 ## Navigatie tijdens een actieve sessie
 
 | Handeling | Waar | Gevolg voor de sessie |

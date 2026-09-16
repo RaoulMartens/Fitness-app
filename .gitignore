@@ -6,6 +6,9 @@ playwright-report/
 !.env.example
 .browser-profile/
 *.tsbuildinfo
+.playwright-cli/
+output/playwright/
+.impeccable/review/
 
 # Lokaal bronmateriaal; niet nodig om de app te bouwen en deels te groot voor GitHub.
 *.pdf

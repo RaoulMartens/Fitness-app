@@ -290,7 +290,9 @@ Lever per stap iets dat werkt.
 **Opgeleverd als low-fidelity testversie op 16 september 2026.** De implementatie staat in src/.
 Opslag-, invoer- en offline browsercontroles staan in tests/ en src/db.test.ts. De technische
 acceptatie is in Chromium gecontroleerd; WebKit is lokaal door Windows Application Control
-geblokkeerd en een fysieke iPhone is nog niet getest. Zie artifacts/m1/VERIFICATIE.md.
+geblokkeerd. Raoul bevestigde op 16 september 2026 na de gevraagde telefoontest: 'Ja het werkt
+volledig, dus we kunnen door'. Dit is gebruikersbevestiging, geen geautomatiseerde WebKit-test.
+Zie artifacts/m1/VERIFICATIE.md.
 
 Het oefenscherm met twee velden en een duidelijk als test gemarkeerd voorschrift. M1 kan na
 technisch akkoord onafhankelijk van de programmakeuze worden gebouwd. Testwaarden zoals 12 kg
@@ -301,6 +303,9 @@ als gehele aantallen registreren en het getoonde doel overeenkomt met het techni
 testvoorschrift. Persoonlijke progressieregels zijn geen voorwaarde om deze opslagtest te halen.
 
 ### M2 — De sessieflow
+**In voorbereiding, 16 september 2026.** Het afzonderlijke [ontwerpvoorstel](m2-ontwerpvoorstel.md)
+maakt het full-bodyvoorstel en de gewijzigde flow beoordeelbaar. Het klikmodel staat in
+public/m2-voorstel/. Programma en schermwijzigingen zijn nog niet als vastgesteld gemarkeerd.
 Vandaag, warming-up, oefening, rust, afronden, gevolgen.
 *Voorwaarde:* het persoonlijke programma en de betrokken wireflows zijn vastgesteld.
 *Klaar wanneer:* je een hele sessie kunt doorlopen; de rusttimer zichtbaar afloopt en na terugkeer

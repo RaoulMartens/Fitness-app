@@ -19,7 +19,10 @@ Persoonlijk programma, timer, daadwerkelijke video's en accounts vallen buiten d
 
 WebKit kon op deze Windows-machine niet starten: Windows Application Control blokkeert
 harfbuzz.dll. Beveiligingsbeleid is niet veranderd. De WebKit-tests staan apart klaar en zijn
-niet als geslaagd geteld. Een fysieke iPhone en daadwerkelijke installatie zijn niet getest.
+niet als geslaagd geteld. Raoul bevestigde op 16 september 2026 na de instructie om de app op
+zijn iPhone te installeren, te sluiten/heropenen en offline te proberen: 'Ja het werkt volledig,
+dus we kunnen door'. De telefoontest is daarmee door de gebruiker bevestigd. Toestelmodel,
+iOS-versie en afzonderlijke teststappen zijn niet door Codex vastgelegd.
 
 Het eerste browserherstartonderzoek gebruikte een te lang profielpad onder test-results.
 Een kort, tijdelijk browserprofiel verhelpt het Windows-padprobleem. De test bewaart het profiel

@@ -212,6 +212,10 @@ de concrete iPhone en iOS-versie blijven onderdeel van de praktijktest.
 
 ## 6. Bouwvolgorde en bewijs
 
+Stand 16 september 2026: M1 is ook op de telefoon door Raoul bevestigd. Voor de volgende stap
+staat een afzonderlijk [M2-ontwerpvoorstel](m2-ontwerpvoorstel.md) klaar, met een werkend klikmodel.
+De inhoudelijke keuze voor full-body en de aangepaste schermteksten blijft ter beoordeling.
+
 | Stap | Werkend resultaat | Controle |
 | --- | --- | --- |
 | M1 | Installeerbare basis met een oefening, setinvoer, een technisch testvoorschrift en herstel. | Testwaarde 12 kg kunnen invoeren; draft en bevestigde set overleven sluiten; dubbel tikken maakt geen tweede set; offline openen na installatie. Geen vastgesteld persoonlijk trainingsadvies. |
