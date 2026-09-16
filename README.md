@@ -23,7 +23,11 @@ npm run preview -- --port 4173 --strictPort
 Open http://127.0.0.1:4173. Wacht de eerste keer op 'App offline beschikbaar'. Gebruik bij
 terugkomen dezelfde browser en hetzelfde adres: localhost en 127.0.0.1 hebben afzonderlijke opslag.
 Installatie op een echte telefoon vraagt een bereikbaar HTTPS-adres; de lokale preview is
-niet vanaf een andere telefoon bereikbaar. Er is nog geen externe hosting ingericht.
+niet vanaf een andere telefoon bereikbaar. De testversie wordt bij elke wijziging op `main`
+automatisch gepubliceerd via GitHub Pages op https://raoulmartens.github.io/Fitness-app/.
+Open die link op je iPhone in Safari en voeg de app via Deel > Zet op beginscherm toe.
+Wacht voor een offline test tot de app 'App offline beschikbaar' meldt. Gegevens blijven alleen
+op dat toestel en in die browser bewaard.
 
 ## Wat werkt
 
