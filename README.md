@@ -4,6 +4,13 @@ M2: de volledige sessieflow met blijvende lokale opslag. De grijze vormgeving en
 volgen `ux-flows/m2/`. Het getoonde startschema bevat zeven oefeningen en veertien werksets.
 Gecontroleerde apparaatinstructies en demonstraties ontbreken nog.
 
+De telefooncontrole van M2 is op 17 september door Raoul bevestigd. De volgende stap staat als
+afzonderlijk [M3a-ontwerpvoorstel](m3-ontwerpvoorstel.md) op `/m3-voorstel/`: bezet materiaal,
+minder tijd, dagvorm en onderbreken. Dit is een klikmodel met eigen tabbladopslag, geen uitbreiding
+van de productieopslag. De hoofdapp blijft M2. [Flows en controle](ux-flows/m3/UX-FLOWS.md).
+Wie vanuit een eerder gecachete app bij de voorstelroute toch M2 ziet, kiest eerst
+'Nieuwe versie openen'; de nieuwe service worker houdt beide voorstelroutes buiten de appcache.
+
 ## Starten
 
 Node.js 22.12+ of een ondersteunde nieuwere versie.

@@ -334,6 +334,15 @@ klopt; de sessie blijft bestaan als je naar Vandaag gaat; pauzeren hervatbaar is
 expliciet afronden of afbreken een eindstatus geeft. Trilling is optioneel waar ondersteund.
 
 ### M3 — Afwijkingen
+**Ontwerpstap, 17 september 2026.** Raoul bevestigt dat de werkende M2-hoofdapp goed werkt op
+zijn telefoon en vraagt door te gaan. M2's telefoontoets is daarmee door de gebruiker bevestigd;
+dit is geen bewijs van alle offline- en achtergrondscenario's. De volgende stap werkt bestaande
+UC-003 t/m UC-006 uit voor het full-bodyprogramma: zie `m3-ontwerpvoorstel.md` en `ux-flows/m3/`.
+Het afzonderlijke klikmodel op `/m3-voorstel/` gebruikt alleen voorbeeldgegevens en eigen
+tabbladopslag. Nieuwe teksten en keuzes worden beoordeeld voordat ze de hoofdapp veranderen.
+Gecontroleerde vervangers en de dosering/duur bij structurele overbelasting blijven open;
+het voorstel maakt die grenzen zichtbaar en doet geen automatische trainingsaanpassingen.
+
 Lukt niet, te zwaar, minder tijd, pauzeren of stoppen.
 *Klaar wanneer:* de vier gebeurtenissen uit R7 elk hun eigen gevolg hebben; een vervanging een
 zichtbare reikwijdte krijgt; en een slechte dag het ingeschatte niveau niet verandert.
