@@ -7,6 +7,9 @@ Plan en Vooruitgang zijn een dunne rand. Mobile-first, 375px.
 Startscherm voor een nieuwe gebruiker: [wireframes/start.html](wireframes/start.html).
 Voor een terugkerende gebruiker: [wireframes/today.html](wireframes/today.html).
 
+Actuele persoonlijke M2-variant: [navigatiecorrectie en werkend klikmodel](m2/UX-FLOWS.md).
+De oorspronkelijke schermen hieronder blijven de referentie voor het volledige product.
+
 ## Master screen map
 [diagrams/screen-map.md](diagrams/screen-map.md) — alle 33 schermen en de navigatie ertussen.
 

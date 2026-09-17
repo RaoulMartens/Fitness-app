@@ -306,6 +306,10 @@ testvoorschrift. Persoonlijke progressieregels zijn geen voorwaarde om deze opsl
 **In voorbereiding, 16 september 2026.** Het afzonderlijke [ontwerpvoorstel](m2-ontwerpvoorstel.md)
 maakt het full-bodyvoorstel en de gewijzigde flow beoordeelbaar. Het klikmodel staat in
 public/m2-voorstel/. Programma en schermwijzigingen zijn nog niet als vastgesteld gemarkeerd.
+Raoul heeft vervolgens opdracht gegeven de navigatie te herstellen met ux-flow-designer:
+Vandaag bevat de sessie-ingang, Plan de trainingsweek en planningskeuzes; beoordeling van het
+planvoorstel staat buiten de dagelijkse appnavigatie. Dit akkoord geldt voor de flowcorrectie,
+niet voor het trainingsprogramma. De uitwerking staat in [ux-flows/m2/UX-FLOWS.md](ux-flows/m2/UX-FLOWS.md).
 Vandaag, warming-up, oefening, rust, afronden, gevolgen.
 *Voorwaarde:* het persoonlijke programma en de betrokken wireflows zijn vastgesteld.
 *Klaar wanneer:* je een hele sessie kunt doorlopen; de rusttimer zichtbaar afloopt en na terugkeer

@@ -10,7 +10,9 @@ const exercises = [
 const key = 'training-m2-design-v1'
 const app = document.querySelector('#app')
 const dialog = document.querySelector('#sheet')
-const fresh = () => ({ view: 'today', session: null, weekend: null, compromise: null })
+const fresh = () => ({ view: 'today', session: null, weekend: null, planDraft: null, compromise: null, reviewReturn: 'today' })
+const viewNames = ['today', 'overview', 'warmup', 'exercise', 'summary', 'consequences', 'plan', 'plan-edit', 'proposal', 'compromise']
+const reviewing = view => ['proposal', 'compromise'].includes(view)
 let state = fresh()
 let wakeLock = null
 let wakeRequested = false
@@ -39,7 +41,7 @@ try {
   if (saved) {
     const parsed = JSON.parse(saved)
     if (!parsed || typeof parsed.view !== 'string' || !('session' in parsed) || (parsed.session && (!Array.isArray(parsed.session.sets) || typeof parsed.session.draft !== 'object'))) throw new Error('Invalid preview')
-    state = parsed
+    state = { ...fresh(), ...parsed }
   }
 } catch {
   storageError('Het eerdere voorbeeld kon niet worden geopend. Je ziet een nieuw voorbeeld; je M1-registraties zijn niet aangeraakt.')
@@ -49,9 +51,17 @@ function save() {
   catch { storageError('Het voorbeeld blijft nu alleen in beeld. Herladen kan de invoer wissen: opslag in dit tabblad is niet beschikbaar.') }
 }
 function go(view) {
+  if (view === 'plan-edit' && state.view !== view && !reviewing(state.view)) state.planDraft = { weekend: state.weekend }
+  if (view === 'proposal' && !reviewing(state.view)) state.reviewReturn = state.view
+  const changed = state.view !== view
   state.view = view
-  save()
   render()
+  save()
+  if (changed) history.pushState({ m2View: state.view }, '', `#${state.view}`)
+  else history.replaceState({ m2View: state.view }, '', `#${state.view}`)
+  focusView()
+}
+function focusView() {
   window.scrollTo(0, 0)
   app.querySelector('h1')?.focus({ preventScroll: true })
 }
@@ -62,7 +72,7 @@ const tabs = page => `<nav class="tabs" aria-label="Hoofdnavigatie"><button data
 function today() {
   const session = state.session
   return `${title('Vandaag')}${active() ? `<section class="panel"><h2>${session.status === 'paused' ? 'Sessie gepauzeerd' : 'Sessie loopt'}</h2><p>Full-body · ${session.sets.length} van 14 sets vastgelegd</p><p class="muted">${session.phase === 'warmup' ? 'Je was bij de warming-up.' : session.sets.length === 14 ? 'Je kunt je sessie afronden.' : `${current().name} · set ${setNumber()}${session.draft.weight || session.draft.reps ? ' · concept bewaard' : ''}`}</p>${button('Verder trainen', 'resume-sheet', 'primary')}</section>` : session ? `<section class="panel"><h2>${completionLabel()}</h2><p>${session.sets.length} van 14 sets vastgelegd in dit voorbeeld.</p>${button('Bekijk je sessie', 'summary', 'primary')}</section>` : `<section class="panel"><h2>Woensdag · full-body</h2><p>7 oefeningen · ongeveer 60 minuten</p><p class="muted">Je hele lichaam, met extra aandacht voor je bovenlichaam.</p>${button('Start training', 'start', 'primary')}${button('Bekijk de sessie', 'overview', 'text-button')}</section>`}
-    <section class="group"><h2>Je weekend</h2><p>${state.weekend ? `Je koos ${state.weekend} in dit voorbeeld.` : 'Nog niets gepland. Je kiest zelf of je een tweede keer gaat.'}</p>${button(state.weekend ? 'Weekendkeuze aanpassen' : 'Weekendtraining kiezen', 'weekend-sheet', 'text-button')}</section>
+    <section class="group"><h2>Je weekend</h2><p>${state.weekend ? `Je koos ${state.weekend} in dit voorbeeld.` : 'Nog niets gepland. Je kiest zelf of je een tweede keer gaat.'}</p>${button('Bekijk je trainingsweek', 'plan', 'text-button')}</section>
     <details><summary>Waarom dit voorstel?</summary><p>Je begint met weinig ervaring, wilt vooral je bovenlichaam ontwikkelen en hebt woensdag als vaste dag. Beide sessies bevatten ook benen. Dezelfde oefeningen geven je gelegenheid de apparaten te leren kennen.</p></details>`
 }
 function overview() {
@@ -102,10 +112,15 @@ function consequences() {
   return `${title('Volgende keer')}<p>Je vorige uitvoering komt naast je nieuwe set te staan.</p><section class="group"><h2>Je doel blijft voorlopig gelijk</h2><p>We hebben nog geen betrouwbare informatie over de inspanning en het apparaat. Daarom verhogen we je gewicht niet automatisch.</p></section><section class="group"><h2>Je planning</h2><p>${state.weekend ? `${state.weekend} is de tweede sessie die je zelf koos.` : 'Woensdag blijft je vaste dag. Het weekend is nog niet ingepland.'}</p><p>Overgebleven sets worden niet doorgeschoven.</p></section>${button('Terug naar Vandaag', 'today', 'primary')}<details><summary>Hoe komt een volgend doel tot stand?</summary><p>Pas als oefening, apparaat, gewicht, alle werksets en inspanningsinformatie vergelijkbaar zijn, kan de app een verhoging voorstellen. Je krijgt de reden te zien voordat je kiest.</p></details>`
 }
 function plan() {
-  return `${title('Je plan')}<p>Full-body · extra aandacht voor je bovenlichaam</p><ul class="exercise-list"><li><strong>Woensdag</strong><span>Vaste training</span></li><li><strong>Weekend</strong><span>${state.weekend || 'Optioneel'}</span></li></ul><p>Richtduur 60 minuten. Je houdt ruimte tot 90 minuten om rustig te beginnen.</p>${button('Bekijk de oefeningen', 'overview', 'primary')}${button('Bekijk het planvoorstel', 'proposal', 'text-button')}${button('Weekendtraining kiezen', 'weekend-sheet', 'text-button')}<details><summary>Hoe zit het met vooruitgang?</summary><p>We gebruiken de trainingen die je echt uitvoert. Een weekend dat je niet inplant, is geen gemiste training.</p></details>`
+  return `${title('Je plan')}<p>Full-body · extra aandacht voor je bovenlichaam</p><section class="panel"><h2>Je trainingsweek</h2><ul class="exercise-list"><li><div><strong>Woensdag</strong><p class="note">Full-body · ongeveer 60 minuten</p></div><span>Vaste training</span></li><li><div><strong>${state.weekend || 'Weekend'}</strong><p class="note">${state.weekend ? 'Full-body · ongeveer 60 minuten' : 'Een tweede training als jij daarvoor kiest.'}</p></div><span>${state.weekend ? 'Ingepland' : 'Niet ingepland'}</span></li></ul></section><p>Richtduur 60 minuten. Je houdt ruimte tot 90 minuten om rustig te beginnen.</p>${button('Trainingsdagen aanpassen', 'plan-edit', 'primary')}<details><summary>Waarom deze verdeling?</summary><p>Je begint met weinig ervaring, wilt vooral je bovenlichaam ontwikkelen en hebt woensdag als vaste dag. Beide sessies bevatten ook benen. Dezelfde oefeningen geven je gelegenheid de apparaten te leren kennen.</p></details><details><summary>Hoe zit het met vooruitgang?</summary><p>We gebruiken de trainingen die je echt uitvoert. Een weekend dat je niet inplant, is geen gemiste training.</p></details>`
+}
+function planEdit() {
+  return `${title('Trainingsdagen aanpassen')}<section class="panel"><h2>Woensdag</h2><p>Je vaste training · ongeveer 60 minuten</p><p class="note">Woensdag blijft de basis van dit voorstel.</p></section><fieldset><legend>Je optionele weekendtraining</legend>${[
+    ['', 'Nog niet inplannen'], ['Zaterdag', 'Zaterdag'], ['Zondag', 'Zondag'],
+  ].map(([value, label]) => `<label class="choice"><input type="radio" name="weekend" value="${value}" ${(state.planDraft.weekend || '') === value ? 'checked' : ''}><span>${label}</span></label>`).join('')}</fieldset><p>Alleen jouw keuze maakt dit een geplande tweede training.</p>${button('Planning opslaan', 'save-plan', 'primary')}${button('Annuleren', 'plan', 'text-button')}`
 }
 function proposal() {
-  return `${title('Je startvoorstel')}<p>Woensdag full-body. Een tweede sessie in het weekend als jij daarvoor kiest.</p><p>Een herkenbare basis voor je eerste weken: benen, borst, rug en extra armen.</p>${list()}<p>2 minuten rust bij de eerste vijf oefeningen; 90 seconden bij de arm-oefeningen. Extra rust blijft mogelijk.</p><p class="note">Dit is een eerste basis. Gerichte schouder-, romp- en heupdominante oefeningen vragen later een aanvulling; dit is nog geen volledig atletiekprogramma.</p>${button('Bekijk de training', 'overview', 'primary')}${button('En als ik minder tijd wil plannen?', 'compromise', 'text-button')}<details><summary>Waarom deze opzet?</summary><p>Het voorstel houdt rekening met je beschikbare woensdag, beperkte ervaring en wens om bovenlichaam en armen te ontwikkelen. De exacte apparaten en media moeten nog worden bevestigd.</p></details>`
+  return `${title('Je startvoorstel')}<p>Woensdag full-body. Een tweede sessie in het weekend als jij daarvoor kiest.</p><p>Een herkenbare basis voor je eerste weken: benen, borst, rug en extra armen.</p>${list()}<p>2 minuten rust bij de eerste vijf oefeningen; 90 seconden bij de arm-oefeningen. Extra rust blijft mogelijk.</p><p class="note">Dit is een eerste basis. Gerichte schouder-, romp- en heupdominante oefeningen vragen later een aanvulling; dit is nog geen volledig atletiekprogramma.</p>${button('Terug naar de app', 'return-app', 'primary')}${button('En als ik minder tijd wil plannen?', 'compromise', 'text-button')}<details><summary>Waarom deze opzet?</summary><p>Het voorstel houdt rekening met je beschikbare woensdag, beperkte ervaring en wens om bovenlichaam en armen te ontwikkelen. De exacte apparaten en media moeten nog worden bevestigd.</p></details>`
 }
 function compromise() {
   return `${title('Als 60 minuten niet past')}<p>We kunnen nog niet beloven dat alle zeven oefeningen in 45 minuten passen. Wat wil je dan aanpassen?</p><fieldset><legend>Een keuze voor het planvoorbeeld</legend>${[
@@ -115,12 +130,25 @@ function compromise() {
   ].map(([value, label, help]) => `<label class="choice"><input type="radio" name="compromise" value="${value}" ${state.compromise === value ? 'checked' : ''}><span><strong>${label}</strong><span class="note">${help}</span></span></label>`).join('')}</fieldset>${button('Bekijk het gevolg', 'compromise-result', 'primary')}<p class="note">Dit scherm hoort bij de latere planning. Tijdens een training wordt minder tijd apart behandeld.</p>`
 }
 function render() {
+  if (!viewNames.includes(state.view)) state.view = 'today'
   if (['warmup', 'exercise'].includes(state.view) && !active()) state.view = state.session ? 'summary' : 'today'
   if (['summary', 'consequences'].includes(state.view) && (!state.session || active())) state.view = 'today'
+  if (state.view === 'plan-edit') state.planDraft ??= { weekend: state.weekend }
+  else if (!reviewing(state.view)) state.planDraft = null
   const training = ['warmup', 'exercise'].includes(state.view)
-  const views = { today, overview, warmup, exercise, summary, consequences, plan, proposal, compromise }
+  const views = { today, overview, warmup, exercise, summary, consequences, plan, 'plan-edit': planEdit, proposal, compromise }
   const content = views[state.view] ?? today
-  app.innerHTML = `<header class="nav"><span>${training ? 'Full-body' : 'Training'}</span>${button(training ? 'Naar Vandaag · sessie blijft lopen' : state.view === 'today' ? 'Het planvoorstel' : 'Terug naar Vandaag', training ? 'today' : state.view === 'today' ? 'proposal' : 'today', 'text-button')}</header><div class="content">${content()}</div><footer class="footer">${storageFailed ? 'Voorbeeldopslag niet beschikbaar' : 'Klikmodel · bewaard in dit tabblad'} · ontwerp ter beoordeling</footer>${['today', 'plan'].includes(state.view) ? tabs(state.view) : ''}`
+  const back = {
+    overview: ['Terug naar Vandaag', 'today'],
+    'plan-edit': ['Terug naar Plan', 'plan'],
+    proposal: ['Terug naar de app', 'return-app'],
+    compromise: ['Terug naar het voorstel', 'proposal'],
+    summary: ['Terug naar Vandaag', 'today'],
+    consequences: ['Terug naar je sessie', 'summary'],
+  }[state.view]
+  const navigation = training ? button('Naar Vandaag · sessie blijft lopen', 'today', 'text-button') : back ? button(...back, 'text-button') : ''
+  app.innerHTML = `<header class="nav"><span>${training ? 'Full-body' : reviewing(state.view) ? 'Planvoorstel beoordelen' : 'Training'}</span>${navigation}</header><div class="content">${content()}</div><footer class="footer">${storageFailed ? 'Voorbeeldopslag niet beschikbaar' : 'Klikmodel · bewaard in dit tabblad'} · ontwerp ter beoordeling</footer>${['today', 'plan'].includes(state.view) ? tabs(state.view) : ''}`
+  document.querySelector('#review-proposal').hidden = reviewing(state.view)
   updateTimer()
   void updateWake()
 }
@@ -132,7 +160,6 @@ function openSheet(name) {
     finish: ['Sessie afronden?', () => `<p>Je hebt ${session.sets.length} van 14 werksets vastgelegd. ${session.sets.length < 14 ? 'De rest blijft niet uitgevoerd.' : 'Alle werksets zijn klaar.'}</p>${draftWarning()}<p>Je sessie krijgt de status ${session.sets.length === 14 ? 'afgerond' : 'deels afgerond'}.</p>${button('Sessie afronden', 'finish', 'primary')}${button('Verder trainen', 'close')}`],
     abort: ['Sessie afbreken?', () => `<p>De ${session.sets.length} vastgelegde sets blijven bewaard. De sessie krijgt de status afgebroken.</p>${draftWarning()}${button('Sessie afbreken', 'abort', 'primary')}${button('Verder trainen', 'close')}`],
     demo: ['Oefenuitleg', () => `<p>${displayed().name}</p><p>Hier komen een demonstratie, instelhulp en korte aanwijzingen voor jouw apparaat.</p><p>Die inhoud is nog niet beschikbaar. Laat de instelling en uitvoering bij de eerste training ter plaatse uitleggen.</p>${button('Terug naar de set', 'close', 'primary')}`],
-    weekend: ['Je weekend', () => `<p>Alleen jouw keuze maakt dit een geplande tweede training.</p><div class="stack">${button('Zaterdag kiezen', 'weekend-saturday')}${button('Zondag kiezen', 'weekend-sunday')}${button('Nog niet inplannen', 'weekend-none')}</div>`],
     reset: ['Voorbeeld opnieuw beginnen?', () => `<p>Alleen de invoer van dit ontwerpvoorstel wordt gewist. Je registraties in de M1-app blijven behouden.</p>${button('Voorbeeld wissen', 'reset-confirm', 'primary')}${button('Terug', 'close')}`],
     compromise: ['Gevolg van je keuze', () => `<p>${({ time: 'Je houdt de zeven oefeningen en maakt meer tijd vrij. De werkelijke duur moeten we nog meten.', frequency: 'Er is eerst een nieuw verdelingsvoorstel nodig. Woensdag blijft vast; je weekend is nog niet veranderd.', priority: 'Er is eerst een korter schema nodig waarin zichtbaar staat welke onderdelen vervallen. Je huidige voorstel is nog niet veranderd.' })[state.compromise]}</p>${button('Terug naar het voorstel', 'proposal', 'primary')}`],
   }
@@ -185,7 +212,7 @@ document.addEventListener('click', event => {
   if (action === 'close') { dialog.close(); return }
   if (action === 'reset') { openSheet('reset'); return }
   if (action === 'reset-confirm') { dialog.close(); state = fresh(); wakeRequested = false; go('today'); return }
-  if (['resume-sheet', 'weekend-sheet', 'finish-sheet', 'abort-sheet'].includes(action)) { openSheet(action.replace('-sheet', '')); return }
+  if (['resume-sheet', 'finish-sheet', 'abort-sheet'].includes(action)) { openSheet(action.replace('-sheet', '')); return }
   if (['interrupt', 'demo'].includes(action)) { openSheet(action); return }
   if (action === 'compromise-result') { if (state.compromise) openSheet('compromise'); else { document.querySelector('[name="compromise"]').focus(); document.querySelector('legend').textContent = 'Kies eerst wat je wilt aanpassen'; } return }
   dialog.close()
@@ -208,9 +235,11 @@ document.addEventListener('click', event => {
     state.session.rest = null
     state.session.draft = { weight: '', reps: '' }
     go('summary')
-  } else if (action.startsWith('weekend-')) {
-    state.weekend = action === 'weekend-saturday' ? 'Zaterdag' : action === 'weekend-sunday' ? 'Zondag' : null
-    save(); render()
+  } else if (action === 'save-plan') {
+    state.weekend = state.planDraft.weekend
+    go('plan')
+  } else if (action === 'return-app') {
+    go(viewNames.includes(state.reviewReturn) && !reviewing(state.reviewReturn) ? state.reviewReturn : 'today')
   } else go(action)
 })
 document.addEventListener('input', event => {
@@ -219,6 +248,7 @@ document.addEventListener('input', event => {
 document.addEventListener('change', event => {
   if (event.target.id === 'warmup-done') state.session.warmed = event.target.checked
   if (event.target.name === 'compromise') state.compromise = event.target.value
+  if (event.target.name === 'weekend') state.planDraft.weekend = event.target.value || null
   if (event.target.id === 'wake') { wakeRequested = event.target.checked; void updateWake() }
   save()
 })
@@ -243,4 +273,16 @@ document.addEventListener('submit', event => {
 document.addEventListener('visibilitychange', () => { updateTimer(); void updateWake() })
 window.addEventListener('pagehide', () => { if (wakeLock) void wakeLock.release() })
 setInterval(updateTimer, 250)
+window.addEventListener('popstate', event => {
+  dialog.close()
+  state.view = event.state?.m2View ?? location.hash.slice(1)
+  render()
+  save()
+  history.replaceState({ m2View: state.view }, '', `#${state.view}`)
+  focusView()
+})
+const initialView = location.hash.slice(1)
+if (viewNames.includes(initialView)) state.view = initialView
 render()
+save()
+history.replaceState({ m2View: state.view }, '', `#${state.view}`)

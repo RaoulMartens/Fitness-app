@@ -1,4 +1,6 @@
-:root {
+<!doctype html>
+<html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Trainingsdagen aanpassen - M2 wireframe</title>
+<style>:root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #333;
   background: #e0e0e0;
@@ -81,3 +83,6 @@ legend { margin-bottom: 10px; font-size: 14px; }
   .app { margin: 0; border: 0; max-width: none; min-height: calc(100dvh - 150px); }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+.app,.review-bar { max-width:375px; } .wf-link { display:block; text-align:center; padding:12px; min-height:44px; } .tabs .wf-link { flex:1; } .tabs [aria-current] { font-weight:600; text-decoration:underline; } .wf-link.primary { border:1px dashed #777; } .wf-link.secondary { border:1px dashed #888; } .wf-nav .wf-link { font-size:12px; }
+</style></head><body><aside class="review-bar"><strong>Statisch M2-wireframe</strong><p>De links tonen de schermflow. Probeer opslaan, invoer, sheets en timers in het werkende klikmodel.</p><div class="review-links"><a class="wf-link" href="../">Werkend klikmodel</a><a class="wf-link" href="proposal.html">Planvoorstel beoordelen</a></div></aside><main class="app"><header class="nav wf-nav"><span>Training</span><a href="plan.html" class="wf-link text-button">Terug naar Plan</a></header><div class="content"><h1 tabindex="-1" class="wf-header">Trainingsdagen aanpassen</h1><section class="panel wf-card"><h2>Woensdag</h2><p>Je vaste training · ongeveer 60 minuten</p><p class="note">Woensdag blijft de basis van dit voorstel.</p></section><fieldset><legend>Je optionele weekendtraining</legend><label class="choice"><input type="radio" name="weekend" value="" checked><span>Nog niet inplannen</span></label><label class="choice"><input type="radio" name="weekend" value="Zaterdag" ><span>Zaterdag</span></label><label class="choice"><input type="radio" name="weekend" value="Zondag" ><span>Zondag</span></label></fieldset><p>Alleen jouw keuze maakt dit een geplande tweede training.</p><a href="plan.html" class="wf-link primary">Planning opslaan</a><a href="plan.html" class="wf-link text-button">Annuleren</a></div><footer class="footer">plan-edit.html · UC-008 · statisch voorbeeld, geen opgeslagen training</footer></main></body></html>

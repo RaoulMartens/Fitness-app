@@ -1,4 +1,6 @@
-:root {
+<!doctype html>
+<html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Warming-up - M2 wireframe</title>
+<style>:root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #333;
   background: #e0e0e0;
@@ -81,3 +83,6 @@ legend { margin-bottom: 10px; font-size: 14px; }
   .app { margin: 0; border: 0; max-width: none; min-height: calc(100dvh - 150px); }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+
+.app,.review-bar { max-width:375px; } .wf-link { display:block; text-align:center; padding:12px; min-height:44px; } .tabs .wf-link { flex:1; } .tabs [aria-current] { font-weight:600; text-decoration:underline; } .wf-link.primary { border:1px dashed #777; } .wf-link.secondary { border:1px dashed #888; } .wf-nav .wf-link { font-size:12px; }
+</style></head><body><aside class="review-bar"><strong>Statisch M2-wireframe</strong><p>De links tonen de schermflow. Probeer opslaan, invoer, sheets en timers in het werkende klikmodel.</p><div class="review-links"><a class="wf-link" href="../">Werkend klikmodel</a><a class="wf-link" href="proposal.html">Planvoorstel beoordelen</a></div></aside><main class="app"><header class="nav wf-nav"><span>Full-body</span><a href="today.html" class="wf-link text-button">Naar Vandaag · sessie blijft lopen</a></header><div class="content"><h1 tabindex="-1" class="wf-header">Warm worden</h1><p>5 tot 10 minuten rustig opwarmen.</p><label class="check"><input type="checkbox" id="warmup-done" > Gedaan</label><section class="group"><h2>Daarna: leg press</h2><p>Maak eerst kennis met de instelling en een lichte proefset.</p><p class="muted">Je werkgewicht staat nog niet vast. Daarom vullen we geen kilo’s voor je in.</p></section><a href="exercise.html" class="wf-link primary">Naar oefening 1</a><details><summary>Hulp bij het apparaat</summary><p>Bij de eerste keer laat je de instelling en uitvoering bij jouw apparaat uitleggen. De apparaatgebonden instructies en warming-upsets komen hier na controle.</p></details><a href="../#today" class="wf-link text-button">Pauzeren of stoppen (in klikmodel)</a></div><footer class="footer">warmup.html · UC-001 · statisch voorbeeld, geen opgeslagen training</footer></main></body></html>

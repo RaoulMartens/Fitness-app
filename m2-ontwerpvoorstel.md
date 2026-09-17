@@ -50,6 +50,12 @@ pas wanneer apparaten, passende instructies en rechtmatig beschikbare demonstrat
 
 ## Schermen en wijzigingen ten opzichte van de PPL-wireflows
 
+De navigatiecorrectie op verzoek van Raoul staat in [ux-flows/m2/UX-FLOWS.md](ux-flows/m2/UX-FLOWS.md).
+Vandaag is de sessie-ingang; Plan toont de trainingsweek met een aparte bewerkstap voor de
+optionele weekendkeuze. Het planvoorstel is bereikbaar vanuit de beoordelingsbalk buiten de
+appnavigatie. Teruggaan behoudt het scherm van herkomst en een lopende sessie. De correctie
+geeft geen inhoudelijk akkoord op het trainingsprogramma.
+
 | Scherm in het klikmodel | Bestaande referentie | Voorgestelde wijziging / voorkeursactie | Use case |
 | --- | --- | --- | --- |
 | Vandaag | today.html | Woensdag full-body; hervatten vervangt de startactie als er al een sessie loopt. Weekend pas na eigen keuze. | UC-001, UC-006 |
@@ -62,7 +68,8 @@ pas wanneer apparaten, passende instructies en rechtmatig beschikbare demonstrat
 | Pauzeren of stoppen | interrupt.html | Doorlopen, echt pauzeren en expliciet beeindigen afzonderlijk. Bevestigen voordat de sessie eindigt. | UC-006 |
 | Klaar / afgebroken | summary.html | Werkelijke voorbeeldsets; ongedane sets leeg. Geen verzonnen duur of prestatieverbetering. | UC-007 |
 | Volgende keer | consequences.html | Geen verhoging bij ontbrekende apparaat- of inspanningsinformatie. Restsets niet doorschuiven. | UC-007 |
-| Je plan | plan.html | Woensdag vast, weekend optioneel. Geen tien-dagencyclus of vaste deloadweek. | UC-008 |
+| Je plan | plan.html | Trainingsweek: woensdag vast, weekend optioneel. Voorkeursactie Trainingsdagen aanpassen; geen ingang naar sessielijst of planvoorstel. | UC-008 |
+| Trainingsdagen aanpassen | plan-edit.html | Conceptkeuze voor het weekend; alleen opslaan past deze toe. Annuleren en terug behouden de oude keuze. | UC-008 |
 | Je startvoorstel | plan-voorstel.html | Dezelfde oefeningen, rust en beschikbare tijd als de sessie. | UC-010 |
 | Als 60 minuten niet past | plan-compromis.html | Frequentie, tijd of prioriteit kiezen; geen beloofde 45-minutenvariant of claim over tragere armgroei. | UC-010 |
 
@@ -74,6 +81,9 @@ op dezelfde oefening verschijnt; een sheet bewaart de context. Geen nieuwe brand
 De originele HTML-bestanden en diagrammen blijven als baseline staan. Na akkoord worden INDEX,
 UX-FLOWS en UC-001, UC-002, UC-006, UC-007 en de planvoorbeelden UC-008/010 definitief afgestemd.
 Onboarding wordt pas in M4 geimplementeerd; het plan/compromis is hier een samenhangend ontwerpvoorbeeld.
+De gecorrigeerde M2-variant heeft nu een eigen use-case-overzicht, diagrammen en uit het klikmodel
+gegenereerde statische HTML-wireframes. Daarmee staat de actuele navigatie naast de oorspronkelijke
+referentie, zonder de PPL-voorbeelden tot persoonlijke voorschriften te maken.
 
 ## Precies gedrag voor de sessie
 
