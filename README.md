@@ -9,8 +9,13 @@ De telefooncontrole van M2 is op 17 september door Raoul bevestigd. Na beoordeli
 compacte [M3a-ontwerpvoorstel](m3-ontwerpvoorstel.md) is M3a in de hoofdapp gebouwd.
 Het afzonderlijke klikmodel op `/m3-voorstel/` blijft een referentie met eigen tabbladopslag.
 [Flows](ux-flows/m3/UX-FLOWS.md) en [implementatiecontrole](ux-flows/m3/IMPLEMENTATIE.md).
+Na Raouls telefooncontrole van M3a staat het [M4-voorstel](m4-ontwerpvoorstel.md) op
+`/m4-voorstel/`: vier vragen, een tijdcompromis en expliciete planbevestiging. De teksten en
+flow volgen UC-010, met het huidige full-bodyschema als enige uitgewerkte variant.
+De hoofdapp blijft M3a; het M4-klikmodel bewaart alleen voorbeelden in zijn eigen tabbladopslag.
+Zie [M4-handoff](ux-flows/m4/UX-FLOWS.md) en [controle](ux-flows/m4/VERIFICATIE.md).
 Wie vanuit een eerder gecachete app bij de voorstelroute toch M2 ziet, kiest eerst
-'Nieuwe versie openen'; de nieuwe service worker houdt beide voorstelroutes buiten de appcache.
+'Nieuwe versie openen'; de nieuwe service worker houdt de voorstelroutes buiten de appcache.
 
 ## Starten
 

@@ -370,6 +370,19 @@ Lukt niet, te zwaar, minder tijd, pauzeren of stoppen.
 zichtbare reikwijdte krijgt; en een slechte dag het ingeschatte niveau niet verandert.
 
 ### M4 — Onboarding en planning
+**Ontwerpstap, 17 september 2026:** Raoul bevestigt de telefooncontrole van M3a en vraagt verder
+te gaan met M4, met teksten die alleen ondersteunen wat de gebruiker op dat moment moet doen.
+Het aangekondigde klikbare voorstel volgt UC-010: start, vier intakevragen, eventueel een
+compromis, planvoorstel en expliciet bevestigen. Bekende antwoorden zijn ter controle voorgevuld;
+een lege intake is eveneens te proberen. Zie `m4-ontwerpvoorstel.md` en `ux-flows/m4/`.
+Het bestaande full-body-startschema is de enige uitgewerkte programmainhoud. De richtduur van
+ongeveer 60 minuten is een inschatting, geen algoritme dat 45 minuten passend maakt. Bij minder
+tijd kiest de gebruiker expliciet meer beschikbare tijd of houdt de beperking aan; dan is nog
+geen passend schema beschikbaar. Andere trainingscontexten krijgen geen verzonnen schema.
+Geen aanmelding of videodownload wordt gesimuleerd als beschikbaar. Het voorstel gebruikt eigen
+tabbladopslag op `/m4-voorstel/` en wijzigt de hoofdapp, sessies en trainingshistorie niet.
+Activeren in de hoofdapp en blijvend profielbeheer volgen na beoordeling van dit voorstel.
+
 De vier vragen, het planvoorstel en het compromisscherm.
 *Klaar wanneer:* een leeg profiel via vier vragen tot een plan leidt; een onmogelijke combinatie het
 compromis benoemt in frequentie, duur of prioriteit; en de app die keuze niet zelf maakt.
