@@ -9,16 +9,10 @@
   <script type="module" src="./prototype.js"></script>
 </head>
 <body>
-  <aside class="review-bar">
-    <strong>M3a · ontwerpvoorstel</strong>
-    <p>Voorbeeldtraining. Je echte registraties blijven in de hoofdapp. Dit tabblad bewaart alleen je proefkeuzes.</p>
-    <div class="review-links">
-      <button data-action="reset-active">Voorbeeld tijdens training</button>
-      <button data-action="reset-planned">Voorbeeld voor de training</button>
-      <a href="../">Naar de werkende app</a>
-      <a href="./wireframes/today.html">Statische wireframes</a>
-    </div>
-  </aside>
+  <header class="prototype-bar">
+    <span>Prototype</span>
+    <button data-action="open-about" class="info-button" aria-label="Over dit prototype">i</button>
+  </header>
   <p id="storage-error" role="alert" hidden></p>
   <main id="app" class="wf-screen"></main>
   <dialog id="sheet" aria-labelledby="sheet-title"><div id="sheet-content"></div></dialog>

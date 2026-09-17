@@ -7,6 +7,7 @@ van overlays, geen nieuwe bestemmingen in de hoofdapp.
 
 | Naam | Bestand | Soort | Use cases | Uitgaande links |
 | --- | --- | --- | --- | --- |
+| Over dit prototype | [about.html](../../public/m3-voorstel/wireframes/about.html) | Sheet | Beoordeling | exercise.html, ../index.html |
 | Vandaag | [today.html](../../public/m3-voorstel/wireframes/today.html) | Scherm | UC-006 | ../index.html, adjust.html, today.html, plan.html |
 | Oefening | [exercise.html](../../public/m3-voorstel/wireframes/exercise.html) | Scherm | UC-003, UC-004, UC-005, UC-006 | today.html, ../index.html, swap.html, hard.html, time.html, interrupt.html, plan.html |
 | Plan | [plan.html](../../public/m3-voorstel/wireframes/plan.html) | Scherm | UC-006 | today.html, plan.html |

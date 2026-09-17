@@ -1,9 +1,8 @@
 <!doctype html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vandaag - M3 wireframe</title><style>* { box-sizing:border-box; }
 body { margin:0; background:#e0e0e0; color:#333; font:16px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
-.review-bar,.wf-screen { width:100%; max-width:420px; margin:auto; padding:16px; }
-.review-bar { font-size:12px; border-bottom:1px dashed #999; }
-.review-links { display:flex; flex-wrap:wrap; gap:8px 16px; }
-.review-links button { min-height:36px; padding:4px 0; border:0; background:none; text-align:left; text-decoration:underline; font-size:12px; }
+.prototype-bar,.wf-screen { width:100%; max-width:420px; margin:auto; padding:16px; }
+.prototype-bar { display:flex; justify-content:space-between; align-items:center; padding:0 16px; font-size:12px; color:#666; }
+.info-button { width:44px; border:0; background:none; text-align:center; font-family:Georgia,serif; font-style:italic; }
 .wf-screen { min-height:70vh; background:#f5f5f5; border:1px dashed #bbb; padding-bottom:max(24px,env(safe-area-inset-bottom)); }
 h1 { font-size:25px; line-height:1.2; margin:18px 0; }
 h2 { font-size:21px; line-height:1.3; margin:0; }
@@ -21,6 +20,19 @@ button:disabled { color:#888; cursor:default; }
 .wf-nav,.sheet-head,.wf-tab-bar { display:flex; gap:8px; justify-content:space-between; align-items:center; }
 .wf-nav { font-size:12px; }
 .wf-nav button { font-size:12px; }
+.support-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:14px; }
+.support-actions button { font-size:13px; text-align:center; padding:10px 4px; background:transparent; }
+.text-action { border:0; background:none; color:#666; text-decoration:underline; font-size:13px; padding:12px 0; }
+.session-tools { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; font-size:13px; }
+.session-tools details { flex:1; }
+.session-tools ol { padding-left:20px; }
+.prescription { display:flex; gap:12px; margin:0 0 8px; }
+.prescription span { flex:1; padding:12px; background:#e8e8e8; border:1px dashed #bbb; }
+.prescription strong { display:block; font-size:22px; }
+.change-list { display:grid; gap:8px; margin:0; }
+.change-list div { display:grid; grid-template-columns:70px 1fr; gap:12px; padding:12px; background:#fff; border:1px dashed #bbb; }
+.change-list dt { color:#666; font-size:13px; }
+.change-list dd { margin:0; }
 .wf-tab-bar { border-top:1px dashed #aaa; margin-top:22px; padding-top:12px; }
 .wf-tab-bar button { flex:1; text-align:center; }
 [aria-current=page] { font-weight:700; background:#ddd; }
@@ -34,6 +46,8 @@ input[type=checkbox] { width:20px; height:20px; }
 ul { padding-left:22px; }
 li { margin:6px 0; }
 .notice { border-left:3px solid #888; padding:8px 12px; background:#e8e8e8; }
+.notice p { margin:4px 0; font-size:14px; }
+.notice button { padding:8px 0; border:0; background:none; text-decoration:underline; font-size:13px; }
 #storage-error { max-width:420px; margin:auto; padding:14px; border:2px solid #555; background:white; }
 dialog { width:min(100%,420px); max-height:88dvh; margin:auto auto 0; padding:20px 16px max(20px,env(safe-area-inset-bottom)); border:1px dashed #777; border-radius:12px 12px 0 0; background:#f5f5f5; overflow:auto; }
 dialog::backdrop { background:rgb(0 0 0 / 35%); }
@@ -45,4 +59,4 @@ dialog::backdrop { background:rgb(0 0 0 / 35%); }
 @media(min-width:500px) { body { padding:20px 0; } dialog { margin:auto; border-radius:8px; } }
 @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto; } }
 
-.wf-screen,.review-bar{max-width:375px}.wf-sheet{border-top:2px dashed #999;padding-top:16px}.wf-context{color:#777;background:#ddd;padding:12px}.wf-link{min-height:44px}</style></head><body><aside class="review-bar">Statisch M3-wireframe · UC-006<p>Voorbeeld, geen opslag. Sheets hieronder tonen hun onderliggende context.</p><a href="../index.html">Naar het interactieve klikmodel</a></aside><main class="wf-screen"><h1 tabindex="-1">Vandaag</h1><section class="wf-card"><h2>Je volgende training</h2><p>Full-body · woensdag 23 september</p><a href="../index.html" class="wf-link wf-button">Start voorbeeldtraining (in klikmodel)</a></section><a href="adjust.html" class="wf-link ">Pas vandaag aan</a><nav class="wf-tab-bar" aria-label="Hoofdnavigatie"><a href="today.html" class="wf-link ">Vandaag</a><a href="plan.html" class="wf-link ">Plan</a></nav><footer class="wf-footer">M3a · voorbeeldgegevens. Geen rusttimer in dit klikmodel.<br>De eerste vier sets zijn fictief; kilo's worden niet voorgeschreven.</footer><footer class="wf-footer">today.html · UC-006</footer></main></body></html>
+.wf-screen,.review-meta{max-width:375px}.review-meta{margin:auto;padding:8px 16px;font-size:12px}.wf-sheet{border-top:2px dashed #999;padding-top:16px}.wf-context{color:#777;background:#ddd;padding:12px}.wf-link{min-height:44px}</style></head><body><details class="review-meta"><summary>Over dit wireframe</summary><p>Vandaag · UC-006 · statisch voorbeeld zonder opslag.</p><a href="../index.html">Interactief prototype</a></details><main class="wf-screen"><h1 tabindex="-1">Vandaag</h1><section class="wf-card"><h2>Je volgende training</h2><p>Full-body · woensdag 23 september</p><a href="../index.html" class="wf-link wf-button">Start training (in klikmodel)</a></section><a href="adjust.html" class="wf-link ">Pas vandaag aan</a><nav class="wf-tab-bar" aria-label="Hoofdnavigatie"><a href="today.html" class="wf-link ">Vandaag</a><a href="plan.html" class="wf-link ">Plan</a></nav></main></body></html>

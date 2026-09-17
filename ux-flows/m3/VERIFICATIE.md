@@ -36,5 +36,16 @@ Het klikmodel bewaart voorbeelden per tabblad; sluiten van het tabblad kan die g
 
 Open `/m3-voorstel/`. Verschijnt de oude hoofdapp, kies 'Nieuwe versie openen'.
 Probeer vooral Lukt niet > Bezet, Minder tijd en Te zwaar > Dagvorm.
-Via de beoordelingsbalk is ook 'Voorbeeld voor de training' bereikbaar voor datum/overslaan.
+Via de infoknop is ook 'Voorbeeld voor de training' bereikbaar voor datum/overslaan.
 Pas na beoordeling volgt implementatie met blijvende opslag in de hoofdapp.
+
+## Vereenvoudigde beoordeling, 17 september
+
+Na feedback van Raoul zijn de beoordelingsbalk en herhaalde voetnoten vervangen door een
+klein Prototype-label en een infoknop. Schermteksten zijn ingekort; setdoel en hoofdactie
+krijgen voorrang. Bij 375px is het oefenscherm visueel bekeken, zonder horizontale overloop.
+Gewicht 17,5 en 10 herhalingen bleven behouden bij openen/sluiten van de nieuwe infosheet
+en daarna openen van Minder tijd. De keuzelijst en reikwijdte blijven zichtbaar.
+Build en syntaxcontrole slagen. De 22 statische schermen zijn opnieuw uit dezelfde teksten
+gegenereerd. De M2-hoofdapp en opslaglogica zijn niet gewijzigd; de eerdere 18/11-testresultaten
+hierboven zijn niet opnieuw gedraaid voor deze presentatiecorrectie.

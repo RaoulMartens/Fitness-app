@@ -3,6 +3,13 @@
 17 september 2026. Uitwerking met ux-flow-designer, voortbouwend op de bestaande use cases en
 de M2-schermrollen. Bron: bouwbrief hoofdstuk 4 (R7), 6, 7 (M3), bouwvoorstel hoofdstuk 3.
 
+Op Raouls verzoek is de beoordelingsweergave vervolgens opgeschoond: alleen een klein
+Prototype-label en infoknop buiten de flow. Uitleg, scenario's en referentielinks staan in
+'Over dit prototype'. Het oefenscherm toont set en herhalingen als twee compacte vlakken,
+een dominante registratieknop, drie kleinere uitwegen en een ondergeschikte pauze/stopactie.
+Sheets bewaren korte gevolgen en reikwijdte; technische en herhaalde uitleg is verwijderd.
+Dit is een presentatiecorrectie, geen nieuw trainings- of opslaggedrag.
+
 ## Ingangen
 
 - [Interactief voorstel](https://raoulmartens.github.io/Fitness-app/m3-voorstel/)

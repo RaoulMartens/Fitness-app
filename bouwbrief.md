@@ -334,6 +334,12 @@ klopt; de sessie blijft bestaan als je naar Vandaag gaat; pauzeren hervatbaar is
 expliciet afronden of afbreken een eindstatus geeft. Trilling is optioneel waar ondersteund.
 
 ### M3 — Afwijkingen
+**Beoordelingsweergave, 17 september 2026:** Raoul vraagt expliciet de extra ontwerp- en
+technische uitleg uit de schermen te halen om de flow te kunnen beoordelen. Dit autoriseert
+compactere schermteksten en duidelijkere hierarchie in het M3-klikmodel. Prototype-uitleg en
+testscenario's komen achter een infoknop. Essentiele gevolgen, reikwijdte en fouten blijven
+zichtbaar op het relevante moment. Trainingsregels, opslag en de M2-hoofdapp veranderen niet.
+
 **Ontwerpstap, 17 september 2026.** Raoul bevestigt dat de werkende M2-hoofdapp goed werkt op
 zijn telefoon en vraagt door te gaan. M2's telefoontoets is daarmee door de gebruiker bevestigd;
 dit is geen bewijs van alle offline- en achtergrondscenario's. De volgende stap werkt bestaande

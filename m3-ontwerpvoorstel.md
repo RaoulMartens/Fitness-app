@@ -46,8 +46,8 @@ Is inmiddels nieuw werk uitgevoerd, dan blijven die resultaten de waarheid.
 
 Het klikmodel is een scenario-oefening: het begint bij de chest press, na vier fictieve sets.
 Registreren werkt ter beoordeling, maar er is geen rusttimer of volledige M2-warming-up nagebouwd.
-Op Vandaag kan ook een nog niet gestarte afspraak worden bekeken via de beoordelingsbalk.
-Deze balk hoort niet bij de toekomstige app.
+Via de infoknop kan ook een nog niet gestarte afspraak worden bekeken. Prototype-uitleg en
+scenario's staan uitsluitend daar; de gewone schermen tonen alleen de relevante handeling.
 
 ## Bouwcontract na beoordeling
 

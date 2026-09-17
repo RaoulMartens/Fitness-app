@@ -7,6 +7,7 @@ const css = await readFile(new URL('public/m3-voorstel/style.css',root),'utf8')
 const out = new URL('public/m3-voorstel/wireframes/',root)
 await mkdir(out,{recursive:true})
 const screens = {
+  about:['Over dit prototype','Beoordeling'],
   today:['Vandaag','UC-006'], exercise:['Oefening','UC-003, UC-004, UC-005, UC-006'], plan:['Plan','UC-006'], summary:['Resultaat','UC-006'],
   adjust:['Pas vandaag aan','UC-003, UC-006'], swap:['Lukt niet','UC-004'], busy:['Apparaat bezet','UC-004'], material:['Geen materiaal','UC-004'], pain:['Pijn','UC-004'], skip:['Oefening overslaan','UC-004'],
   time:['Minder tijd','UC-003'], 'time-review':['Gevolg minder tijd','UC-003'], hard:['Te zwaar','UC-005'], structural:['Structureel te zwaar','UC-005'], weight:['Doel vandaag','UC-005'],
@@ -21,7 +22,7 @@ for (const [id,[title,uc]] of Object.entries(screens)) {
   runInNewContext(`${source.slice(0,source.indexOf("document.addEventListener('input'"))}\nstate = fresh(${!planned}); view = '${base ? id : planned ? 'today' : 'exercise'}'; selection = ${id === 'postpone-review' ? "'2026-09-24'" : '[5,6]'}; reason='day'; render(); sheet='${id}'; ${base ? '' : 'renderSheet();'}`,context)
   const links = new Set()
   function convert(html) {
-    return html.replace(/<button\b([^>]*)>([\s\S]*?)<\/button>/g,(_,attrs,label) => {
+    return html.replace('href="../"','href="../../"').replace('href="./wireframes/today.html"','href="today.html"').replace(/<button\b([^>]*)>([\s\S]*?)<\/button>/g,(_,attrs,label) => {
       const action = attrs.match(/data-action="([^"]+)"/)?.[1] ?? ''
       let target = action.startsWith('nav-') ? action.slice(4) : action.startsWith('open-') ? action.slice(5) : action.startsWith('reason-') ? 'weight' : action === 'review-date' ? 'postpone-review' : action === 'close' ? (planned ? 'today' : 'exercise') : null
       if (!(target in screens)) target = null
@@ -32,8 +33,8 @@ for (const [id,[title,uc]] of Object.entries(screens)) {
       .replace(/<input\b([^>]*)>/g,'<input $1 disabled>')
       .replace(/ data-\w+(?:-\w+)*="[^"]*"/g,'')
   }
-  const body = base ? convert(app.innerHTML) : `<div class="wf-context" aria-hidden="true"><p>Voorbeeldcontext: ${planned ? 'Vandaag - afspraak woensdag 23 september' : 'Chest press - set 1 van 2, invoer blijft bewaard'}</p></div><section class="wf-sheet">${convert(content.innerHTML)}</section>`
-  await writeFile(new URL(`${id}.html`,out),`<!doctype html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} - M3 wireframe</title><style>${css}\n.wf-screen,.review-bar{max-width:375px}.wf-sheet{border-top:2px dashed #999;padding-top:16px}.wf-context{color:#777;background:#ddd;padding:12px}.wf-link{min-height:44px}</style></head><body><aside class="review-bar">Statisch M3-wireframe · ${uc}<p>Voorbeeld, geen opslag. Sheets hieronder tonen hun onderliggende context.</p><a href="../index.html">Naar het interactieve klikmodel</a></aside><main class="wf-screen">${body}<footer class="wf-footer">${id}.html · ${uc}</footer></main></body></html>\n`)
+  const body = base ? convert(app.innerHTML) : `<div class="wf-context" aria-hidden="true"><p>${planned ? 'Vandaag · woensdag 23 september' : 'Chest press · set 1 van 2'}</p></div><section class="wf-sheet">${convert(content.innerHTML)}</section>`
+  await writeFile(new URL(`${id}.html`,out),`<!doctype html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} - M3 wireframe</title><style>${css}\n.wf-screen,.review-meta{max-width:375px}.review-meta{margin:auto;padding:8px 16px;font-size:12px}.wf-sheet{border-top:2px dashed #999;padding-top:16px}.wf-context{color:#777;background:#ddd;padding:12px}.wf-link{min-height:44px}</style></head><body><details class="review-meta"><summary>Over dit wireframe</summary><p>${title} · ${uc} · statisch voorbeeld zonder opslag.</p><a href="../index.html">Interactief prototype</a></details><main class="wf-screen">${body}</main></body></html>\n`)
   inventory.push(`| ${title} | [${id}.html](../../public/m3-voorstel/wireframes/${id}.html) | ${base ? 'Scherm' : 'Sheet'} | ${uc} | ${[...links].join(', ')} |`)
 }
 await mkdir(new URL('ux-flows/m3/',root),{recursive:true})

@@ -46,22 +46,22 @@ function render() {
   let body = ''
   if (view === 'today') {
     const statusText = {active:'Je training loopt',paused:'Je training is gepauzeerd',planned:'Je volgende training',skipped:'Training bewust overgeslagen',completed:'Training afgerond',aborted:'Training afgebroken'}[state.status]
-    body = `<h1 tabindex="-1">Vandaag</h1><section class="wf-card"><h2>${statusText}</h2><p>Full-body · ${dateLabel(state.appointment)}</p>${active() ? `<p>${state.sets.length} sets gedaan. Je invoer staat klaar.</p>${button('Verder trainen','resume',true)}` : state.status === 'planned' ? button('Start voorbeeldtraining','start',true) : `<p>Geen inhaalverplichting.</p>${button('Bekijk het resultaat','nav-summary')}`}</section>${state.status === 'planned' ? button('Pas vandaag aan','open-adjust') : ''}${changeNotice()}`
+    body = `<h1 tabindex="-1">Vandaag</h1><section class="wf-card"><h2>${statusText}</h2><p>Full-body · ${dateLabel(state.appointment)}</p>${active() ? `<p>${state.sets.length} sets gedaan</p>${button('Verder trainen','resume',true)}` : state.status === 'planned' ? button('Start training','start',true) : `<p>Geen inhaalverplichting.</p>${button('Bekijk het resultaat','nav-summary')}`}</section>${state.status === 'planned' ? button('Pas vandaag aan','open-adjust') : ''}${changeNotice()}`
   } else if (view === 'plan') {
-    body = `<h1 tabindex="-1">Plan</h1><section class="wf-card"><h2>Je trainingsweek</h2><p>Woensdag is je vaste basis. Het weekend is optioneel en nog niet gekozen.</p></section><section class="wf-card"><h3>Afspraak in dit voorbeeld</h3><p>${dateLabel(state.appointment)}</p>${state.appointment !== state.originalDate ? `<p>Eenmalig verplaatst vanaf ${dateLabel(state.originalDate)}.</p>` : ''}<p>${state.status === 'skipped' ? 'Bewust overgeslagen' : state.status === 'planned' ? 'Gepland' : 'Bekijk je uitvoering op Vandaag'}</p></section><p class="muted">Een losse afspraak verplaatsen verandert je vaste woensdag niet.</p>`
+    body = `<h1 tabindex="-1">Plan</h1><section class="wf-card"><h2>Je trainingsweek</h2><p>Woensdag · vaste training<br>Weekend · nog niet gepland</p></section><section class="wf-card"><h3>Volgende afspraak</h3><p>${dateLabel(state.appointment)}</p>${state.appointment !== state.originalDate ? `<p>Eenmalig verplaatst vanaf ${dateLabel(state.originalDate)}.</p>` : ''}<p>${state.status === 'skipped' ? 'Bewust overgeslagen' : state.status === 'planned' ? 'Gepland' : 'Bekijk je uitvoering op Vandaag'}</p></section>`
   } else if (view === 'summary') {
-    body = `<h1 tabindex="-1">${state.status === 'aborted' ? 'Training afgebroken' : state.status === 'skipped' ? 'Training overgeslagen' : 'Je resultaat'}</h1><div class="wf-card"><p>${state.status === 'skipped' ? 'Deze afspraak is bewust overgeslagen. Er is geen training gestart.' : `${state.sets.length} sets gedaan · ${state.skipped.length} overgeslagen · ${14-state.sets.length-state.skipped.length} niet afgemaakt.`}</p><p>Gedane sets blijven bewaard. Er wordt niets naar het weekend verschoven.</p></div><ul>${state.changes.map(c => `<li>${escape(c)}</li>`).join('')}</ul>${button('Naar Vandaag','nav-today',true)}`
+    body = `<h1 tabindex="-1">${state.status === 'aborted' ? 'Training afgebroken' : state.status === 'skipped' ? 'Training overgeslagen' : 'Je resultaat'}</h1><div class="wf-card"><p>${state.status === 'skipped' ? 'Deze afspraak is bewust overgeslagen. Er is geen training gestart.' : `${state.sets.length} sets gedaan · ${state.skipped.length} overgeslagen · ${14-state.sets.length-state.skipped.length} niet afgemaakt.`}</p><p class="muted">Geen inhaaltraining.</p></div><ul>${state.changes.map(c => `<li>${escape(c)}</li>`).join('')}</ul>${button('Naar Vandaag','nav-today',true)}`
   } else if (!active()) {
     body = `<h1 tabindex="-1">Geen lopende training</h1>${button('Naar Vandaag','nav-today',true)}`
   } else if (state.status === 'paused') {
-    body = `<h1 tabindex="-1">Training gepauzeerd</h1><p>Je invoer en volgorde blijven staan.</p>${button('Verder trainen','resume',true)}`
+    body = `<h1 tabindex="-1">Training gepauzeerd</h1>${button('Verder trainen','resume',true)}`
   } else if (current() === undefined) {
     body = `<h1 tabindex="-1">Je bent klaar voor vandaag</h1><p>${state.sets.length} sets gedaan · ${state.skipped.length} overgeslagen.</p>${changeNotice()}${button('Sessie afronden','open-complete',true)}`
   } else {
     const slot = current()
-    body = `<nav class="wf-nav"><span>Sessie blijft lopen</span>${button('Naar Vandaag','nav-today')}</nav><h1 tabindex="-1">${names[slot]}</h1><p>Set ${remaining(slot)[0]} van 2 · ${[1,5,6].includes(slot) ? '10–15' : '8–12'} herhalingen</p><p class="muted">Houd ongeveer 2–3 herhalingen over.</p>${state.weights[slot] ? `<div class="notice">Doel vandaag: ${escape(state.weights[slot])} kg. Volgende training ongewijzigd.</div>` : ''}${changeNotice()}<form id="set-form" class="group"><div class="fields"><label>Gewicht (kg)<input name="weight" inputmode="decimal" value="${escape(draft().weight)}" autocomplete="off"></label><label>Herhalingen<input name="reps" inputmode="numeric" value="${escape(draft().reps)}" autocomplete="off"></label></div><p id="form-error" role="alert" class="error" hidden></p><button type="submit" class="primary">Voorbeeldset vastleggen</button></form><div class="group" style="margin-top:16px">${button('Lukt niet','open-swap')}${button('Te zwaar','open-hard')}${button('Minder tijd','open-time')}${button('Pauzeren of stoppen','open-interrupt')}</div><details><summary>Resterende volgorde</summary><ol>${openSlots().map(s => `<li>${names[s]} · ${remaining(s).length} sets</li>`).join('')}</ol></details>`
+    body = `<nav class="wf-nav"><span>Training · ${state.sets.length}/14 sets</span>${button('Naar Vandaag','nav-today')}</nav><h1 tabindex="-1">${names[slot]}</h1><div class="prescription"><span><strong>${remaining(slot)[0]} / 2</strong>set</span><span><strong>${[1,5,6].includes(slot) ? '10–15' : '8–12'}</strong>herhalingen</span></div><p class="muted">Houd 2–3 herhalingen over.</p>${state.weights[slot] ? `<div class="notice">Doel vandaag: ${escape(state.weights[slot])} kg</div>` : ''}${changeNotice()}<form id="set-form" class="group"><div class="fields"><label>Gewicht (kg)<input name="weight" inputmode="decimal" value="${escape(draft().weight)}" autocomplete="off"></label><label>Herhalingen<input name="reps" inputmode="numeric" value="${escape(draft().reps)}" autocomplete="off"></label></div><p id="form-error" role="alert" class="error" hidden></p><button type="submit" class="primary">Set vastleggen</button></form><div class="support-actions">${button('Lukt niet','open-swap')}${button('Te zwaar','open-hard')}${button('Minder tijd','open-time')}</div><div class="session-tools"><details><summary>Hierna</summary><ol>${openSlots().map(s => `<li>${names[s]} · ${remaining(s).length} sets</li>`).join('')}</ol></details><button data-action="open-interrupt" class="text-action">Pauzeren / stoppen</button></div>`
   }
-  app.innerHTML = `${body}${tabs()}<footer class="wf-footer">M3a · voorbeeldgegevens. Geen rusttimer in dit klikmodel.<br>De eerste vier sets zijn fictief; kilo's worden niet voorgeschreven.</footer>`
+  app.innerHTML = `${body}${tabs()}`
 }
 function navigate(target) {
   view = target
@@ -99,7 +99,10 @@ function skipSlots(next, slots, why) {
 function renderSheet() {
   const slot = current()
   let title = '', body = ''
-  if (sheet === 'adjust') {
+  if (sheet === 'about') {
+    title = 'Over dit prototype'
+    body = `<p>Je test de flow met voorbeeldgegevens. Je echte training blijft in de hoofdapp.</p><p class="muted">Alleen opslag in dit tabblad. Geen rusttimer; de training begint met vier fictieve sets.</p>${button('Voorbeeld tijdens training','reset-active')}${button('Voorbeeld voor de training','reset-planned')}<a href="../">Naar de werkende app</a><a href="./wireframes/today.html">Statische wireframes</a>`
+  } else if (sheet === 'adjust') {
     title = 'Wat is er anders vandaag?'
     body = `${button('Ik heb minder tijd','open-time')}${button('Training verplaatsen','open-postpone')}${button('Ik sla vandaag over','open-skip-day')}`
   } else if (sheet === 'swap') {
@@ -108,40 +111,40 @@ function renderSheet() {
   } else if (sheet === 'busy') {
     title = 'Apparaat bezet'
     const next = openSlots()[1]
-    body = next === undefined ? `<p>Er staat geen andere oefening meer open.</p>${button('Bij deze oefening blijven','close',true)}${button('Oefening overslaan','open-skip')}` : `<p>Doe eerst ${names[next]}. ${names[slot]} komt achteraan terug, met je invoer bewaard.</p><p class="muted">Alleen vandaag.</p>${button('Later doen','apply-later',true)}`
+    body = next === undefined ? `<p>Er staat geen andere oefening meer open.</p>${button('Bij deze oefening blijven','close',true)}${button('Oefening overslaan','open-skip')}` : `<dl class="change-list"><div><dt>Nu</dt><dd>${names[next]}</dd></div><div><dt>Daarna</dt><dd>${names[slot]} achteraan</dd></div></dl><p class="muted">Alleen vandaag.</p>${button('Later doen','apply-later',true)}`
   } else if (sheet === 'material' || sheet === 'pain' || sheet === 'skip') {
     title = sheet === 'pain' ? 'Stop deze oefening' : sheet === 'material' ? 'Geen materiaal' : 'Oefening overslaan'
-    body = `${sheet === 'pain' ? '<p>Bij pijn bieden we geen vervangende oefening als veilige oplossing.</p>' : sheet === 'material' ? '<p>Voor deze oefening is nog geen passend alternatief gecontroleerd.</p>' : ''}<p>${remaining(slot).length} resterende sets van ${names[slot]} vervallen vandaag. Gedane sets blijven staan.</p>${button('Resterende sets overslaan',`apply-skip-${sheet}`,true)}${button('Training stoppen','open-interrupt')}`
+    body = `${sheet === 'pain' ? '<p>Sla deze oefening over of stop de training.</p>' : sheet === 'material' ? '<p>Nog geen gecontroleerd alternatief beschikbaar.</p>' : ''}<p>${names[slot]} · ${remaining(slot).length} open sets vervallen vandaag.</p>${button('Resterende sets overslaan',`apply-skip-${sheet}`,true)}${button('Training stoppen','open-interrupt')}`
   } else if (sheet === 'time') {
     title = 'Minder tijd vandaag'
-    body = `<p>Welke oefeningen wil je vandaag laten vervallen?</p><div class="group">${openSlots().map(s => `<label class="choice"><input type="checkbox" data-slot="${s}" ${selection.includes(s) ? 'checked' : ''}>${names[s]} · ${remaining(s).length} open sets</label>`).join('')}</div><p class="muted">Alleen resterende sets. Niets schuift naar het weekend. Dit is geen berekende tijdsbesparing.</p><button data-action="open-time-review" class="primary" ${selection.length ? '' : 'disabled'}>Bekijk het gevolg</button>`
+    body = `<p>Wat sla je vandaag over?</p><div class="group">${openSlots().map(s => `<label class="choice"><input type="checkbox" data-slot="${s}" ${selection.includes(s) ? 'checked' : ''}>${names[s]} · ${remaining(s).length} open sets</label>`).join('')}</div><p class="muted">Alleen vandaag.</p><button data-action="open-time-review" class="primary" ${selection.length ? '' : 'disabled'}>Bekijk het gevolg</button>`
   } else if (sheet === 'time-review') {
     title = 'Dit verandert vandaag'
-    body = `<div class="wf-card"><h3>Vervalt</h3><ul>${selection.map(s => `<li>${names[s]} · ${remaining(s).length} sets</li>`).join('')}</ul><h3>Blijft</h3><p>${openSlots().filter(s => !selection.includes(s)).map(s => names[s]).join(', ') || 'Geen open oefeningen. Je rondt af met wat je hebt gedaan.'}</p></div><p>Gedane sets blijven staan. Je volgende training verandert niet.</p>${button('Accepteren','apply-time',true)}${button('Zelf aanpassen','open-time')}`
+    body = `<div class="wf-card"><h3>Vervalt</h3><ul>${selection.map(s => `<li>${names[s]} · ${remaining(s).length} sets</li>`).join('')}</ul><h3>Blijft</h3><p>${openSlots().filter(s => !selection.includes(s)).map(s => names[s]).join(', ') || 'Geen open oefeningen. Je rondt af met wat je hebt gedaan.'}</p></div><p>Volgende training ongewijzigd.</p>${button('Accepteren','apply-time',true)}${button('Zelf aanpassen','open-time')}`
   } else if (sheet === 'hard') {
     title = 'Zwaarder dan verwacht'
     body = `<p>Hoe komt dat volgens jou?</p>${button('Dagvorm','reason-day')}${button('Techniek onzeker','reason-technique')}${button('Structureel te zwaar','open-structural')}`
   } else if (sheet === 'structural') {
     title = 'Structureel te zwaar'
-    body = `<p>Een langer durende aanpassing vraagt een nieuw doel, een duur en een terugkeermoment. Die afspraken staan nog open.</p><p>Je kunt vandaag wel zelf het doel aanpassen. Je niveau en volgende trainingen veranderen daardoor niet.</p>${button('Alleen vandaag aanpassen','reason-structural',true)}${button('Niets veranderen','close')}`
+    body = `<p>Je plan aanpassen is nog niet beschikbaar. Je kunt wel het doel voor vandaag wijzigen.</p>${button('Alleen vandaag aanpassen','reason-structural',true)}${button('Niets veranderen','close')}`
   } else if (sheet === 'weight') {
     title = 'Alleen vandaag aanpassen'
-    body = `<p>${reason === 'day' ? 'Een mindere dag verandert je niveau niet.' : reason === 'technique' ? 'Onzeker over de techniek? Je kunt ook deze oefening overslaan.' : 'De structurele aanpassing blijft nog open.'}</p><label>Jouw doel voor de resterende sets (kg)<input id="target-weight" inputmode="decimal" autocomplete="off"></label><p class="muted">Je kiest zelf. De app berekent geen nieuw gewicht. Je registreert straks wat je werkelijk gebruikt.</p><p id="sheet-error" role="alert" hidden></p>${button('Doel vandaag gebruiken','apply-weight',true)}${button('Oefening overslaan','open-skip')}`
+    body = `<p>${reason === 'day' ? 'Volgende training ongewijzigd.' : reason === 'technique' ? 'Je kunt ook deze oefening overslaan.' : 'Je plan blijft ongewijzigd.'}</p><label>Doelgewicht (kg)<input id="target-weight" inputmode="decimal" autocomplete="off"></label><p id="sheet-error" role="alert" hidden></p>${button('Doel vandaag gebruiken','apply-weight',true)}${button('Oefening overslaan','open-skip')}`
   } else if (sheet === 'interrupt') {
     title = 'Pauzeren of stoppen'
-    body = `<p class="wf-label">SESSIE BEWAREN</p>${button('Terug naar Vandaag','keep-going')}${button('Pauzeren','pause')}<p class="wf-label">SESSIE BEEINDIGEN</p>${button('Afronden met wat ik heb gedaan','open-complete')}${button('Afbreken','open-abort')}<p class="muted">Verplaatsen of overslaan hoort bij een nog niet gestarte afspraak. Je lopende training blijft een eigen uitvoering.</p>`
+    body = `<p class="wf-label">SESSIE BEWAREN</p>${button('Terug naar Vandaag','keep-going')}${button('Pauzeren','pause')}<p class="wf-label">SESSIE BEEINDIGEN</p>${button('Afronden met wat ik heb gedaan','open-complete')}${button('Afbreken','open-abort')}`
   } else if (['complete','abort'].includes(sheet)) {
     title = sheet === 'complete' ? 'Training afronden?' : 'Training afbreken?'
-    body = `<p>${state.sets.length} gedane sets blijven staan. ${14-state.sets.length-state.skipped.length} open sets worden niet als nul herhalingen geregistreerd.</p><p>Niet bevestigde invoer blijft concept en telt niet als gedane set.</p>${button(sheet === 'complete' ? 'Ja, afronden' : 'Ja, afbreken',`finish-${sheet}`,true)}`
+    body = `<p>${state.sets.length} sets bewaard · ${14-state.sets.length-state.skipped.length} niet afgemaakt.</p>${Object.values(state.drafts).some(d => d.weight || d.reps) ? '<p>Je open invoer telt niet als gedane set.</p>' : ''}${button(sheet === 'complete' ? 'Ja, afronden' : 'Ja, afbreken',`finish-${sheet}`,true)}`
   } else if (sheet === 'postpone') {
     title = 'Training verplaatsen'
-    body = `<p>Alleen deze afspraak. Je vaste woensdag en optionele weekend veranderen niet.</p><label>Nieuwe datum<input type="date" id="new-date" min="2026-09-17" value="${state.appointment}"></label><p id="sheet-error" role="alert" hidden></p>${button('Bekijk het gevolg','review-date',true)}`
+    body = `<p>Eenmalig. Je vaste trainingsdagen blijven staan.</p><label>Nieuwe datum<input type="date" id="new-date" min="2026-09-17" value="${state.appointment}"></label><p id="sheet-error" role="alert" hidden></p>${button('Bekijk het gevolg','review-date',true)}`
   } else if (sheet === 'postpone-review') {
     title = 'Deze afspraak verplaatsen?'
-    body = `<p>Van ${dateLabel(state.appointment)} naar ${dateLabel(selection)}.</p><p>Het blijft dezelfde afspraak. Er komt geen extra training bij.</p>${button('Verplaatsen','apply-date',true)}`
+    body = `<dl class="change-list"><div><dt>Van</dt><dd>${dateLabel(state.appointment)}</dd></div><div><dt>Naar</dt><dd>${dateLabel(selection)}</dd></div></dl>${button('Verplaatsen','apply-date',true)}`
   } else if (sheet === 'skip-day') {
     title = 'Vandaag overslaan?'
-    body = `<p>De afspraak van ${dateLabel(state.appointment)} wordt bewust overgeslagen. Er ontstaat geen inhaaltraining.</p>${button('Ja, deze training overslaan','apply-skip-day',true)}`
+    body = `<p>${dateLabel(state.appointment)} vervalt. Geen inhaaltraining.</p>${button('Ja, deze training overslaan','apply-skip-day',true)}`
   }
   content.innerHTML = `<div class="sheet-head"><h2 id="sheet-title" tabindex="-1">${title}</h2>${button('Sluiten','close')}</div><div class="group">${body}</div>`
 }
