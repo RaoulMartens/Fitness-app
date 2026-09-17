@@ -5,6 +5,7 @@ opdracht om de verwarrende flow te herstellen. Low fidelity blijft de visuele af
 
 ## Ingangen
 
+- [Hoofdapp](https://raoulmartens.github.io/Fitness-app/): sinds 17 september de werkende M2-flow met blijvende lokale opslag; het klikmodel hieronder blijft een afzonderlijke referentie.
 - [Werkend klikmodel](http://127.0.0.1:4173/m2-voorstel/): opslag binnen dit tabblad, invoer, sheets, rust en sessiestatus.
 - [Statisch HTML-prototype](../../public/m2-voorstel/wireframes/today.html): gewone links, zonder JavaScript.
 - [Use cases en afbakening](use-cases.md).

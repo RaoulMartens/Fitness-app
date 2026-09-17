@@ -11,7 +11,7 @@ export function Sheet({ title, children, onClose }: { title: string; children: R
       if (previous instanceof HTMLElement) previous.focus()
     }
   }, [])
-  return <dialog ref={dialog} className="sheet" aria-labelledby="sheet-title" onCancel={onClose} onClick={event => {
+  return <dialog ref={dialog} className="sheet" aria-labelledby="sheet-title" onCancel={event => { event.preventDefault(); onClose() }} onClick={event => {
     if (event.target === event.currentTarget) {
       const bounds = event.currentTarget.getBoundingClientRect()
       if (event.clientY < bounds.top || event.clientX < bounds.left || event.clientX > bounds.right) onClose()

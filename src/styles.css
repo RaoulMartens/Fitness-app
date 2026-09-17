@@ -78,3 +78,31 @@ hr { margin: 2px 0; border: 0; border-top: 1px dashed var(--line); }
   .app { margin: 0 auto; border: 0; min-height: 100dvh; max-width: 100%; padding-top: env(safe-area-inset-top); }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+
+.workout-nav { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 16px; min-height:56px; background:#e8e8e8; border-bottom:1px dashed var(--line); font-size:12px; }
+.group { display:grid; gap:10px; }
+.note { font-size:12px; line-height:1.5; color:var(--muted); }
+.exercise-list { list-style:none; margin:0; padding:0; }
+.exercise-list li { display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px dashed #ccc; font-size:14px; }
+.exercise-list li > span { white-space:nowrap; color:var(--muted); }
+.tabs { display:flex; gap:12px; padding:8px 12px max(8px, env(safe-area-inset-bottom)); border-top:1px dashed var(--line); background:#e8e8e8; }
+.tabs button { flex:1; background:transparent; border:0; }
+.tabs [aria-current] { font-weight:600; text-decoration:underline; text-underline-offset:6px; }
+.workout details { border:1px dashed #bbb; background:white; }
+.workout summary { cursor:pointer; padding:12px; min-height:44px; font-size:14px; }
+.workout details p { padding:0 12px 12px; }
+.choices { border:0; padding:0; margin:0; display:grid; gap:10px; }
+.choices legend { margin-bottom:12px; font-size:14px; }
+.choice { display:flex; align-items:center; gap:10px; padding:12px; border:1px dashed #aaa; background:white; min-height:44px; font-size:14px; }
+.check { display:flex; align-items:center; gap:10px; min-height:44px; font-size:14px; }
+.check input { width:20px; height:20px; flex-shrink:0; }
+.workout input { accent-color:#444; }
+.workout-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; border:0; padding:0; margin:0; }
+.workout-fields label { display:grid; gap:6px; font-size:13px; }
+.workout-fields input { width:100%; min-width:0; border:1px dashed #888; border-radius:4px; padding:12px; font-size:18px; background:white; }
+.rest { display:grid; gap:12px; padding:16px; background:#e8e8e8; border:1px dashed #888; }
+.timer { font-size:40px; line-height:1.1; font-variant-numeric:tabular-nums; }
+.workout .set-table { table-layout:auto; }
+.workout .set-table th { width:auto; }
+.workout a { color:inherit; text-underline-offset:3px; min-height:44px; display:inline-flex; align-items:center; }
+.workout .history-button { align-items:center; }

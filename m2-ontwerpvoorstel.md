@@ -1,5 +1,10 @@
 # M2 - persoonlijke sessie, ter beoordeling
 
+Vervolg 17 september: Raoul bevestigt de telefoontest en geeft opdracht door te bouwen.
+De hoofdapp implementeert nu deze sessieflow met blijvende lokale opslag; dit document en
+het afzonderlijke klikmodel blijven de ontwerpreferentie. De open apparaatinstructies en
+demonstratiemedia hieronder blijven open.
+
 16 september 2026. Raoul heeft de M1-telefoontest bevestigd en wil verder. Dit voorstel maakt
 de nog open programmakeuze en wijzigingen aan de wireflows concreet. Het is geen vastgesteld
 trainingsprogramma. Het klikmodel staat in `public/m2-voorstel/` en is bereikbaar via

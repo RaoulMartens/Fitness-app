@@ -1,7 +1,8 @@
 # Training: werkend low-fidelity prototype
 
-M1: een oefening met drie expliciete testsets. De grijze vormgeving volgt
-`ux-flows/wireframes/exercise.html`. Dit is nog geen persoonlijk trainingsschema.
+M2: de volledige sessieflow met blijvende lokale opslag. De grijze vormgeving en schermrollen
+volgen `ux-flows/m2/`. Het getoonde startschema bevat zeven oefeningen en veertien werksets.
+Gecontroleerde apparaatinstructies en demonstraties ontbreken nog.
 
 ## Starten
 
@@ -31,24 +32,34 @@ op dat toestel en in die browser bewaard.
 
 ## Wat werkt
 
-Voor de volgende bouwstap staat een [M2-ontwerpvoorstel](m2-ontwerpvoorstel.md) klaar. Open
-`/m2-voorstel/` op de lokale preview of de [publieke preview](https://raoulmartens.github.io/Fitness-app/m2-voorstel/).
-Dit is een apart klikmodel; het gebruikt alleen tijdelijke tabbladopslag en schrijft niets
-naar de trainingsdatabase. Het persoonlijke programma en de schermwijzigingen zijn ter beoordeling.
+De hoofdapp opent op Vandaag: starten of hervatten, met een optioneel sessie-overzicht.
+Plan bevat de trainingsweek en een afzonderlijke bewerkstap voor de optionele weekendtraining.
+Het oorspronkelijke [ontwerpvoorstel](m2-ontwerpvoorstel.md) blijft beschikbaar op `/m2-voorstel/`.
+Dat aparte klikmodel gebruikt tijdelijke tabbladopslag; de hoofdapp gebruikt IndexedDB.
 
-- Gewicht (ook 12 of 12,5 kg) en gehele herhalingen invoeren en stapsgewijs wijzigen.
+- Warming-up, zeven oefeningen, rust, expliciet afronden of afbreken, resultaat en volgende keer.
+- Gewicht (ook 12 of 12,5 kg) en gehele herhalingen invoeren; geen verzonnen begingewichten.
 - Conceptinvoer per toetsaanslag in IndexedDB bewaren, ook lege of halve invoer zoals '12,'.
 - Valideren bij bevestiging; een set en de bijbehorende uitgaande opdracht atomair opslaan.
-- Dubbele bevestiging zonder dubbele log; correcties met revisies, geen stille overschrijving
-  van een nieuwere set uit een ander venster.
+- Dubbele bevestiging zonder dubbele log; revisiecontrole tegen stille overschrijvingen.
+- Rust op basis van een eindtijd: blijft correct na sluiten; expliciet pauzeren bevriest de resttijd.
+- Scherm aanhouden tijdens rust waar ondersteund, met zichtbare terugval bij weigering.
 - Opgeslagen sets en concepten hervatten na sluiten en offline heropenen.
 - Een uitlegsheet openen met behoud van de invoer; terug naar Vandaag en weer verder.
-- Testsessie afronden, nieuwe testsessie starten en eerdere registraties teruglezen.
+- Volledig of gedeeltelijk afronden; eerdere registraties en vorige uitvoering teruglezen.
+- Weekendplanning expliciet opslaan of annuleren, zonder een lopende training te wijzigen.
 - Zichtbare opslagfouten met mogelijkheid opnieuw te proberen. Alleen geslaagde schrijfacties
   krijgen de status 'op apparaat opgeslagen'.
 
-Het testvoorschrift staat in `src/model.ts`, de opslag in `src/db.ts`, de setinvoer in
-`src/components/SetForm.tsx`, de schermstructuur in `src/App.tsx` en alle stijlen in `src/styles.css`.
+M2 staat in `src/workout/`: `model.ts` bevat het startschema en de types, `db.ts` de transacties,
+`WorkoutSetForm.tsx` de setinvoer en `WorkoutApp.tsx` de schermen. Stijlen staan in `src/styles.css`.
+Een setbevestiging bewaart set, sessiecursor, rust en uitgaande opdracht in dezelfde transactie.
+Elke sessie heeft een vast voorschriftsnapshot; latere programmawijzigingen herschrijven dat niet.
+
+M1 blijft bereikbaar via `/?m1=1` en via 'Over deze versie'. Die testweergave houdt zijn eigen
+database `training-m1`; M2 gebruikt `training-m2`. Er wordt niets gewist of automatisch overgenomen
+uit M1 of het klikmodel. Een terugrol van de appcode laat beide databases bestaan. De opslagtests
+controleren behoud van een M1-set, concept en wachtrij na M2-gebruik en opnieuw openen.
 Er is geen backend en er worden geen trainingsgegevens verstuurd. De uitgaande wachtrij is alleen
 een lokale voorbereiding op M6; cloudsynchronisatie is niet geimplementeerd.
 
@@ -72,14 +83,28 @@ npx playwright install webkit
 npm run test:e2e:webkit
 ```
 
-Op de huidige Windows-machine blokkeert Application Control het laden van `harfbuzz.dll` uit
-de WebKit-testbrowser. Dat is een omgevingsblokkade, geen geslaagde WebKit-test. Beveiligingsbeleid
-is niet aangepast. De WebKit-controle blijft open. Raoul heeft de M1-telefoontest op
-16 september 2026 bevestigd; nieuwe M2-interacties krijgen later hun eigen iPhone-test.
+Verificatie 17 september: build en 18 opslagtests slagen. Alle 11 Chromium-browsertests slagen.
+WebKit start inmiddels: 8 van 11 tests slagen, waaronder alle M2-interacties behalve offline
+heropenen. Drie tests (ook bestaande M1-tests) geven bij `context.setOffline(true)` een interne
+WebKit-navigatiefout. Dat is geen geslaagde offline-test; de precieze oorzaak is niet vastgesteld.
+
+Een afzonderlijke controle schakelt daarom de lokale webserver echt uit, zonder offline-emulatie:
+
+```sh
+node scripts/check-offline-webkit.mjs
+```
+
+Die controle slaagt in WebKit: herladen en volledig sluiten/heropenen bewaren de sessie en
+conceptinvoer terwijl de server onbereikbaar is. Draai eerst een lokale build (zonder
+`GITHUB_PAGES=1`). Deze test start een eigen tijdelijke server en gebruikt een eigen browserprofiel.
+De bestaande M1-registraties zijn ook na een echte serviceworker-update naar M2 visueel behouden.
+Raoul heeft het M2-klikmodel op telefoon bevestigd; de nieuwe blijvende opslag, pauze en rust
+vragen nog een afzonderlijke echte iPhone-test.
 
 ## Bewuste grenzen
 
-Geen echte demonstratievideo, rusttimer, persoonlijk programma, onboarding of serverlogin in M1.
-De demo meldt eerlijk dat het bestand ontbreekt. Gegevens zijn uitsluitend lokaal; wissen van
+Geen echte demonstratievideo, apparaatinstructies, automatische progressie, onboarding of serverlogin.
+De demo meldt eerlijk dat het bestand ontbreekt. Nieuwe gewichten worden niet automatisch verhoogd.
+Geen gegarandeerd rustsignaal met vergrendeld scherm. Gegevens zijn uitsluitend lokaal; wissen van
 browsergegevens wist de registratie. Export/verwijderen en synchronisatie blijven in M6.
 De definitieve appstijl volgt later. `bouwbrief.md` en `bouwvoorstel.md` houden de besluiten bij.

@@ -17,6 +17,17 @@ Claudes review zijn techniek/M1, trainingsprogramma en fasering van push-ups apa
 Het bouwakkoord komt uit Raouls bericht, niet uit de review. Broncorrecties hieronder
 zijn verwerkt; de oorspronkelijke PPL-inhoud is geen automatisch voorschrift voor Raoul.
 
+**Vervolg 17 september 2026:** na publicatie van de gecorrigeerde M2-flow bevestigt Raoul:
+"het werkt op telefoon dus we kunnen door". Dit is bouwakkoord voor de aangekondigde volledige
+sessieflow met blijvende opslag, op basis van het getoonde startschema en de geteste schermrollen.
+Er worden geen extra trainingsregels vastgesteld. Gecontroleerde apparaatinstructies en video's
+blijven nodig voordat de begeleiding gebruiksklaar is voor een echte training.
+
+M2 bewaart sessies, voorschriftsnapshots, concepten, sets, rust en een lokale uitgaande wachtrij
+in een eigen IndexedDB-database `training-m2`. `training-m1` blijft ongewijzigd en bereikbaar via
+de M1-testweergave. Er is geen destructieve migratie of automatische import van klikmodeldata.
+Terugrollen naar M1 laat beide databases staan; een volgende M2-versie kan M2-gegevens heropenen.
+
 ---
 
 ## 1. Wat dit is
@@ -303,6 +314,12 @@ als gehele aantallen registreren en het getoonde doel overeenkomt met het techni
 testvoorschrift. Persoonlijke progressieregels zijn geen voorwaarde om deze opslagtest te halen.
 
 ### M2 — De sessieflow
+**Gebouwd, 17 september 2026.** Na het vervolgakkoord (bovenaan) werkt de sessieflow in de
+hoofdapp met IndexedDB. Vandaag en Plan hebben de beoordeelde rollen; veertien werksets,
+rust, pauzeren/hervatten, expliciet deels of volledig afronden en afbreken zijn aangesloten.
+Het voorstel hieronder beschrijft de eerdere beoordelingsfase. Instructies en demonstratiemedia
+zijn nog niet gereed; de volledige nieuwe opslagflow vraagt een eigen controle op Raouls iPhone.
+
 **In voorbereiding, 16 september 2026.** Het afzonderlijke [ontwerpvoorstel](m2-ontwerpvoorstel.md)
 maakt het full-bodyvoorstel en de gewijzigde flow beoordeelbaar. Het klikmodel staat in
 public/m2-voorstel/. Programma en schermwijzigingen zijn nog niet als vastgesteld gemarkeerd.

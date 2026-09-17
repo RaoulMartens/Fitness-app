@@ -12,7 +12,7 @@ export default defineConfig({
     manifest: {
       name: 'Training — werkend wireframe',
       short_name: 'Training',
-      description: 'Low-fidelity testversie voor lokale setregistratie.',
+      description: 'Low-fidelity trainingsflow met lokale sessies, setregistratie en rust.',
       lang: 'nl',
       start_url: base,
       scope: base,

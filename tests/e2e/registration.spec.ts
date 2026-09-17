@@ -16,7 +16,7 @@ test.afterAll(async () => {
 test('concept, sheet, dubbel tikken, correctie, offline en een nieuwe sessie', async ({ page, context }, testInfo) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
-  await page.goto('/')
+  await page.goto('/?m1=1')
   await expect(page.getByRole('heading', { name: 'Set 1', exact: true })).toBeVisible()
   await expect(page.getByText('Testgegevens · nog geen persoonlijk trainingsschema')).toBeVisible()
   const weight = page.getByRole('textbox', { name: 'Gewicht kg' })
@@ -73,7 +73,7 @@ test('concept, sheet, dubbel tikken, correctie, offline en een nieuwe sessie', a
 })
 
 test('opslagfout toont geen succes en een nieuwe poging werkt', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/?m1=1')
   const weight = page.getByRole('textbox', { name: 'Gewicht kg' })
   await expect(weight).toBeVisible()
   await page.evaluate(() => {
@@ -94,10 +94,10 @@ test('opslagfout toont geen succes en een nieuwe poging werkt', async ({ page })
 })
 
 test('twee vensters overschrijven bevestigde sets niet stilzwijgend', async ({ page, context }) => {
-  await page.goto('/')
+  await page.goto('/?m1=1')
   await expect(page.getByRole('textbox', { name: 'Gewicht kg' })).toBeVisible()
   const second = await context.newPage()
-  await second.goto('/')
+  await second.goto('/?m1=1')
   await expect(second.getByRole('textbox', { name: 'Gewicht kg' })).toBeVisible()
   await page.getByRole('button', { name: 'Set vastleggen', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Set 1 vastgelegd' })).toBeVisible()
@@ -126,7 +126,7 @@ test('hele browser sluiten bewaart bevestigde set en concept, ook bij offline he
     const page = await first.newPage()
     page.on('console', message => { if (message.type() === 'error') diagnostics.push(message.text()) })
     page.on('pageerror', error => diagnostics.push(error.message))
-    await page.goto('http://127.0.0.1:4173')
+    await page.goto('http://127.0.0.1:4173/?m1=1')
     await page.getByRole('button', { name: 'Set vastleggen', exact: true }).click()
     await page.getByRole('button', { name: 'Volgende set' }).click()
     await page.getByRole('textbox', { name: 'Gewicht kg' }).fill('16,')
@@ -140,7 +140,7 @@ test('hele browser sluiten bewaart bevestigde set en concept, ook bij offline he
   try {
     await second.setOffline(true)
     const page = await second.newPage()
-    await page.goto('http://127.0.0.1:4173')
+    await page.goto('http://127.0.0.1:4173/?m1=1')
     await expect(page.getByRole('textbox', { name: 'Gewicht kg' })).toHaveValue('16,')
     const firstRow = page.getByRole('row').filter({ has: page.getByRole('rowheader', { name: '1', exact: true }) })
     await expect(firstRow.getByRole('cell', { name: '12 × 10', exact: true })).toHaveCount(2)
