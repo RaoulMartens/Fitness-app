@@ -37,5 +37,7 @@
 Dit bewijst geen iPhone-/WebKit-gedrag en geen volledige offline M2-opslag. De werkende
 M1-app is ongemoeid gelaten. Het M2-model bewaart voorbeelden in sessionStorage binnen dit
 tabblad. Op 16 september was de correctie alleen lokaal gebouwd en gecontroleerd.
-Op 17 september is de publicatiestap gestart via de bestaande GitHub Pages-workflow;
-de workflowstatus en de gepubliceerde schermen worden afzonderlijk gecontroleerd.
+Op 17 september is de navigatiecorrectie gepubliceerd via de bestaande GitHub Pages-workflow
+(run 35260885987, geslaagd). De eerste live controle toonde nieuwe HTML met een oud gecachet
+navigatiescript. De script- en stylesheetverwijzingen hebben daarom een versiekenmerk gekregen;
+deze correctie wordt via dezelfde workflow gepubliceerd en opnieuw in de browser gecontroleerd.
