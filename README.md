@@ -1,13 +1,14 @@
 # Training: werkend low-fidelity prototype
 
-M2: de volledige sessieflow met blijvende lokale opslag. De grijze vormgeving en schermrollen
-volgen `ux-flows/m2/`. Het getoonde startschema bevat zeven oefeningen en veertien werksets.
+M3a: de volledige sessieflow en aanpassingen voor vandaag met blijvende lokale opslag.
+De compacte, grijze schermen volgen `ux-flows/m2/` en het goedgekeurde `ux-flows/m3/`.
+Het startschema bevat zeven oefeningen en veertien werksets.
 Gecontroleerde apparaatinstructies en demonstraties ontbreken nog.
 
-De telefooncontrole van M2 is op 17 september door Raoul bevestigd. De volgende stap staat als
-afzonderlijk [M3a-ontwerpvoorstel](m3-ontwerpvoorstel.md) op `/m3-voorstel/`: bezet materiaal,
-minder tijd, dagvorm en onderbreken. Dit is een klikmodel met eigen tabbladopslag, geen uitbreiding
-van de productieopslag. De hoofdapp blijft M2. [Flows en controle](ux-flows/m3/UX-FLOWS.md).
+De telefooncontrole van M2 is op 17 september door Raoul bevestigd. Na beoordeling van het
+compacte [M3a-ontwerpvoorstel](m3-ontwerpvoorstel.md) is M3a in de hoofdapp gebouwd.
+Het afzonderlijke klikmodel op `/m3-voorstel/` blijft een referentie met eigen tabbladopslag.
+[Flows](ux-flows/m3/UX-FLOWS.md) en [implementatiecontrole](ux-flows/m3/IMPLEMENTATIE.md).
 Wie vanuit een eerder gecachete app bij de voorstelroute toch M2 ziet, kiest eerst
 'Nieuwe versie openen'; de nieuwe service worker houdt beide voorstelroutes buiten de appcache.
 
@@ -55,18 +56,27 @@ Dat aparte klikmodel gebruikt tijdelijke tabbladopslag; de hoofdapp gebruikt Ind
 - Een uitlegsheet openen met behoud van de invoer; terug naar Vandaag en weer verder.
 - Volledig of gedeeltelijk afronden; eerdere registraties en vorige uitvoering teruglezen.
 - Weekendplanning expliciet opslaan of annuleren, zonder een lopende training te wijzigen.
+- Bezet: open sets van de huidige oefening later doen, met behoud van conceptinvoer.
+- Resterende sets overslaan bij pijn of ontbrekend materiaal; zelf oefeningen weglaten bij minder tijd.
+- Handmatig doelgewicht voor vandaag, gescheiden van het werkelijk geregistreerde gewicht.
+- Laatste aanpassing terugdraaien zonder inmiddels uitgevoerde sets te verwijderen.
+- Een nog niet gestarte afspraak verplaatsen, inkorten of overslaan, met behoud van geschiedenis.
 - Zichtbare opslagfouten met mogelijkheid opnieuw te proberen. Alleen geslaagde schrijfacties
   krijgen de status 'op apparaat opgeslagen'.
 
-M2 staat in `src/workout/`: `model.ts` bevat het startschema en de types, `db.ts` de transacties,
-`WorkoutSetForm.tsx` de setinvoer en `WorkoutApp.tsx` de schermen. Stijlen staan in `src/styles.css`.
+De hoofdapp staat in `src/workout/`: `model.ts` bevat het startschema en de types, `db.ts` de
+transacties, `AdjustmentSheet.tsx` de aanpassingen, `WorkoutSetForm.tsx` de setinvoer en
+`WorkoutApp.tsx` de schermen. Stijlen staan in `src/styles.css`.
 Een setbevestiging bewaart set, sessiecursor, rust en uitgaande opdracht in dezelfde transactie.
 Elke sessie heeft een vast voorschriftsnapshot; latere programmawijzigingen herschrijven dat niet.
 
 M1 blijft bereikbaar via `/?m1=1` en via 'Over deze versie'. Die testweergave houdt zijn eigen
-database `training-m1`; M2 gebruikt `training-m2`. Er wordt niets gewist of automatisch overgenomen
-uit M1 of het klikmodel. Een terugrol van de appcode laat beide databases bestaan. De opslagtests
-controleren behoud van een M1-set, concept en wachtrij na M2-gebruik en opnieuw openen.
+database `training-m1`; de hoofdapp gebruikt `training-m2`, nu versie 2. De migratie kopieert
+M2-sessies, sets, concepten, planning en wachtrij atomair naar afzonderlijke M3-tabellen. Alle
+oude tabellen blijven staan. Oude gecachete M2-code kan daardoor geen M3-uitvoering overschrijven.
+Invoer die een oud tabblad na de migratie toevoegt, wordt zichtbaar gemeld en apart getoond;
+die wordt niet automatisch samengevoegd. Herstel gebruikt M3-compatibele code: M2-code ziet
+alleen de oorspronkelijke tabellen. M1 en klikmodeldata worden niet geimporteerd.
 Er is geen backend en er worden geen trainingsgegevens verstuurd. De uitgaande wachtrij is alleen
 een lokale voorbereiding op M6; cloudsynchronisatie is niet geimplementeerd.
 
@@ -90,10 +100,11 @@ npx playwright install webkit
 npm run test:e2e:webkit
 ```
 
-Verificatie 17 september: build en 18 opslagtests slagen. Alle 11 Chromium-browsertests slagen.
-WebKit start inmiddels: 8 van 11 tests slagen, waaronder alle M2-interacties behalve offline
-heropenen. Drie tests (ook bestaande M1-tests) geven bij `context.setOffline(true)` een interne
-WebKit-navigatiefout. Dat is geen geslaagde offline-test; de precieze oorzaak is niet vastgesteld.
+Verificatie 17 september: build en 31 opslagtests slagen. Alle 15 Chromium-browsertests en de
+4 nieuwe M3a-tests in WebKit slagen. Die controleren ook annuleren, meerdere vensters en herstel
+na een opslagfout. De laatste correctie aan het openen van een aanpassing is opnieuw in beide
+browsers gecontroleerd. De bestaande WebKit-suite had bij M2 drie navigatiefouten met
+`context.setOffline(true)`; die volledige suite is voor M3a niet opnieuw als geslaagd aangemerkt.
 
 Een afzonderlijke controle schakelt daarom de lokale webserver echt uit, zonder offline-emulatie:
 
@@ -101,12 +112,12 @@ Een afzonderlijke controle schakelt daarom de lokale webserver echt uit, zonder 
 node scripts/check-offline-webkit.mjs
 ```
 
-Die controle slaagt in WebKit: herladen en volledig sluiten/heropenen bewaren de sessie en
-conceptinvoer terwijl de server onbereikbaar is. Draai eerst een lokale build (zonder
+Die controle slaagt in WebKit: herladen en volledig sluiten/heropenen bewaren de aangepaste
+oefenvolgorde; terugdraaien herstelt de oefening inclusief halve conceptinvoer terwijl de server
+onbereikbaar is. Draai eerst een lokale build (zonder
 `GITHUB_PAGES=1`). Deze test start een eigen tijdelijke server en gebruikt een eigen browserprofiel.
 De bestaande M1-registraties zijn ook na een echte serviceworker-update naar M2 visueel behouden.
-Raoul heeft het M2-klikmodel op telefoon bevestigd; de nieuwe blijvende opslag, pauze en rust
-vragen nog een afzonderlijke echte iPhone-test.
+Raoul heeft M2 op telefoon bevestigd. M3a vraagt nog een afzonderlijke echte iPhone-test.
 
 ## Bewuste grenzen
 

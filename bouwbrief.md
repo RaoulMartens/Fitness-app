@@ -334,6 +334,22 @@ klopt; de sessie blijft bestaan als je naar Vandaag gaat; pauzeren hervatbaar is
 expliciet afronden of afbreken een eindstatus geeft. Trilling is optioneel waar ondersteund.
 
 ### M3 — Afwijkingen
+**Bouwakkoord M3a, 17 september 2026:** na beoordeling van het compacte voorstel vraagt Raoul
+door te gaan naar de volgende bouwstap. De zes beschreven M3a-situaties zijn in de
+hoofdapp gebouwd met blijvende opslag. [Implementatiecontrole](ux-flows/m3/IMPLEMENTATIE.md).
+`training-m2` krijgt een uitbreidende versie 2:
+oorspronkelijke tabellen blijven behouden; sessies, snapshots, sets, concepten, planning en
+outbox worden eenmalig atomair gekopieerd naar afzonderlijke M3-tabellen. Nieuwe
+sessievelden bewaren de open setvolgorde, overgeslagen sets, doelen voor vandaag en een
+aanpassingshistorie. Afspraken krijgen een eigen tabel, los van de uitvoering. Oude appcode
+kan uitsluitend de oude tabellen schrijven. Nieuwe invoer daar wordt vergeleken met de
+migratiebasis en zichtbaar aangeboden ter controle, zonder automatisch samenvoegen. Een
+herstel gebruikt M3-compatibele code; de oude M2-code ziet alleen de oude gegevens. Geen
+gegevens of tabellen worden verwijderd. De M1-database blijft ongewijzigd.
+Blijvende vervangingen en structurele trainingsregels vallen buiten dit M3a-akkoord.
+Bij wijziging van de weekendkeuze volgt de eerstvolgende nog niet gestarte afspraak het nieuwe
+weekritme. Een expliciet verplaatste afspraak en een lopende sessie blijven behouden.
+
 **Beoordelingsweergave, 17 september 2026:** Raoul vraagt expliciet de extra ontwerp- en
 technische uitleg uit de schermen te halen om de flow te kunnen beoordelen. Dit autoriseert
 compactere schermteksten en duidelijkere hierarchie in het M3-klikmodel. Prototype-uitleg en

@@ -131,7 +131,7 @@ test('opslagfout bewaart invoer, houdt navigatie tegen en is opnieuw te proberen
     const original = IDBObjectStore.prototype.put
     let fail = true
     IDBObjectStore.prototype.put = function (...args) {
-      if (this.name === 'drafts' && fail) { fail = false; throw new DOMException('Test quota', 'QuotaExceededError') }
+      if (this.name === 'workoutDrafts' && fail) { fail = false; throw new DOMException('Test quota', 'QuotaExceededError') }
       return original.apply(this, args)
     }
   })

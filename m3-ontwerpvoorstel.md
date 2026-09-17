@@ -1,5 +1,9 @@
 # M3 - afwijken tijdens je training
 
+Status 17 september 2026: het compacte voorstel is beoordeeld en M3a is in de hoofdapp
+gebouwd met blijvende opslag. [Implementatie en controle](ux-flows/m3/IMPLEMENTATIE.md).
+Hieronder staat het oorspronkelijke beoordelingsvoorstel; het klikmodel blijft als referentie.
+
 17 september 2026. Raoul heeft de werkende M2 op zijn telefoon bevestigd en opdracht gegeven
 door te gaan. Dit voorstel concretiseert de bestaande UC-003 t/m UC-006 uit de bouwbrief.
 Geen nieuwe use cases: de eerder vastgelegde situaties vormen fase 1 van ux-flow-designer.

@@ -24,6 +24,7 @@ describe('M2 blijvende sessies', () => {
     } finally { starterProgram.slots[0].name = originalName }
   })
   it('bewaart set, sessiecursor, rust en outbox atomair en dedupliceert bevestiging', async () => {
+    const before = await database.outbox.count()
     const input = await draft()
     const records = await Promise.all([logSet(input, session.revision, database), logSet(input, session.revision, database)])
     expect(records[0]).toEqual(records[1])
@@ -33,7 +34,7 @@ describe('M2 blijvende sessies', () => {
     expect(saved?.cursor).toBe(1)
     expect(saved?.rest?.afterSetId).toBe(input.id)
     expect(saved && restRemaining(saved)).toBeGreaterThan(110_000)
-    expect(await database.outbox.count()).toBe(4)
+    expect(await database.outbox.count()).toBe(before + 2)
     await expect(logSet({ ...input, weight: '14' }, session.revision, database)).rejects.toThrow('ander venster')
   })
   it('rolt de hele bevestiging terug bij falen van de uitgaande wachtrij', async () => {

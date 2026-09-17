@@ -11,7 +11,7 @@ export function WorkoutSetForm({ session, slot, target, initialDraft, previous, 
   onRecovery: (draft: WorkoutDraft | null) => void; onReload: () => void
 }) {
   const [input, setInput] = useState(() => ({ weight: initialDraft?.weight ?? '', reps: initialDraft?.reps ?? '' }))
-  const [status, setStatus] = useState(initialDraft ? 'Concept op apparaat opgeslagen' : 'Vul je uitgevoerde set in.')
+  const [status, setStatus] = useState(initialDraft ? 'Concept op apparaat opgeslagen' : '')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const revision = useRef(initialDraft?.revision ?? 0)
@@ -61,10 +61,10 @@ export function WorkoutSetForm({ session, slot, target, initialDraft, previous, 
     finally { submitting.current = false; setSaving(false); onBusy(unsaved.current) }
   }
   return <form className="set-form" onSubmit={submit} noValidate>
-    <h2>Set {target.number} van {slot.sets.length}</h2>
-    <p>{target.repsMin}–{target.repsMax} herhalingen. Houd ongeveer {target.rir.min}–{target.rir.max} herhalingen over met goede techniek.</p>
-    <p className="note">Eerste training: kies je gewicht na een lichte proefset. Bij twijfel vraag je hulp bij het apparaat.</p>
-    <p className="note">{previous ? `Vorige registratie van set ${target.number}: ${formatWeight(previous.weight)} kg × ${previous.reps}. Alleen vergelijkbaar op hetzelfde apparaat.` : 'Nog geen vorige registratie van deze set.'}</p>
+    <div className="prescription"><div><strong>{target.number} / {slot.sets.length}</strong><span>set</span></div><div><strong>{target.repsMin}–{target.repsMax}</strong><span>herhalingen</span></div></div>
+    <p className="note">Houd {target.rir.min}–{target.rir.max} herhalingen over.</p>
+    {target.weight !== null && <p className="target-today">Doel vandaag: {formatWeight(target.weight)} kg</p>}
+    {previous && <p className="note">Vorige registratie van set {target.number}: {formatWeight(previous.weight)} kg × {previous.reps}. Alleen vergelijkbaar op hetzelfde apparaat.</p>}
     <fieldset className="workout-fields" disabled={saving}>
       <legend className="sr-only">Set registreren</legend>
       <label>Gewicht (kg)<input inputMode="decimal" autoComplete="off" value={input.weight} onChange={event => update('weight', event.target.value)} placeholder="Vul in" /></label>

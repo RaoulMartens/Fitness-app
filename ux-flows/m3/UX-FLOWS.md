@@ -3,6 +3,10 @@
 17 september 2026. Uitwerking met ux-flow-designer, voortbouwend op de bestaande use cases en
 de M2-schermrollen. Bron: bouwbrief hoofdstuk 4 (R7), 6, 7 (M3), bouwvoorstel hoofdstuk 3.
 
+M3a is na beoordeling gebouwd in de [hoofdapp](https://raoulmartens.github.io/Fitness-app/),
+met blijvende lokale opslag. Zie [implementatie en controle](IMPLEMENTATIE.md).
+De beschrijving van sessionStorage hieronder geldt uitsluitend voor het referentieklikmodel.
+
 Op Raouls verzoek is de beoordelingsweergave vervolgens opgeschoond: alleen een klein
 Prototype-label en infoknop buiten de flow. Uitleg, scenario's en referentielinks staan in
 'Over dit prototype'. Het oefenscherm toont set en herhalingen als twee compacte vlakken,
@@ -56,9 +60,9 @@ Regenereren: `node scripts/export-m3-wireframes.mjs`.
 
 ## Nog te beslissen
 
-M3a vraagt beoordeling van de concrete flow en tekst. Gecontroleerde alternatieven,
-blijvende voorkeuren en tijdelijke planversies bij structurele overbelasting zijn nog open.
-Daarom is dit geen oplevering van de volledige M3-hoofdapp. Apparaatinstructies en demo's
+De concrete M3a-flow is goedgekeurd en gebouwd. Gecontroleerde alternatieven, blijvende
+voorkeuren en tijdelijke planversies bij structurele overbelasting zijn nog open.
+Daarom is dit geen oplevering van de volledige M3-scope. Apparaatinstructies en demo's
 blijven nodig voor echte trainingsbegeleiding. Geen automatisch tijds- of gewichtsalgoritme.
 
 Voor een latere visuele fase is ui-ux-pro-max optioneel te installeren; voor deze low-fidelity
