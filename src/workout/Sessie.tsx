@@ -121,7 +121,8 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           const id = recordId(session.id, slot.id, target.number)
           const record = sets.find(item => item.id === id)
           const eerder = vorigeSets.find(item => item.number === target.number)
-          const label = target.kind === 'warmup' ? 'W' : String(target.number)
+          const warmup = target.kind === 'warmup'
+          const label = warmup ? 'warming-up' : String(target.number)
           const vorigeTekst = target.kind === 'warmup'
             ? '—'
             : eerder ? `${formatWeight(eerder.weight)} × ${eerder.reps}` : '—'
@@ -129,7 +130,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           if (record) {
             return (
               <div className="set done" key={target.number}>
-                <span className="num">{label}</span>
+                <span className={warmup ? 'num w' : 'num'}>{label}</span>
                 <span className="prev">{vorigeTekst}</span>
                 <span className="in">{formatWeight(record.weight)}</span>
                 <span className="in">{record.reps}</span>
@@ -140,7 +141,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           if (id !== huidig.id || session.rest) {
             return (
               <div className="set" key={target.number}>
-                <span className="num">{label}</span>
+                <span className={warmup ? 'num w' : 'num'}>{label}</span>
                 <span className="prev">{vorigeTekst}</span>
                 <span className="in">—</span><span className="in">—</span>
                 <span className="tick">○</span>
@@ -150,7 +151,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           return (
             <Stappers
               key={target.number}
-              label={vorigeTekst === '—' ? (target.kind === 'warmup' ? 'warming-up' : `set ${target.number}`) : vorigeTekst}
+              label={label} warmup={warmup} vorige={vorigeTekst}
               exerciseId={slot.exerciseId}
               weight={weight} reps={reps}
               onWeight={setWeight} onReps={setReps}
@@ -195,6 +196,8 @@ function useDeVorigeKeer(exerciseId: string | undefined) {
 
 function Stappers(props: {
   label: string
+  warmup: boolean
+  vorige: string
   exerciseId: string
   weight: number | null
   reps: number
@@ -209,13 +212,23 @@ function Stappers(props: {
 
   return (
     <div className="set inline">
-      <span className="num">{props.label}</span>
-      <button onClick={() => props.onWeight(Math.max(minWeight, rond(weight - step)))} aria-label="Gewicht omlaag">−</button>
-      <button className="val" onClick={() => typen(weight, props.onWeight)} aria-label="Gewicht intypen">{formatWeight(weight)}</button>
-      <button onClick={() => props.onWeight(rond(weight + step))} aria-label="Gewicht omhoog">+</button>
-      <button onClick={() => props.onReps(Math.max(1, props.reps - 1))} aria-label="Herhaling minder">−</button>
-      <button className="val" onClick={() => typen(props.reps, value => props.onReps(Math.round(value)))} aria-label="Herhalingen intypen">{props.reps}</button>
-      <button onClick={() => props.onReps(props.reps + 1)} aria-label="Herhaling meer">+</button>
+      <span className={props.warmup ? 'num w' : 'num'}>{props.label}</span>
+      <span className="prev">{props.vorige}</span>
+      <button className="val" onClick={() => typen(weight, props.onWeight)} aria-label="Gewicht intypen">
+        {formatWeight(weight)}
+      </button>
+      <button className="val" onClick={() => typen(props.reps, value => props.onReps(Math.round(value)))} aria-label="Herhalingen intypen">
+        {props.reps}
+      </button>
+      <span className="tick">○</span>
+      <span className="pad kg">
+        <button onClick={() => props.onWeight(Math.max(minWeight, rond(weight - step)))} aria-label="Gewicht omlaag">−</button>
+        <button onClick={() => props.onWeight(rond(weight + step))} aria-label="Gewicht omhoog">+</button>
+      </span>
+      <span className="pad herh">
+        <button onClick={() => props.onReps(Math.max(1, props.reps - 1))} aria-label="Herhaling minder">−</button>
+        <button onClick={() => props.onReps(props.reps + 1)} aria-label="Herhaling meer">+</button>
+      </span>
     </div>
   )
 }

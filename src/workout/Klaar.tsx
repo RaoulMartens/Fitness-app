@@ -64,10 +64,12 @@ export function Klaar({ outcome, session, sets, voorstellen, toestanden, onTerug
                 </span>
                 <span className="bot">
                   <span>{item.from === null ? 'eerste keer' : `was ${formatWeight(item.from)}`}</span>
-                  <span className="steps">
-                    {Array.from({ length: Math.min(state?.increases ?? 0, 8) }, (_, index) => <i className="on" key={index} />)}
-                    <i className={omlaag ? 'back' : 'next'} />
-                  </span>
+                  {(state?.increases ?? 0) > 0 && (
+                    <span className="steps">
+                      {Array.from({ length: Math.min(state!.increases, 8) }, (_, index) => <i className="on" key={index} />)}
+                      <i className={omlaag ? 'back' : 'next'} />
+                    </span>
+                  )}
                   <span className="doel">{REDEN[item.reason]}</span>
                 </span>
               </div>

@@ -15,7 +15,7 @@
   --paper: #f5f5f5;
   --surface: #fff;
   --line: #ccc;
-  --muted: #8f8f8f;
+  --muted: #6f6f6f;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,6 +30,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   background: var(--paper); display: flex; flex-direction: column;
 }
 .body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+/* Zonder tabbalk raakt de onderste knop de rand van het scherm. */
+.screen > .body:last-child { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 .bar {
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   background: #e8e8e8; border-bottom: 1px dashed var(--line);
@@ -41,11 +43,11 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 
 h1 { font-size: 20px; font-weight: 600; }
 h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-p { font-size: 14px; color: #666; line-height: 1.45; }
-.sub { font-size: 13px; color: #888; }
-.muted { font-size: 12px; color: #999; }
-.next { font-size: 12px; color: #999; line-height: 1.5; }
-.lab { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #a8a8a8; }
+p { font-size: 14px; color: #545454; line-height: 1.45; }
+.sub { font-size: 13px; color: #6e6e6e; }
+.muted { font-size: 12px; color: #707070; }
+.next { font-size: 12px; color: #6e6e6e; line-height: 1.5; }
+.lab { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #767676; }
 
 /* --- bediening ----------------------------------------------------------- */
 .btn, .link {
@@ -53,12 +55,12 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
   border-radius: 4px; min-height: 44px; cursor: pointer;
 }
 .btn {
-  background: #ccc; border: 1px dashed #999; padding: 14px;
-  font-size: 16px; font-weight: 600; color: #444;
+  background: #c4c4c4; border: 1px dashed #777; padding: 14px;
+  font-size: 16px; font-weight: 600; color: #1f1f1f;
 }
 .link {
-  background: #f0f0f0; border: 1px dashed #b0b0b0; padding: 12px;
-  font-size: 14px; color: #555;
+  background: #f0f0f0; border: 1px dashed #999; padding: 12px;
+  font-size: 14px; color: #3d3d3d;
 }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn + .link, .btn + .btn, .link + .link { margin-top: 8px; }
@@ -73,8 +75,8 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
 }
 .kop.rust { background: #d8d8d8; border-bottom-style: solid; border-bottom-color: #999; }
 .kop .line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 26px; }
-.kop .big { font-size: 16px; font-weight: 600; color: #444; }
-.kop .sm { font-size: 11px; color: #888; }
+.kop .big { font-size: 16px; font-weight: 600; color: #222; }
+.kop .sm { font-size: 11px; color: #6b6b6b; }
 
 .segs { display: flex; gap: 3px; height: 6px; }
 .segs i { flex: 1; border-radius: 1px; background: #dcdcdc; }
@@ -85,40 +87,48 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
 .video {
   width: 100%; aspect-ratio: 16/9; background: #dcdcdc; border: 1px dashed #b5b5b5;
   border-radius: 4px; display: flex; align-items: center; justify-content: center;
-  color: #8a8a8a; font-size: 30px; border-width: 1px; cursor: pointer;
+  color: #6f6f6f; font-size: 30px; border-width: 1px; cursor: pointer;
 }
 .video::after { content: '\25B6'; }
 .video iframe, .video video { width: 100%; height: 100%; border: 0; border-radius: 4px; }
 .video.speelt::after { content: none; }
 
 /* --- settabel ------------------------------------------------------------ */
-.set { display: grid; grid-template-columns: 26px 1fr 1fr 1fr 38px; gap: 5px; align-items: stretch; }
+.set { display: grid; grid-template-columns: 64px 60px 1fr 1fr 34px; gap: 4px; align-items: stretch; }
 .set > * { display: flex; align-items: center; justify-content: center; font-size: 13px; padding: 9px 2px; text-align: center; }
-.set.head > * { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #999; padding: 2px 0; }
-.set .num { color: #888; font-size: 12px; }
-.set .prev { color: #aaa; }
-.set .in { background: #fff; border: 1px dashed #999; border-radius: 3px; color: #444; font-weight: 600; }
-.set .tick { border: 1px dashed #999; border-radius: 3px; background: #eee; color: #aaa; }
-.set.done .in { background: #e6e6e6; border-style: solid; border-color: var(--line); color: #888; font-weight: 400; }
-.set.done .tick { background: #c8c8c8; border-style: solid; border-color: #888; color: #333; }
+.set.head > * { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #777; padding: 2px 0; }
+.set .num { color: #6e6e6e; font-size: 12px; white-space: nowrap; }
+.set .num.w { font-size: 10px; letter-spacing: -.01em; }
+.set .prev { color: #777; }
+.set .in { background: #fff; border: 1px dashed #8a8a8a; border-radius: 3px; color: #333; font-weight: 600; }
+.set .tick { border: 1px dashed #8a8a8a; border-radius: 3px; background: #ececec; color: #888; }
+.set.done .in { background: #e6e6e6; border-style: solid; border-color: var(--line); color: #666; font-weight: 400; }
+.set.done .tick { background: #c2c2c2; border-style: solid; border-color: #777; color: #222; }
 
-/* Actieve rij: stappers erin, zodat er geen balk onderaan nodig is. */
-.set.inline {
-  grid-template-columns: 52px 40px 1fr 40px 40px 1fr 40px; gap: 4px;
-  background: #ededed; border-radius: 4px; padding: 4px 2px;
-}
-.set.inline .num { font-size: 11px; }
-.set.inline button {
-  display: flex; align-items: center; justify-content: center; min-height: 44px;
-  border: 1px dashed #999; background: #efefef; border-radius: 4px;
-  font-size: 18px; color: #555; cursor: pointer; padding: 0;
-}
-.set.inline button:active { background: #ddd; }
+/*
+ * De rij die je invult houdt precies dezelfde kolommen als de rest van de tabel,
+ * zodat je ziet welke set je invult en onder welke kop het getal hoort. De plus-
+ * en minknoppen staan op een tweede regel onder hun eigen kolom: daar past een
+ * aanraakvlak van 44 px zonder dat de tabel uit elkaar valt.
+ */
+.set.inline { background: #e2e2e2; border-radius: 4px; padding: 4px 2px; row-gap: 4px; }
+.set.inline > * { padding: 0; grid-row: 1; }
+.set.inline .num { color: #333; font-weight: 600; }
+.set.inline .prev { color: #6b6b6b; }
 .set.inline .val {
-  display: flex; align-items: center; justify-content: center; background: #fff;
-  border: 2px solid #666; border-radius: 4px; font-size: 16px; font-weight: 600; color: #222;
-  padding: 0; cursor: pointer; width: 100%;
+  display: flex; align-items: center; justify-content: center; min-height: 42px; width: 100%;
+  background: #fff; border: 2px solid #555; border-radius: 4px;
+  font-size: 17px; font-weight: 700; color: #111; cursor: pointer; padding: 0;
 }
+.set.inline .pad { grid-row: 2; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.set.inline .pad.kg { grid-column: 3; }
+.set.inline .pad.herh { grid-column: 4; }
+.set.inline .pad button {
+  display: flex; align-items: center; justify-content: center; min-height: 44px;
+  border: 1px dashed #8a8a8a; background: #f2f2f2; border-radius: 4px;
+  font-size: 20px; color: #444; cursor: pointer; padding: 0;
+}
+.set.inline .pad button:active { background: #d4d4d4; }
 .addrow {
   display: flex; align-items: center; justify-content: center; min-height: 44px;
   border: 1px dashed #cfcfcf; border-radius: 4px; background: #efefef;
@@ -132,13 +142,13 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
 .facts b { display: block; font-size: 15px; color: #333; }
 .facts span { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: .04em; }
 
-.mini { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; color: #777; padding: 6px 0; border-top: 1px dashed #ededed; }
+.mini { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; color: #5e5e5e; padding: 6px 0; border-top: 1px dashed #ededed; }
 .mini b { color: #333; font-weight: 600; }
 .mini .ar { display: inline-block; width: 16px; font-size: 13px; color: #888; }
 .mini .ar.up { color: #4a4a4a; }
-.mini .ar.down { color: #a8a8a8; }
-.plus { font-size: 12px; color: #999; padding-top: 8px; border-top: 1px dashed #ededed; margin-top: 2px; }
-.note { font-size: 12px; color: #777; background: #ececec; border: 1px dashed #c8c8c8; border-radius: 4px; padding: 8px 10px; }
+.mini .ar.down { color: #777; }
+.plus { font-size: 12px; color: #6e6e6e; padding-top: 8px; border-top: 1px dashed #ededed; margin-top: 2px; }
+.note { font-size: 12px; color: #555; background: #ececec; border: 1px dashed #c8c8c8; border-radius: 4px; padding: 8px 10px; }
 
 /* --- lijsten ------------------------------------------------------------- */
 .list2 { background: #fff; border: 1px dashed var(--line); border-radius: 4px; }
@@ -158,7 +168,7 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
 .p2 .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .p2 .top b { font-size: 14px; color: #333; font-weight: 600; }
 .p2 .top .now { margin-left: auto; font-size: 14px; color: #333; font-weight: 600; white-space: nowrap; }
-.p2 .bot { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-size: 11px; color: #a0a0a0; }
+.p2 .bot { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-size: 11px; color: #6f6f6f; }
 .p2 .bot .doel { margin-left: auto; }
 .steps { display: flex; gap: 3px; }
 .steps i { width: 13px; height: 13px; border-radius: 2px; background: #e8e8e8; border: 1px dashed #d0d0d0; }
@@ -171,17 +181,18 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
 /* --- week en kalender ---------------------------------------------------- */
 .week { display: flex; gap: 4px; }
 .day { flex: 1; border: 1px dashed #c4c4c4; border-radius: 4px; padding: 7px 0 6px; text-align: center; background: #f0f0f0; }
-.day b { display: block; font-size: 12px; color: #666; font-weight: 600; }
-.day span { display: block; font-size: 9px; color: #a5a5a5; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.day b { display: block; font-size: 13px; color: #333; font-weight: 600; }
+.day span { display: block; font-size: 10px; color: #6f6f6f; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
 .day.train { background: #d2d2d2; border-style: solid; border-color: #9a9a9a; }
 .day.train b { color: #333; }
 .day.today { border: 2px solid #555; background: #fff; }
 .day.train.today { background: #d2d2d2; border: 2px solid #555; }
 
 /* --- tabbalk ------------------------------------------------------------- */
-.tabs { background: #e8e8e8; border-top: 1px dashed var(--line); display: flex; padding: 8px 0; }
+.tabs { background: #e8e8e8; border-top: 1px dashed var(--line); display: flex;
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
 .tabs button {
-  flex: 1; display: block; padding: 2px 0 0; font-size: 11px; color: #888;
+  flex: 1; display: block; padding: 2px 0 0; font-size: 11px; color: #6b6b6b;
   background: none; border: 0; cursor: pointer;
 }
 .tabs button.on { color: #333; font-weight: 600; }
@@ -192,7 +203,7 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
 .sheet-wrap { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(60, 60, 60, .35); }
 .sheet {
   background: #efefef; border-top: 2px dashed #aaa; border-radius: 12px 12px 0 0;
-  padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px max(24px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px;
   max-width: 430px; width: 100%; margin: 0 auto;
 }
 .grip { width: 44px; height: 4px; border-radius: 2px; background: #bbb; margin: 0 auto 12px; }
@@ -206,7 +217,7 @@ p { font-size: 14px; color: #666; line-height: 1.45; }
   cursor: pointer; text-align: left;
 }
 .opt .lbl { font-size: 14px; color: #444; }
-.opt .eff { font-size: 11px; color: #999; text-align: right; flex-shrink: 0; max-width: 48%; }
+.opt .eff { font-size: 11px; color: #6f6f6f; text-align: right; flex-shrink: 0; max-width: 48%; }
 
 /* --- meldingen ----------------------------------------------------------- */
 .fout { background: #e4e4e4; border: 1px dashed #999; border-radius: 4px; padding: 10px 12px; font-size: 13px; color: #333; }
