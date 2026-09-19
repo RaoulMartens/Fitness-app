@@ -409,3 +409,8 @@ a.behind { color:inherit; }
         border:1px dashed #b0b0b0; background:#f0f0f0; border-radius:4px; }
 .links { gap:8px; }
 .typ a { text-decoration:underline; }
+/* instellingenrij: naam links, waarde rechts, tikbaar */
+.list2 a .rv { margin-left:auto; font-size:13px; color:#8f8f8f; white-space:nowrap; }
+/* knoppen onder elkaar houden afstand, ook buiten een flexcontainer */
+.btn + .link, .btn + .btn, .link + .link, .link + .btn { margin-top:8px; }
+.links .link + .link { margin-top:0; }
