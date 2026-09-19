@@ -71,6 +71,30 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
     setReps(start.reps)
   }, [huidig?.id, start.weight, start.reps])
 
+  /**
+   * Afgelopen rust gaat vanzelf door. Je staat bij het apparaat, niet met je telefoon
+   * in je hand, en een aftelling die op 0:00 blijft staan vraagt een handeling voor
+   * iets wat al besloten is. Per rust hoogstens één poging: het sleutelpaar afterSetId
+   * en endAt verandert pas bij een volgende rust of bij rust erbij.
+   *
+   * Tijdens een correctie niet. Dan zou het scherm onder je handen van oefening
+   * wisselen en de rij die je aan het aanpassen bent uit beeld halen.
+   */
+  const verdergegaan = useRef<string | null>(null)
+  useEffect(() => {
+    if (!session.rest) { verdergegaan.current = null; return }
+    if (session.status !== 'active' || corrigeert) return
+    const controle = setInterval(() => {
+      if (!session.rest || restRemaining(session) > 0) return
+      const sleutel = `${session.rest.afterSetId}:${session.rest.endAt}`
+      if (verdergegaan.current === sleutel) return
+      verdergegaan.current = sleutel
+      // Mislukt dit, dan is de sessie intussen veranderd; de knop blijft de weg terug.
+      void changeWorkout(session.id, session.revision, 'next-set').catch(() => {})
+    }, 250)
+    return () => clearInterval(controle)
+  }, [session, corrigeert])
+
   if (!slot || !huidig) {
     return <Afgerond session={session} onFout={onFout} onKlaar={onKlaar} />
   }
