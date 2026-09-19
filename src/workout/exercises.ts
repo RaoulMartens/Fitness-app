@@ -4,6 +4,10 @@
  *
  * `step` en `minWeight` horen bij het apparaat, niet bij de oefening in het algemeen:
  * ze zijn ingevuld met 2,5 kg als aanname en moeten in de sportschool worden nagelopen.
+ *
+ * De eerste zeven staan in het schema; de rest bestaat alleen als vervanger. Oefeningen
+ * op puur lichaamsgewicht staan er niet in: elke set heeft hier een gewicht, en een
+ * push-up zonder gewicht zou de progressieregels betekenisloos maken.
  */
 export interface Exercise {
   id: string
@@ -19,6 +23,9 @@ export interface Exercise {
   /** Laagste gewicht dat dit apparaat kan. Een voorstel gaat hier nooit onder. */
   minWeight: number
   restSeconds: number
+  /** Waarin deze zich onderscheidt van de rest. Staat in de vervangerslijst, waar
+   *  de spiergroep niets toevoegt omdat die per definitie gelijk is. */
+  verschil: string
   /** Ids van oefeningen die dezelfde spieren dekken, voor 'Andere oefening'. */
   alternatives: string[]
 }
@@ -34,6 +41,7 @@ export const exercises: Exercise[] = [
     step: 5,
     minWeight: 20,
     restSeconds: 120,
+    verschil: 'vaste baan',
     alternatives: ['hack-squat', 'goblet-squat'],
   },
   {
@@ -45,6 +53,7 @@ export const exercises: Exercise[] = [
     step: 2.5,
     minWeight: 10,
     restSeconds: 120,
+    verschil: 'apparaat',
     alternatives: ['romanian-deadlift'],
   },
   {
@@ -57,7 +66,8 @@ export const exercises: Exercise[] = [
     step: 2.5,
     minWeight: 10,
     restSeconds: 120,
-    alternatives: ['dumbbell-press', 'incline-press', 'push-up'],
+    verschil: 'vaste baan',
+    alternatives: ['dumbbell-press', 'incline-press'],
   },
   {
     id: 'row',
@@ -69,6 +79,7 @@ export const exercises: Exercise[] = [
     step: 2.5,
     minWeight: 10,
     restSeconds: 120,
+    verschil: 'vrij zittend',
     alternatives: ['chest-supported-row'],
   },
   {
@@ -80,7 +91,8 @@ export const exercises: Exercise[] = [
     step: 2.5,
     minWeight: 10,
     restSeconds: 120,
-    alternatives: ['pull-up', 'row'],
+    verschil: 'van boven',
+    alternatives: ['chest-supported-row', 'row'],
   },
   {
     id: 'biceps-curl',
@@ -91,6 +103,7 @@ export const exercises: Exercise[] = [
     step: 2.5,
     minWeight: 5,
     restSeconds: 90,
+    verschil: 'handpalmen omhoog',
     alternatives: ['hammer-curl'],
   },
   {
@@ -102,7 +115,107 @@ export const exercises: Exercise[] = [
     step: 2.5,
     minWeight: 5,
     restSeconds: 90,
+    verschil: 'naar beneden',
     alternatives: ['overhead-extension'],
+  },
+  {
+    id: 'hack-squat',
+    name: 'Hack squat',
+    muscles: 'Bovenbenen en billen',
+    why: 'Zelfde werk als de leg press, met je rug tegen een schuine steun.',
+    cues: ['Voeten iets naar voren', 'Knieën in lijn met je tenen'],
+    step: 5,
+    minWeight: 20,
+    restSeconds: 120,
+    verschil: 'rug gesteund',
+    alternatives: ['leg-press', 'goblet-squat'],
+  },
+  {
+    id: 'goblet-squat',
+    name: 'Goblet squat',
+    muscles: 'Bovenbenen en billen',
+    helper: 'Je romp werkt mee om rechtop te blijven.',
+    why: 'Met een losse halter, voor als beide beenapparaten bezet zijn.',
+    cues: ['Halter tegen je borst', 'Rechtop blijven', 'Hakken op de grond'],
+    step: 2.5,
+    minWeight: 5,
+    restSeconds: 120,
+    verschil: 'losse halter',
+    alternatives: ['leg-press', 'hack-squat'],
+  },
+  {
+    id: 'romanian-deadlift',
+    name: 'Romanian deadlift',
+    muscles: 'Hamstrings en billen',
+    why: 'Rekt de achterkant van je benen onder belasting. Alternatief voor de leg curl.',
+    cues: ['Lichte kniebuiging vasthouden', 'Heupen naar achteren', 'Rug recht'],
+    step: 2.5,
+    minWeight: 20,
+    restSeconds: 120,
+    verschil: 'vrije oefening',
+    alternatives: ['leg-curl'],
+  },
+  {
+    id: 'dumbbell-press',
+    name: 'Dumbbell press',
+    muscles: 'Borst en voorste schouder',
+    helper: 'Je triceps helpt mee.',
+    why: 'Losse gewichten, dus elke kant doet zijn eigen werk.',
+    cues: ['Polsen recht boven je ellebogen', 'Niet tegen elkaar tikken bovenin'],
+    step: 2.5,
+    minWeight: 5,
+    restSeconds: 120,
+    verschil: 'losse gewichten',
+    alternatives: ['chest-press', 'incline-press'],
+  },
+  {
+    id: 'incline-press',
+    name: 'Incline press',
+    muscles: 'Borst, bovenste deel, en voorste schouder',
+    helper: 'Je triceps helpt mee.',
+    why: 'Zelfde duwbeweging onder een andere hoek.',
+    cues: ['Rug tegen de leuning', 'Ellebogen iets naar binnen'],
+    step: 2.5,
+    minWeight: 10,
+    restSeconds: 120,
+    verschil: 'andere hoek',
+    alternatives: ['chest-press', 'dumbbell-press'],
+  },
+  {
+    id: 'chest-supported-row',
+    name: 'Chest supported row',
+    muscles: 'Rug en achterste schouder',
+    why: 'Trekken met je borst tegen een steun, zodat je onderrug niet meedoet.',
+    cues: ['Borst tegen het kussen', 'Schouderbladen naar elkaar'],
+    step: 2.5,
+    minWeight: 10,
+    restSeconds: 120,
+    verschil: 'borst gesteund',
+    alternatives: ['row', 'pulldown'],
+  },
+  {
+    id: 'hammer-curl',
+    name: 'Hammer curl',
+    muscles: 'Biceps en onderarm',
+    why: 'Zelfde beweging met je duimen omhoog, waardoor je onderarm meer werk krijgt.',
+    cues: ['Ellebogen op hun plek', 'Rustig laten zakken'],
+    step: 2.5,
+    minWeight: 5,
+    restSeconds: 90,
+    verschil: 'duimen omhoog',
+    alternatives: ['biceps-curl'],
+  },
+  {
+    id: 'overhead-extension',
+    name: 'Triceps extension boven je hoofd',
+    muscles: 'Triceps',
+    why: 'Andere hoek dan de pushdown, waardoor de lange kop van je triceps meer werk krijgt.',
+    cues: ['Ellebogen naar voren gericht', 'Niet in je nek laten zakken'],
+    step: 2.5,
+    minWeight: 5,
+    restSeconds: 90,
+    verschil: 'boven je hoofd',
+    alternatives: ['triceps-pushdown'],
   },
 ]
 

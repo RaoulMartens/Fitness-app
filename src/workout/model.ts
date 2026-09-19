@@ -17,6 +17,8 @@ export interface Slot {
    *  oude sessies niet met terugwerkende kracht anders laat uitvallen. */
   step: number
   minWeight: number
+  /** Gevuld zodra je deze oefening vandaag hebt vervangen; het schema zelf blijft gelijk. */
+  originalExerciseId?: string
   sets: Target[]
 }
 export interface Program {
@@ -50,7 +52,7 @@ export interface AdjustmentState {
 }
 export interface Adjustment {
   id: string
-  kind: 'later' | 'skip' | 'time' | 'weight' | 'undo'
+  kind: 'later' | 'skip' | 'time' | 'weight' | 'vervangen' | 'undo'
   reason: string
   scope: 'today'
   label: string

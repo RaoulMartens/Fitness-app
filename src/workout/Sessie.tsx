@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { addExtraSet, changeWorkout, correctSet, logSet, workoutDb, writeDraft } from './db'
+import { addExtraSet, adjustWorkout, changeWorkout, correctSet, logSet, workoutDb, writeDraft, type AdjustmentCommand } from './db'
 import { findExercise } from './exercises'
 import { finishWorkout } from './finish'
 import {
@@ -218,11 +218,92 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           <div className="links">
             {corrigeert
               ? <button className="link" onClick={() => setCorrigeert(null)}>Annuleren</button>
-              : <Afronden session={session} drafts={drafts} onFout={onFout} onKlaar={onKlaar} />}
+              : <>
+                  <Afronden session={session} drafts={drafts} onFout={onFout} onKlaar={onKlaar} />
+                  {!session.rest && <Aanpassen session={session} slot={slot} sets={sets} drafts={drafts} onFout={onFout} />}
+                </>}
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * Wat je met de oefening van nu kunt doen zonder het schema te veranderen. Beide keuzes
+ * gelden alleen vandaag. Een keuze die niet kan blijft staan met de reden ernaast: hem
+ * weglaten zou de sheet per situatie van vorm laten veranderen.
+ */
+function Aanpassen({ session, slot, sets, drafts, onFout }: {
+  session: Workout
+  slot: Workout['snapshot']['slots'][number]
+  sets: WorkoutSet[]
+  drafts: WorkoutDraft[]
+  onFout: (melding: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [stap, setStap] = useState<'keuze' | 'vervangen'>('keuze')
+  const begonnen = sets.some(item => item.slotId === slot.id)
+  const andereOpen = pendingTargets(session).some(item => item.slot.id !== slot.id)
+  const exercise = findExercise(slot.exerciseId)
+  const alternatieven = (exercise?.alternatives ?? [])
+    .map(findExercise)
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+
+  function sluit() { setOpen(false); setStap('keuze') }
+
+  async function voer(command: AdjustmentCommand) {
+    try {
+      await adjustWorkout(session.id, session.revision, crypto.randomUUID(), draftVersions(drafts), command)
+      sluit()
+    } catch (error) {
+      onFout(error instanceof Error ? error.message : 'De aanpassing is niet doorgevoerd.')
+      sluit()
+    }
+  }
+
+  return (
+    <>
+      <button className="link" onClick={() => setOpen(true)}>Oefening aanpassen</button>
+      {open && (
+        <div className="sheet-wrap" onClick={sluit}>
+          <div className="sheet" onClick={event => event.stopPropagation()}>
+            <div className="grip" />
+            {stap === 'keuze' ? (
+              <>
+                <h1>{slot.name}</h1>
+                <button className="opt" disabled={!andereOpen} onClick={() => voer({ kind: 'later' })}>
+                  <span className="lbl">Later doen</span>
+                  <span className="eff">{andereOpen ? 'Achteraan in de sessie' : 'Er staat niets anders meer open'}</span>
+                </button>
+                <button className="opt" disabled={begonnen || !alternatieven.length} onClick={() => setStap('vervangen')}>
+                  <span className="lbl">Andere oefening</span>
+                  <span className="eff">
+                    {begonnen
+                      ? 'Kan niet meer: je hebt hier al een set op staan'
+                      : alternatieven.length ? 'Zelfde spieren, ander apparaat' : 'Geen vervanger bekend'}
+                  </span>
+                </button>
+              </>
+            ) : (
+              <>
+                <h1>Andere oefening</h1>
+                <p className="sub">In plaats van {slot.name} · {exercise?.muscles.toLowerCase()}</p>
+                <div className="list2">
+                  {alternatieven.map(item => (
+                    <button className="kies" key={item.id} onClick={() => voer({ kind: 'vervangen', exerciseId: item.id })}>
+                      <span className="nm">{item.name}</span>
+                      <span className="mt">{item.verschil}</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="next">Alleen voor vandaag. Je schema houdt {slot.name}.</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

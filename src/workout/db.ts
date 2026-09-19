@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import { findExercise } from './exercises'
 import { parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
 
 export class WorkoutDatabase extends Dexie {
@@ -321,9 +322,10 @@ export type AdjustmentCommand =
   | { kind: 'skip'; reason: 'pain' | 'material' | 'skip' }
   | { kind: 'time'; slots: string[] }
   | { kind: 'weight'; weight: string; reason: 'day' | 'technique' | 'structural' }
+  | { kind: 'vervangen'; exerciseId: string }
   | { kind: 'undo' }
 export async function adjustWorkout(id: string, revision: number, operationId: string, expectedDrafts: DraftVersions, command: AdjustmentCommand, database = workoutDb) {
-  return database.transaction('rw', database.sessions, database.sets, database.drafts, database.outbox, async () => {
+  return database.transaction('rw', database.sessions, database.sets, database.drafts, database.outbox, database.exerciseStates, async () => {
     const session = await database.sessions.get(id)
     if (!session) throw changed()
     if (session.adjustments?.some(item => item.id === operationId)) return session
@@ -349,6 +351,30 @@ export async function adjustWorkout(id: string, revision: number, operationId: s
         if (!open.some(item => item.slot.id !== current.slot.id)) throw new Error('Er staat geen andere oefening meer open.')
         session.pendingIds = [...open.filter(item => item.slot.id !== current.slot.id), ...open.filter(item => item.slot.id === current.slot.id)].map(item => item.id)
         label = `${current.slot.name} komt later terug.`
+      } else if (command.kind === 'vervangen') {
+        const vervanger = findExercise(command.exerciseId)
+        if (!vervanger) throw new Error('Die oefening staat niet in je lijst.')
+        const slot = session.snapshot.slots.find(item => item.id === current.slot.id)
+        if (!slot || slot.exerciseId === vervanger.id) throw new Error('Kies een andere oefening dan deze.')
+        // Halverwege van apparaat wisselen maakt de sets van vandaag onvergelijkbaar,
+        // en het voorstel zou op de verkeerde oefening terechtkomen.
+        const gedaan = await database.sets.where('sessionId').equals(id).toArray()
+        if (gedaan.some(item => item.slotId === slot.id)) {
+          throw new Error(`Je hebt al een set op ${slot.name} vastgelegd. Vervangen kan alleen voordat je begint.`)
+        }
+        const oud = slot.name
+        slot.originalExerciseId = slot.originalExerciseId ?? slot.exerciseId
+        slot.exerciseId = vervanger.id
+        slot.name = vervanger.name
+        slot.step = vervanger.step
+        slot.minWeight = vervanger.minWeight
+        slot.restSeconds = vervanger.restSeconds
+        // Het gewicht van het oude apparaat zegt niets over het nieuwe.
+        const eigen = await database.exerciseStates.get(vervanger.id)
+        slot.sets = slot.sets.map(target => ({ ...target, weight: eigen?.currentWeight ?? null }))
+        session.todayWeights = Object.fromEntries(
+          Object.entries(session.todayWeights ?? {}).filter(([key]) => !key.startsWith(`${id}:${slot.id}:`)))
+        label = `${vervanger.name} in plaats van ${oud}, alleen vandaag.`
       } else if (command.kind === 'weight') {
         const weight = parseInput(command.weight, '1').weight
         if (weight <= 0) throw new Error('Vul een gewicht boven 0 in.')

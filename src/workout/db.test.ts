@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { addExtraSet, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { exercise } from './exercises'
 import { plannedSlot } from './finish'
 import { recordId, restRemaining, starterProgram, targets, type Workout } from './model'
 
@@ -140,5 +141,28 @@ describe('corrigeren en een set erbij', () => {
     // De rest van de sessie schuift niet: alleen deze oefening krijgt er een rij bij.
     expect(open.length).toBe(voor.pendingIds!.length + 1)
     expect(plannedSlot(na, eerste.id)?.plannedSets).toBe(plannedSlot(voor, eerste.id)?.plannedSets)
+  })
+})
+
+describe('een andere oefening voor vandaag', () => {
+  it('neemt naam, stap en laagste gewicht van de vervanger over en laat het schema staan', async () => {
+    const voor = (await database.sessions.get(session.id))!
+    const na = await adjustWorkout(session.id, voor.revision, crypto.randomUUID(), {},
+      { kind: 'vervangen', exerciseId: 'hack-squat' }, database)
+    const slot = na.snapshot.slots[0]
+    expect(slot.exerciseId).toBe('hack-squat')
+    expect(slot.originalExerciseId).toBe('leg-press')
+    expect(slot.step).toBe(exercise('hack-squat').step)
+    expect(slot.sets.every(target => target.weight === null)).toBe(true)
+    expect(starterProgram.slots[0].exerciseId).toBe('leg-press')
+    expect(na.adjustments?.at(-1)?.kind).toBe('vervangen')
+  })
+  it('weigert vervangen zodra er een set op die oefening staat', async () => {
+    await logSet(await draft(), session.revision, database)
+    // Aanpassen kan pas als de rust voorbij is; die staat het vastleggen anders in de weg.
+    let nu = (await database.sessions.get(session.id))!
+    nu = await changeWorkout(nu.id, nu.revision, 'next-set', undefined, database)
+    await expect(adjustWorkout(session.id, nu.revision, crypto.randomUUID(), {},
+      { kind: 'vervangen', exerciseId: 'hack-squat' }, database)).rejects.toThrow('voordat je begint')
   })
 })
