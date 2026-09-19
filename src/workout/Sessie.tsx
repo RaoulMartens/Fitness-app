@@ -71,6 +71,42 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
     setReps(start.reps)
   }, [huidig?.id, start.weight, start.reps])
 
+  function openCorrectie(record: WorkoutSet) {
+    setCorrigeert(record.id)
+    setCorrectieWeight(record.weight)
+    setCorrectieReps(record.reps)
+  }
+
+  async function correctieOpslaan() {
+    if (!corrigeert) return
+    if (!magVastleggen(correctieWeight, correctieReps)) return onFout('Vul een gewicht en een heel aantal herhalingen in.')
+    try {
+      await correctSet(corrigeert, correctieWeight, correctieReps, session.revision)
+      setCorrigeert(null)
+    } catch (error) {
+      onFout(error instanceof Error ? error.message : 'De correctie is niet opgeslagen.')
+    }
+  }
+
+  /**
+   * Ergens anders tikken sluit de correctie af en bewaart hem. Het getal staat al
+   * zichtbaar op de nieuwe waarde en verandert alleen door jouw tikken, dus wegklikken
+   * is geen ongeluk. Annuleren blijft de weg om hem weg te gooien.
+   *
+   * De rij zelf, de opslaanknop en de annuleerknop dragen data-correctie en vallen
+   * buiten deze luisteraar: hij loopt op pointerdown, dus zonder die uitzondering zou
+   * de knop onder je vinger al vervangen zijn voordat de klik erop aankomt.
+   */
+  useEffect(() => {
+    if (!corrigeert) return
+    function buiten(event: PointerEvent) {
+      if ((event.target as HTMLElement | null)?.closest('[data-correctie]')) return
+      void correctieOpslaan()
+    }
+    document.addEventListener('pointerdown', buiten)
+    return () => document.removeEventListener('pointerdown', buiten)
+  }, [corrigeert, correctieWeight, correctieReps, session.revision])
+
   /**
    * Afgelopen rust gaat vanzelf door. Je staat bij het apparaat, niet met je telefoon
    * in je hand, en een aftelling die op 0:00 blijft staan vraagt een handeling voor
@@ -117,23 +153,6 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
       await logSet(geschreven, session.revision)
     } catch (error) {
       onFout(error instanceof Error ? error.message : 'Er ging iets mis. Je invoer staat nog in beeld.')
-    }
-  }
-
-  function openCorrectie(record: WorkoutSet) {
-    setCorrigeert(record.id)
-    setCorrectieWeight(record.weight)
-    setCorrectieReps(record.reps)
-  }
-
-  async function correctieOpslaan() {
-    if (!corrigeert) return
-    if (!magVastleggen(correctieWeight, correctieReps)) return onFout('Vul een gewicht en een heel aantal herhalingen in.')
-    try {
-      await correctSet(corrigeert, correctieWeight, correctieReps, session.revision)
-      setCorrigeert(null)
-    } catch (error) {
-      onFout(error instanceof Error ? error.message : 'De correctie is niet opgeslagen.')
     }
   }
 
@@ -202,7 +221,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           if (record && corrigeert === id) {
             return (
               <Stappers
-                key={target.number}
+                key={target.number} corrigeert
                 label={label} smal={target.kind !== 'work'} vorige={vorigeTekst}
                 exerciseId={slot.exerciseId}
                 weight={correctieWeight} reps={correctieReps}
@@ -255,7 +274,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {corrigeert
-            ? <button className="btn" onClick={correctieOpslaan}>Correctie opslaan</button>
+            ? <button className="btn" data-correctie onClick={correctieOpslaan}>Correctie opslaan</button>
             : session.rest
               ? <button className="btn" onClick={rustOverslaan}>
                   {naarAnderApparaat ? `Verder met ${huidig.slot.name}` : 'Verder'}
@@ -263,7 +282,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
               : <button className="btn" onClick={vastleggen}>Set vastleggen</button>}
           <div className="links">
             {corrigeert
-              ? <button className="link" onClick={() => setCorrigeert(null)}>Annuleren</button>
+              ? <button className="link" data-correctie onClick={() => setCorrigeert(null)}>Annuleren</button>
               : <>
                   <Afronden session={session} drafts={drafts} onFout={onFout} onKlaar={onKlaar} />
                   {!session.rest && <Aanpassen session={session} slot={slot} sets={sets} drafts={drafts} onFout={onFout} />}
@@ -376,6 +395,7 @@ function useDeVorigeKeer(exerciseId: string | undefined) {
 function Stappers(props: {
   label: string
   smal: boolean
+  corrigeert?: boolean
   vorige: string
   exerciseId: string
   weight: number | null
@@ -390,7 +410,7 @@ function Stappers(props: {
   const rond = (value: number) => Math.round(value * 100) / 100
 
   return (
-    <div className="set inline">
+    <div className="set inline" data-correctie={props.corrigeert ? '' : undefined}>
       <span className={props.smal ? 'num w' : 'num'}>{props.label}</span>
       <span className="prev">{props.vorige}</span>
       <button className="val" onClick={() => typen(weight, props.onWeight)} aria-label="Gewicht intypen">
