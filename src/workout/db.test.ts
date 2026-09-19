@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
 import { exercise } from './exercises'
 import { plannedSlot } from './finish'
-import { recordId, restRemaining, starterProgram, targets, type Workout } from './model'
+import { pendingTargets, recordId, restRemaining, restSlot, starterProgram, targets, type Workout } from './model'
 
 let database: WorkoutDatabase
 let session: Workout
@@ -164,5 +164,29 @@ describe('een andere oefening voor vandaag', () => {
     nu = await changeWorkout(nu.id, nu.revision, 'next-set', undefined, database)
     await expect(adjustWorkout(session.id, nu.revision, crypto.randomUUID(), {},
       { kind: 'vervangen', exerciseId: 'hack-squat' }, database)).rejects.toThrow('voordat je begint')
+  })
+})
+
+describe('waar de lopende rust bij hoort', () => {
+  it('blijft bij dezelfde oefening zolang die nog een set open heeft', async () => {
+    await logSet(await draft(), session.revision, database)
+    const nu = (await database.sessions.get(session.id))!
+    const eerste = targets(nu.snapshot)[0].slot
+    expect(restSlot(nu)?.id).toBe(eerste.id)
+    // De volgende set staat op hetzelfde apparaat, dus er is niets om naartoe te gaan.
+    expect(pendingTargets(nu)[0].slot.id).toBe(eerste.id)
+  })
+  it('wijst naar de afgelopen oefening zodra de volgende set op een ander apparaat staat', async () => {
+    let nu = (await database.sessions.get(session.id))!
+    const eerste = targets(nu.snapshot)[0].slot
+    for (let index = 0; index < eerste.sets.length; index++) {
+      nu = (await database.sessions.get(session.id))!
+      if (nu.rest) nu = await changeWorkout(nu.id, nu.revision, 'next-set', undefined, database)
+      session = nu
+      await logSet(await draft(), nu.revision, database)
+    }
+    nu = (await database.sessions.get(session.id))!
+    expect(restSlot(nu)?.id).toBe(eerste.id)
+    expect(pendingTargets(nu)[0].slot.id).not.toBe(eerste.id)
   })
 })

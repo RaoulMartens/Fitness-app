@@ -3,7 +3,7 @@ import { addExtraSet, adjustWorkout, changeWorkout, correctSet, logSet, workoutD
 import { findExercise } from './exercises'
 import { finishWorkout } from './finish'
 import {
-  draftVersions, formatWeight, pendingTargets, recordId, restRemaining, restTotal, targets, timerLabel,
+  draftVersions, formatWeight, pendingTargets, recordId, restRemaining, restSlot, restTotal, targets, timerLabel,
   type Workout, type WorkoutDraft, type WorkoutSet,
 } from './model'
 import { magVastleggen } from './rules'
@@ -118,7 +118,10 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
     catch (error) { onFout(error instanceof Error ? error.message : 'Er ging iets mis.') }
   }
 
-  const laatsteVanOefening = !open.slice(1).some(item => item.slot.id === slot.id)
+  // De rust hoort bij de set die je net deed. Die oefening is pas klaar als de
+  // eerstvolgende set op een ander apparaat staat; de set die je nu nog moet doen
+  // staat vooraan in de rij, dus die mag niet uit de vergelijking vallen.
+  const naarAnderApparaat = Boolean(session.rest) && restSlot(session)?.id !== slot.id
   const rustDuur = restTotal(session)
   const deelRust = rustDuur > 0 ? Math.min(100, Math.max(0, (rust / rustDuur) * 100)) : 0
 
@@ -212,7 +215,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
             ? <button className="btn" onClick={correctieOpslaan}>Correctie opslaan</button>
             : session.rest
               ? <button className="btn" onClick={rustOverslaan}>
-                  {laatsteVanOefening && hierna ? `Verder met ${hierna.name}` : 'Verder'}
+                  {naarAnderApparaat ? `Verder met ${slot.name}` : 'Verder'}
                 </button>
               : <button className="btn" onClick={vastleggen}>Set vastleggen</button>}
           <div className="links">
