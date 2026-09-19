@@ -5,8 +5,8 @@ export interface Target {
   repsMax: number
   weight: number | null
   rir: { min: number; max: number }
-  /** Een warming-upset telt niet mee voor progressie. Zie bouwdocument sectie 4.0. */
-  kind: 'warmup' | 'work'
+  /** Warming-up en extra tellen niet mee voor progressie. Zie bouwdocument sectie 4.0. */
+  kind: 'warmup' | 'work' | 'extra'
 }
 export interface Slot {
   id: string

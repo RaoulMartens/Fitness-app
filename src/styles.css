@@ -110,6 +110,9 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
 .set .in { background: #fff; border: 1px dashed #8a8a8a; border-radius: 3px; color: #333; font-weight: 600; }
 .set .tick { border: 1px dashed #8a8a8a; border-radius: 3px; background: #ececec; color: #888; }
 .set.done .in { background: #e6e6e6; border-style: solid; border-color: var(--line); color: #666; font-weight: 400; }
+/* Een vastgelegde waarde is aan te tikken om hem te corrigeren. */
+.set.done button.in { cursor: pointer; }
+.set.done button.in:active { background: #d6d6d6; }
 .set.done .tick { background: #c2c2c2; border-style: solid; border-color: #777; color: #222; }
 
 /*
@@ -138,9 +141,10 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
 .set.inline .pad button:active { background: #d4d4d4; }
 .addrow {
   display: flex; align-items: center; justify-content: center; min-height: 44px;
-  border: 1px dashed #cfcfcf; border-radius: 4px; background: #efefef;
-  font-size: 13px; color: #777; text-decoration: none; width: 100%; cursor: pointer;
+  border: 1px dashed #c4c4c4; border-radius: 4px; background: #efefef;
+  font-size: 13px; color: #5e5e5e; text-decoration: none; width: 100%; cursor: pointer;
 }
+.addrow:active { background: #e2e2e2; }
 
 /* --- kaartinhoud --------------------------------------------------------- */
 .facts { display: flex; gap: 6px; }

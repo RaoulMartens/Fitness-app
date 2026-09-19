@@ -174,6 +174,61 @@ export async function logSet(draft: WorkoutDraft, sessionRevision: number, datab
   })
 }
 
+/**
+ * Een vastgelegde set verbeteren. Dat gebeurt meestal meteen na het vastleggen, dus
+ * ook terwijl de rust loopt. De oude waarde bewaren we niet: een typefout is geen
+ * meetwaarde. Wel dát er gecorrigeerd is, zodat een herberekening later te verklaren is.
+ */
+export async function correctSet(setId: string, weight: number, reps: number, sessionRevision: number, database = workoutDb) {
+  return database.transaction('rw', database.sessions, database.sets, database.outbox, async () => {
+    const record = await database.sets.get(setId)
+    if (!record) throw changed()
+    if (record.weight === weight && record.reps === reps) return record
+    if (!Number.isFinite(weight) || weight <= 0 || !Number.isInteger(reps) || reps < 1) {
+      throw new Error('Vul een gewicht en een heel aantal herhalingen in.')
+    }
+    const session = await database.sessions.get(record.sessionId)
+    if (!session || session.revision !== sessionRevision || !isRunning(session)) throw changed()
+    const correctedAt = new Date().toISOString()
+    const next: WorkoutSet = { ...record, weight, reps, correctedAt }
+    await database.sets.put(next)
+    await database.outbox.put({ id: `${setId}:correct`, entity: 'set', entityId: setId, payload: next, status: 'local', createdAt: correctedAt })
+    session.revision++
+    await queueSession(session, database)
+    return next
+  })
+}
+
+/**
+ * Een set erbij op de oefening waar je mee bezig bent. Die telt niet mee voor
+ * progressie (sectie 4.0): het schema blijft het schema, dit is werk van vandaag.
+ * Hij komt achter de sets van dezelfde oefening te staan, en vooraan als die al
+ * allemaal gedaan zijn — dan is dit de set die je nu doet.
+ */
+export async function addExtraSet(sessionId: string, revision: number, slotId: string, database = workoutDb) {
+  return database.transaction('rw', database.sessions, database.sets, database.outbox, async () => {
+    const session = await database.sessions.get(sessionId)
+    if (!session || session.revision !== revision || !isRunning(session)) throw changed()
+    const slot = session.snapshot.slots.find(item => item.id === slotId)
+    if (!slot?.sets.length) throw changed()
+    const gedaan = (await database.sets.where('sessionId').equals(sessionId).toArray())
+      .filter(item => item.slotId === slotId)
+      .sort((a, b) => a.recordedAt.localeCompare(b.recordedAt))
+    const number = Math.max(...slot.sets.map(target => target.number)) + 1
+    slot.sets = [...slot.sets, {
+      ...slot.sets[slot.sets.length - 1],
+      number, kind: 'extra', weight: gedaan.at(-1)?.weight ?? null,
+    }]
+    const open = pendingIds(session)
+    const laatsteVanSlot = open.map(item => item.startsWith(`${session.id}:${slot.id}:`)).lastIndexOf(true)
+    const id = recordId(session.id, slot.id, number)
+    session.pendingIds = [...open.slice(0, laatsteVanSlot + 1), id, ...open.slice(laatsteVanSlot + 1)]
+    session.revision++
+    await queueSession(session, database)
+    return session
+  })
+}
+
 export type SessionAction = 'begin-exercise' | 'pause' | 'resume' | 'next-set' | 'extra-rest' | 'complete' | 'abort' | 'warmup-on' | 'warmup-off'
 export async function changeWorkout(id: string, revision: number, action: SessionAction, draftRevision?: number | DraftVersions, database = workoutDb) {
   return database.transaction('rw', database.sessions, database.drafts, database.outbox, database.appointments, database.workspace, async () => {

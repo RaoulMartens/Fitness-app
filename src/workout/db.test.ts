@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { beginWorkout, changeWorkout, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { addExtraSet, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { plannedSlot } from './finish'
 import { recordId, restRemaining, starterProgram, targets, type Workout } from './model'
 
 let database: WorkoutDatabase
@@ -104,5 +105,40 @@ describe('M2 blijvende sessies', () => {
     expect(await database.sessions.get(session.id)).toEqual(session)
     await expect(updateWeekend('Zaterdag', 0, database)).rejects.toThrow('ander venster')
     expect((await database.workspace.get('main'))?.weekend).toBe('Zondag')
+  })
+})
+
+describe('corrigeren en een set erbij', () => {
+  it('past een vastgelegde set aan, merkt hem als gecorrigeerd en is herhaalbaar', async () => {
+    const input = await draft('20', '110')
+    const record = await logSet(input, session.revision, database)
+    const versie = (await database.sessions.get(session.id))!.revision
+    const verbeterd = await correctSet(record.id, 20, 11, versie, database)
+    expect(verbeterd.reps).toBe(11)
+    expect(verbeterd.correctedAt).toBeTruthy()
+    expect(await database.sets.count()).toBe(1)
+    // Tweede keer met dezelfde waarden: geen nieuwe revisie, geen fout.
+    const opnieuw = await correctSet(record.id, 20, 11, versie, database)
+    expect(opnieuw.correctedAt).toBe(verbeterd.correctedAt)
+  })
+  it('weigert een correctie op een oude revisie of met onmogelijke waarden', async () => {
+    const record = await logSet(await draft(), session.revision, database)
+    const versie = (await database.sessions.get(session.id))!.revision
+    await expect(correctSet(record.id, 20, 10, versie - 1, database)).rejects.toThrow()
+    await expect(correctSet(record.id, 20, 0.5, versie, database)).rejects.toThrow('heel aantal')
+    expect((await database.sets.get(record.id))?.reps).toBe(10)
+  })
+  it('zet een extra set achter de sets van dezelfde oefening en telt niet als werkset', async () => {
+    const eerste = targets(session.snapshot)[0].slot
+    const voor = (await database.sessions.get(session.id))!
+    const na = await addExtraSet(session.id, voor.revision, eerste.id, database)
+    const extra = na.snapshot.slots.find(item => item.id === eerste.id)!.sets.at(-1)!
+    expect(extra.kind).toBe('extra')
+    const open = na.pendingIds!
+    const eigen = open.filter(id => id.startsWith(`${session.id}:${eerste.id}:`))
+    expect(eigen.at(-1)).toBe(recordId(session.id, eerste.id, extra.number))
+    // De rest van de sessie schuift niet: alleen deze oefening krijgt er een rij bij.
+    expect(open.length).toBe(voor.pendingIds!.length + 1)
+    expect(plannedSlot(na, eerste.id)?.plannedSets).toBe(plannedSlot(voor, eerste.id)?.plannedSets)
   })
 })

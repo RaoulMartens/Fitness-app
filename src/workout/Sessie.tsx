@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { changeWorkout, logSet, workoutDb, writeDraft } from './db'
+import { addExtraSet, changeWorkout, correctSet, logSet, workoutDb, writeDraft } from './db'
 import { findExercise } from './exercises'
 import { finishWorkout } from './finish'
 import {
@@ -53,6 +53,11 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
   const [weight, setWeight] = useState<number | null>(start.weight)
   const [reps, setReps] = useState<number>(start.reps)
   const gezet = useRef<string | null>(null)
+  // Een set die je opnieuw opent staat los van de set die je nu doet: anders
+  // overschrijft een correctie de waarden die al in de openstaande rij stonden.
+  const [corrigeert, setCorrigeert] = useState<string | null>(null)
+  const [correctieWeight, setCorrectieWeight] = useState(0)
+  const [correctieReps, setCorrectieReps] = useState(0)
 
   // Bij een nieuwe set opnieuw beginnen bij wat er vorige keer stond.
   useEffect(() => {
@@ -84,6 +89,28 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
     } catch (error) {
       onFout(error instanceof Error ? error.message : 'Er ging iets mis. Je invoer staat nog in beeld.')
     }
+  }
+
+  function openCorrectie(record: WorkoutSet) {
+    setCorrigeert(record.id)
+    setCorrectieWeight(record.weight)
+    setCorrectieReps(record.reps)
+  }
+
+  async function correctieOpslaan() {
+    if (!corrigeert) return
+    if (!magVastleggen(correctieWeight, correctieReps)) return onFout('Vul een gewicht en een heel aantal herhalingen in.')
+    try {
+      await correctSet(corrigeert, correctieWeight, correctieReps, session.revision)
+      setCorrigeert(null)
+    } catch (error) {
+      onFout(error instanceof Error ? error.message : 'De correctie is niet opgeslagen.')
+    }
+  }
+
+  async function setErbij() {
+    try { await addExtraSet(session.id, session.revision, slot!.id) }
+    catch (error) { onFout(error instanceof Error ? error.message : 'Er kon geen set bij.') }
   }
 
   async function rustOverslaan() {
@@ -125,27 +152,40 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           const id = recordId(session.id, slot.id, target.number)
           const record = sets.find(item => item.id === id)
           const eerder = vorigeSets.find(item => item.number === target.number)
-          const warmup = target.kind === 'warmup'
-          const label = warmup ? 'warming-up' : String(target.number)
-          const vorigeTekst = target.kind === 'warmup'
-            ? '—'
-            : eerder ? `${formatWeight(eerder.weight)} × ${eerder.reps}` : '—'
+          const label = target.kind === 'warmup' ? 'warming-up' : target.kind === 'extra' ? 'extra' : String(target.number)
+          // Alleen een geplande werkset heeft een tegenhanger in de vorige sessie.
+          const vorigeTekst = target.kind === 'work' && eerder ? `${formatWeight(eerder.weight)} × ${eerder.reps}` : '—'
 
+          if (record && corrigeert === id) {
+            return (
+              <Stappers
+                key={target.number}
+                label={label} smal={target.kind !== 'work'} vorige={vorigeTekst}
+                exerciseId={slot.exerciseId}
+                weight={correctieWeight} reps={correctieReps}
+                onWeight={setCorrectieWeight} onReps={setCorrectieReps}
+              />
+            )
+          }
           if (record) {
             return (
               <div className="set done" key={target.number}>
-                <span className={warmup ? 'num w' : 'num'}>{label}</span>
+                <span className={target.kind !== 'work' ? 'num w' : 'num'}>{label}</span>
                 <span className="prev">{vorigeTekst}</span>
-                <span className="in">{formatWeight(record.weight)}</span>
-                <span className="in">{record.reps}</span>
+                <button className="in" onClick={() => openCorrectie(record)} aria-label={`Gewicht van ${label} aanpassen`}>
+                  {formatWeight(record.weight)}
+                </button>
+                <button className="in" onClick={() => openCorrectie(record)} aria-label={`Herhalingen van ${label} aanpassen`}>
+                  {record.reps}
+                </button>
                 <span className="tick">✓</span>
               </div>
             )
           }
-          if (id !== huidig.id || session.rest) {
+          if (id !== huidig.id || session.rest || corrigeert) {
             return (
               <div className="set" key={target.number}>
-                <span className={warmup ? 'num w' : 'num'}>{label}</span>
+                <span className={target.kind !== 'work' ? 'num w' : 'num'}>{label}</span>
                 <span className="prev">{vorigeTekst}</span>
                 <span className="in">—</span><span className="in">—</span>
                 <span className="tick">○</span>
@@ -155,7 +195,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           return (
             <Stappers
               key={target.number}
-              label={label} warmup={warmup} vorige={vorigeTekst}
+              label={label} smal={target.kind !== 'work'} vorige={vorigeTekst}
               exerciseId={slot.exerciseId}
               weight={weight} reps={reps}
               onWeight={setWeight} onReps={setReps}
@@ -163,14 +203,22 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           )
         })}
 
+        {!session.rest && !corrigeert && (
+          <button className="addrow" onClick={setErbij}>+ Set toevoegen</button>
+        )}
+
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {session.rest
-            ? <button className="btn" onClick={rustOverslaan}>
-                {laatsteVanOefening && hierna ? `Verder met ${hierna.name}` : 'Verder'}
-              </button>
-            : <button className="btn" onClick={vastleggen}>Set vastleggen</button>}
+          {corrigeert
+            ? <button className="btn" onClick={correctieOpslaan}>Correctie opslaan</button>
+            : session.rest
+              ? <button className="btn" onClick={rustOverslaan}>
+                  {laatsteVanOefening && hierna ? `Verder met ${hierna.name}` : 'Verder'}
+                </button>
+              : <button className="btn" onClick={vastleggen}>Set vastleggen</button>}
           <div className="links">
-            <Afronden session={session} drafts={drafts} onFout={onFout} onKlaar={onKlaar} />
+            {corrigeert
+              ? <button className="link" onClick={() => setCorrigeert(null)}>Annuleren</button>
+              : <Afronden session={session} drafts={drafts} onFout={onFout} onKlaar={onKlaar} />}
           </div>
         </div>
       </div>
@@ -200,7 +248,7 @@ function useDeVorigeKeer(exerciseId: string | undefined) {
 
 function Stappers(props: {
   label: string
-  warmup: boolean
+  smal: boolean
   vorige: string
   exerciseId: string
   weight: number | null
@@ -216,7 +264,7 @@ function Stappers(props: {
 
   return (
     <div className="set inline">
-      <span className={props.warmup ? 'num w' : 'num'}>{props.label}</span>
+      <span className={props.smal ? 'num w' : 'num'}>{props.label}</span>
       <span className="prev">{props.vorige}</span>
       <button className="val" onClick={() => typen(weight, props.onWeight)} aria-label="Gewicht intypen">
         {formatWeight(weight)}
