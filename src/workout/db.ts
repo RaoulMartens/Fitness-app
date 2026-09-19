@@ -161,7 +161,7 @@ export async function logSet(draft: WorkoutDraft, sessionRevision: number, datab
     const { slot, target, id } = currentTarget(session)
     const saved = await database.drafts.get(id)
     if (id !== draft.id || !saved || saved.revision !== draft.revision || saved.weight !== draft.weight || saved.reps !== draft.reps) throw changed()
-    const record: WorkoutSet = { id, sessionId: session.id, slotId: slot.id, exerciseId: slot.exerciseId, number: target.number, ...values, target, recordedAt: new Date().toISOString() }
+    const record: WorkoutSet = { id, sessionId: session.id, slotId: slot.id, exerciseId: slot.exerciseId, number: target.number, ...values, target, kind: target.kind, recordedAt: new Date().toISOString() }
     await database.sets.add(record)
     await database.outbox.add({ id: `${id}:record`, entity: 'set', entityId: id, payload: record, status: 'local', createdAt: record.recordedAt })
     await database.drafts.delete(id)

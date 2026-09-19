@@ -72,7 +72,7 @@ describe('M2 blijvende sessies', () => {
     expect(restRemaining(session)).toBe(30_000)
   })
   it('doorloopt alle sets zonder voortijdig af te ronden', async () => {
-    for (let index = 0; index < 14; index++) {
+    for (let index = 0; index < targets(starterProgram).length; index++) {
       await logSet(await draft(), session.revision, database)
       session = (await database.sessions.get(session.id))!
       if (session.rest) session = await changeWorkout(session.id, session.revision, 'next-set', undefined, database)
@@ -81,7 +81,7 @@ describe('M2 blijvende sessies', () => {
     expect(session.rest).toBeNull()
     session = await changeWorkout(session.id, session.revision, 'complete', undefined, database)
     expect(session.status).toBe('completed')
-    expect(await database.sets.count()).toBe(14)
+    expect(await database.sets.count()).toBe(targets(starterProgram).length)
     expect((await beginWorkout(database)).id).not.toBe(session.id)
     expect(await database.sessions.count()).toBe(2)
   })

@@ -1,15 +1,22 @@
+import { exercise as catalogue } from './exercises'
 export interface Target {
   number: number
   repsMin: number
   repsMax: number
   weight: number | null
   rir: { min: number; max: number }
+  /** Een warming-upset telt niet mee voor progressie. Zie bouwdocument sectie 4.0. */
+  kind: 'warmup' | 'work'
 }
 export interface Slot {
   id: string
   exerciseId: string
   name: string
   restSeconds: number
+  /** Gekopieerd uit de catalogus, zodat een latere wijziging aan een apparaat
+   *  oude sessies niet met terugwerkende kracht anders laat uitvallen. */
+  step: number
+  minWeight: number
   sets: Target[]
 }
 export interface Program {
@@ -123,7 +130,11 @@ export interface Proposal {
 /** Cache boven de sets. Alles hierin moet herleidbaar zijn uit sets plus outcomes. */
 export interface ExerciseState {
   exerciseId: string
+  /** Het voorstel voor de volgende keer. */
   currentWeight: number | null
+  /** Wat je de vorige sessie daadwerkelijk tilde. Nodig om te zien of je echt
+   *  zwaarder bent gaan tillen: currentWeight is een voornemen, dit is werk. */
+  lastUsedWeight: number | null
   startWeight: number | null
   preBreakWeight: number | null
   increases: number
@@ -154,18 +165,24 @@ export type PendingChange = { id: string; entityId: string; status: 'local'; cre
 
 export const starterProgram: Program = {
   id: 'full-body-start', version: 1, name: 'Full-body',
-  slots: [
-    { id: 'leg-press', name: 'Leg press', reps: [8, 12], rest: 120 },
-    { id: 'leg-curl', name: 'Leg curl', reps: [10, 15], rest: 120 },
-    { id: 'chest-press', name: 'Chest press', reps: [8, 12], rest: 120 },
-    { id: 'row', name: 'Zittende row', reps: [8, 12], rest: 120 },
-    { id: 'pulldown', name: 'Lat pulldown', reps: [8, 12], rest: 120 },
-    { id: 'biceps-curl', name: 'Biceps curl', reps: [10, 15], rest: 90 },
-    { id: 'triceps-pushdown', name: 'Triceps pushdown', reps: [10, 15], rest: 90 },
-  ].map(exercise => ({
-    id: exercise.id, exerciseId: exercise.id, name: exercise.name, restSeconds: exercise.rest,
-    sets: [1, 2].map(number => ({ number, repsMin: exercise.reps[0], repsMax: exercise.reps[1], weight: null, rir: { min: 2, max: 3 } })),
-  })),
+  slots: ([
+    { id: 'leg-press', reps: [8, 12] },
+    { id: 'leg-curl', reps: [10, 15] },
+    { id: 'chest-press', reps: [8, 12] },
+    { id: 'row', reps: [8, 12] },
+    { id: 'pulldown', reps: [8, 12] },
+    { id: 'biceps-curl', reps: [10, 15] },
+    { id: 'triceps-pushdown', reps: [10, 15] },
+  ] as const).map(entry => {
+    const exercise = catalogue(entry.id)
+    return {
+    id: entry.id, exerciseId: entry.id, name: exercise.name, restSeconds: exercise.restSeconds,
+    step: exercise.step, minWeight: exercise.minWeight,
+    sets: [
+      { number: 0, repsMin: 10, repsMax: 15, weight: null, rir: { min: 4, max: 6 }, kind: 'warmup' as const },
+      ...[1, 2].map(number => ({ number, repsMin: entry.reps[0], repsMax: entry.reps[1], weight: null, rir: { min: 2, max: 3 }, kind: 'work' as const })),
+    ],
+  } }),
 }
 
 export const targets = (program: Program) => program.slots.flatMap(slot => slot.sets.map(target => ({ slot, target })))

@@ -1,7 +1,7 @@
 import Dexie from 'dexie'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { adjustWorkout, beginWorkout, changeAppointment, changeWorkout, nextAppointment, openWorkspace, WorkoutDatabase, writeDraft, logSet, readLegacyChanges, updateWeekend } from './db'
-import { draftVersions, pendingTargets, recordId, starterProgram, type Workout } from './model'
+import { draftVersions, pendingTargets, recordId, starterProgram, targets, type Workout } from './model'
 
 let db: WorkoutDatabase
 let session: Workout
@@ -22,6 +22,9 @@ async function record() {
   await logSet(draft, session.revision, db); await reload()
   if (session.rest) session = await changeWorkout(session.id, session.revision, 'next-set', undefined, db)
 }
+const TOTAAL = targets(starterProgram).length
+const PER_OEFENING = starterProgram.slots[0].sets.length
+
 describe('M3a aanpassingen', () => {
   it('weekendkeuze werkt de volgende afspraak bij maar behoudt een bewuste verplaatsing', async () => {
     vi.setSystemTime(new Date('2026-09-17T12:00:00'))
@@ -40,7 +43,7 @@ describe('M3a aanpassingen', () => {
     const revision = session.revision, id = crypto.randomUUID(), expected = await versions()
     await adjust({ kind: 'later' }, id)
     expect(pendingTargets(session)[0].slot.id).toBe('leg-curl')
-    expect(pendingTargets(session).at(-2)?.id).toBe(draft.id)
+    expect(pendingTargets(session).at(-PER_OEFENING)?.id).toBe(draft.id)
     await adjustWorkout(session.id, revision, id, expected, { kind: 'later' }, db)
     expect((await db.sessions.get(session.id))?.adjustments).toHaveLength(1)
     db.close(); await db.open(); await reload()
@@ -55,19 +58,20 @@ describe('M3a aanpassingen', () => {
     await adjust({ kind: 'undo' })
     expect(pendingTargets(session)[0].slot.id).toBe('leg-press')
     expect(pendingTargets(session).map(item => item.id)).not.toContain(result.id)
-    expect(pendingTargets(session)).toHaveLength(13)
+    expect(pendingTargets(session)).toHaveLength(TOTAAL - 1)
     expect(await db.sets.get(result.id)).toEqual(result)
     expect(session.cursor).toBe(1)
   })
   it('overslaan wijzigt alleen open sets en alle aanpassingen kunnen teruggedraaid worden', async () => {
     await record()
     await adjust({ kind: 'skip', reason: 'pain' })
-    expect(Object.keys(session.skipped!)).toEqual([recordId(session.id, 'leg-press', 2)])
+    expect(Object.keys(session.skipped!)).toEqual(
+      Array.from({ length: PER_OEFENING - 1 }, (_, index) => recordId(session.id, 'leg-press', index + 1)))
     await adjust({ kind: 'time', slots: ['biceps-curl', 'triceps-pushdown'] })
-    expect(Object.keys(session.skipped!)).toHaveLength(5)
+    expect(Object.keys(session.skipped!)).toHaveLength(PER_OEFENING - 1 + PER_OEFENING * 2)
     await adjust({ kind: 'undo' }); await adjust({ kind: 'undo' })
     expect(Object.keys(session.skipped!)).toHaveLength(0)
-    expect(pendingTargets(session)).toHaveLength(13)
+    expect(pendingTargets(session)).toHaveLength(TOTAAL - 1)
     expect(await db.sets.count()).toBe(1)
   })
   it('doel voor vandaag is gescheiden van werkelijk gewicht en het oorspronkelijke voorschrift', async () => {
@@ -114,7 +118,7 @@ describe('M3a aanpassingen', () => {
     expect(session.status).toBe('active'); expect(session.rest).toBeNull()
     session = await changeWorkout(session.id, session.revision, 'complete', await versions(), db)
     expect(await db.sets.count()).toBe(1)
-    expect(Object.keys(session.skipped!)).toHaveLength(13)
+    expect(Object.keys(session.skipped!)).toHaveLength(TOTAAL - 1)
   })
   it('een afspraak verplaatsen of overslaan kan niet een actieve training verbergen', async () => {
     const appointment = (await db.appointments.get(session.appointmentId!))!
@@ -136,7 +140,7 @@ describe('M3a aanpassingen', () => {
     session = await beginWorkout(db)
     expect(pendingTargets(session)[0].slot.id).toBe('leg-curl')
     expect(session.snapshot.slots[0].sets[0].weight).toBeNull()
-    expect(Object.keys(session.skipped!)).toHaveLength(2)
+    expect(Object.keys(session.skipped!)).toHaveLength(PER_OEFENING)
     expect((await db.workspace.get('main'))?.weekend).toBeNull()
   })
   it('bewust overslaan bewaart de afspraak en maakt op verzoek alleen de volgende afspraak', async () => {
