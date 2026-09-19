@@ -7,7 +7,10 @@ const base = process.env.GITHUB_PAGES === '1' ? '/Fitness-app/' : '/'
 export default defineConfig({
   base,
   plugins: [react(), VitePWA({
-    registerType: 'prompt',
+    // De app vernieuwt zichzelf. Met 'prompt' bleef een oude service worker de
+    // vorige build serveren zolang niemand op een bijwerkknop drukte, en die
+    // knop bestaat niet meer.
+    registerType: 'autoUpdate',
     includeAssets: ['icon.svg', 'apple-touch-icon.png'],
     manifest: {
       name: 'Training — werkend wireframe',
@@ -30,6 +33,10 @@ export default defineConfig({
       navigateFallback: `${base}index.html`,
       navigateFallbackDenylist: [/^\/ux-flows\//, /\/proto(?:\/|$)/],
       cleanupOutdatedCaches: true,
+      // Een nieuwe worker wacht niet op het sluiten van het laatste tabblad,
+      // en neemt meteen de openstaande pagina over.
+      skipWaiting: true,
+      clientsClaim: true,
     },
   })],
   test: { include: ['src/**/*.test.ts'], setupFiles: ['tests/setup.ts'] },
