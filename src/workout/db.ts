@@ -1,6 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import { parseInput } from '../model'
-import { isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace } from './model'
+import { parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
 
 export class WorkoutDatabase extends Dexie {
   sessions!: Table<Workout, string>
@@ -10,6 +9,9 @@ export class WorkoutDatabase extends Dexie {
   workspace!: Table<WorkoutWorkspace, string>
   appointments!: Table<Appointment, string>
   migration!: Table<{ id: string; baseline: Record<string, string> }, string>
+  proposals!: Table<Proposal, string>
+  exerciseStates!: Table<ExerciseState, string>
+  outcomes!: Table<SessionOutcome, string>
 
   constructor(name = 'training-m2') {
     super(name)
@@ -24,7 +26,26 @@ export class WorkoutDatabase extends Dexie {
       await transaction.table<Workout>('workouts').toCollection().modify(session => { session.pendingIds = pendingIds(session) })
       await transaction.table('migration').put({ id: 'm2', baseline })
     })
-    // Cached M2 clients keep their original stores; they cannot overwrite the M3 execution.
+    // Versie 3: schone start voor v1. Bewuste, eenmalige overgang — de oude tabellen
+    // gaan in één transactie leeg. Een sessie uit het oude model heeft geen sessieplan
+    // en kan dus niet worden voortgezet; hem laten staan zou een half werkende sessie
+    // opleveren die de app tijdens gebruik tegenkomt.
+    this.version(3).stores({
+      workouts: 'id, startedAt', workoutSets: 'id, sessionId', workoutDrafts: 'id, sessionId',
+      workoutOutbox: 'id, entityId, status', workoutWorkspace: 'id', appointments: 'id, date, status',
+      migration: 'id',
+      proposals: 'id, exerciseId, [exerciseId+sessionDay]',
+      exerciseStates: 'exerciseId',
+      outcomes: 'sessionId, finishedAt',
+      // Tabellen uit M1 vervallen.
+      sessions: null, sets: null, drafts: null, outbox: null, workspace: null,
+    }).upgrade(async transaction => {
+      for (const naam of ['workouts', 'workoutSets', 'workoutDrafts', 'workoutOutbox', 'appointments', 'migration']) {
+        await transaction.table(naam).clear()
+      }
+      await transaction.table('workoutWorkspace').clear()
+    })
+
     this.sessions = this.table('workouts')
     this.sets = this.table('workoutSets')
     this.drafts = this.table('workoutDrafts')

@@ -152,32 +152,34 @@ describe('M3a aanpassingen', () => {
   })
 })
 
-it('upgrade bewaart M2; oude schrijvers kunnen M3 niet overschrijven en hun nieuwe invoer blijft zichtbaar', async () => {
+it('de overgang naar v1 maakt de oude opslag in één keer leeg', async () => {
+  // Bewuste, eenmalige overgang: schoon beginnen. Een sessie uit het oude model heeft geen
+  // sessieplan en kan niet worden voortgezet; die mag de app niet tijdens gebruik tegenkomen.
   const name = `legacy-${crypto.randomUUID()}`
   const old = new Dexie(name)
   old.version(1).stores({ sessions: 'id, startedAt', sets: 'id, sessionId', drafts: 'id, sessionId', outbox: 'id, entityId, status', workspace: 'id' })
   const legacySession: Workout = { id: 'old', status: 'active', phase: 'exercise', startedAt: '2026-09-16T18:00:00Z', warmed: true, cursor: 1, revision: 3, snapshot: structuredClone(starterProgram), rest: null }
-  const savedDraft = { id: 'old:leg-press:2', sessionId: 'old', weight: '12,', reps: '', revision: 1, updatedAt: '' }
   await old.table('sessions').add(legacySession)
-  await old.table('drafts').add(savedDraft)
+  await old.table('drafts').add({ id: 'old:leg-press:2', sessionId: 'old', weight: '12,', reps: '', revision: 1, updatedAt: '' })
   await old.table('sets').add({ id: 'old:leg-press:1', sessionId: 'old', weight: 12, reps: 10 })
   await old.table('outbox').add({ id: 'old-operation', status: 'local', payload: legacySession })
   old.close()
+
   const upgraded = new WorkoutDatabase(name)
   try {
     await upgraded.open()
-    const migrated = (await upgraded.sessions.get('old'))!
-    expect(migrated.snapshot).toEqual(legacySession.snapshot)
-    expect(migrated.cursor).toBe(1); expect(migrated.revision).toBe(3)
-    expect(pendingTargets(migrated)[0].id).toBe(savedDraft.id)
-    expect(await upgraded.drafts.get(savedDraft.id)).toEqual(savedDraft)
-    expect(await upgraded.sets.count()).toBe(1)
-    expect((await upgraded.outbox.get('old-operation'))?.payload).toEqual(legacySession)
-    expect(await upgraded.table('sessions').get('old')).toEqual(legacySession)
-    expect(await readLegacyChanges(upgraded)).toEqual([])
-    await old.open()
-    await old.table('drafts').put({ ...savedDraft, weight: '99' })
-    expect(await upgraded.drafts.get(savedDraft.id)).toEqual(savedDraft)
-    expect(await readLegacyChanges(upgraded)).toEqual(['Concept old:leg-press:2: 99 kg · geen herhalingen.'])
+    expect(await upgraded.sessions.count()).toBe(0)
+    expect(await upgraded.sets.count()).toBe(0)
+    expect(await upgraded.drafts.count()).toBe(0)
+    expect(await upgraded.outbox.count()).toBe(0)
+    expect(await upgraded.appointments.count()).toBe(0)
+    // De nieuwe tabellen bestaan en zijn bruikbaar.
+    expect(await upgraded.proposals.count()).toBe(0)
+    expect(await upgraded.exerciseStates.count()).toBe(0)
+    expect(await upgraded.outcomes.count()).toBe(0)
+    // Een verse sessie werkt na de overgang.
+    await openWorkspace(upgraded)
+    const session = await beginWorkout(upgraded)
+    expect(session.snapshot.slots.length).toBe(starterProgram.slots.length)
   } finally { old.close(); await upgraded.delete() }
 })

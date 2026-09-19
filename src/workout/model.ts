@@ -81,6 +81,64 @@ export interface WorkoutSet {
   reps: number
   target: Target
   recordedAt: string
+  /** Warming-up en extra tellen niet mee voor progressie. Zie bouwdocument sectie 4.0. */
+  kind?: 'warmup' | 'work' | 'extra'
+  correctedAt?: string
+}
+
+/**
+ * Het plan van één oefening zoals het gold tijdens die sessie. Bewaard bij de sessie,
+ * niet opgezocht in de catalogus: een latere wijziging aan een apparaat mag oude
+ * sessies niet met terugwerkende kracht anders laten uitvallen.
+ */
+export interface SessionSlot {
+  slotId: string
+  exerciseId: string
+  originalExerciseId?: string
+  plannedSets: number
+  originalSets: number
+  order: number
+  step: number
+  minWeight: number
+  repsMin: number
+  repsMax: number
+  startWeight: number | null
+}
+
+/** Eén voorstel per sessie per oefening, zodat een correctie van een oude sessie
+ *  een nieuwer voorstel niet overschrijft. */
+export interface Proposal {
+  id: string
+  exerciseId: string
+  sessionId: string
+  sessionDay: string
+  from: number | null
+  to: number
+  reason: 'boven-bereik' | 'onder-bereik' | 'vasthouden' | 'pauze' | 'plateau'
+  createdAt: string
+  appliedInSessionId?: string
+  superseded: boolean
+}
+
+/** Cache boven de sets. Alles hierin moet herleidbaar zijn uit sets plus outcomes. */
+export interface ExerciseState {
+  exerciseId: string
+  currentWeight: number | null
+  startWeight: number | null
+  preBreakWeight: number | null
+  increases: number
+  stalls: number
+  lastWorkedDay: string | null
+}
+
+/** Keuzes die geen set veranderen en dus anders bij herberekening zouden verdwijnen. */
+export interface SessionOutcome {
+  sessionId: string
+  sessionDay: string
+  finishedAt: string
+  finishedPartially: boolean
+  wasBreakSession: boolean
+  plateauChoice?: Record<string, 'terug' | 'vervangen' | 'laten'>
 }
 export interface WorkoutWorkspace {
   id: 'main'
@@ -136,4 +194,22 @@ export function resultLabel(session: Workout) {
 export function timerLabel(milliseconds: number) {
   const seconds = Math.ceil(milliseconds / 1000)
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+}
+
+export function parseInput(weight: string, reps: string) {
+  if (!/^\d+(?:[.,]\d{1,2})?$/.test(weight.trim())) {
+    throw new Error('Vul een gewicht in met maximaal twee decimalen, bijvoorbeeld 12 of 12,5.')
+  }
+  if (!/^\d+$/.test(reps.trim()) || Number(reps) < 1 || Number(reps) > 999) {
+    throw new Error('Vul een heel aantal herhalingen in tussen 1 en 999.')
+  }
+  const value = Number(weight.replace(',', '.'))
+  if (!Number.isFinite(value) || value > 9999) {
+    throw new Error('Vul een gewicht in tussen 0 en 9999 kg.')
+  }
+  return { weight: value, reps: Number(reps) }
+}
+
+export function formatWeight(value: number) {
+  return value.toLocaleString('nl-NL', { maximumFractionDigits: 2 })
 }

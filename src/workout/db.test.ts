@@ -1,6 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { TrainingDatabase, confirmSet, saveDraft, startSession } from '../db'
-import { setId } from '../model'
 import { beginWorkout, changeWorkout, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
 import { recordId, restRemaining, starterProgram, targets, type Workout } from './model'
 
@@ -106,24 +104,5 @@ describe('M2 blijvende sessies', () => {
     expect(await database.sessions.get(session.id)).toEqual(session)
     await expect(updateWeekend('Zaterdag', 0, database)).rejects.toThrow('ander venster')
     expect((await database.workspace.get('main'))?.weekend).toBe('Zondag')
-  })
-  it('behoudt de complete M1-database tijdens openen, trainen en terugrollen', async () => {
-    const legacy = new TrainingDatabase(`m1-preservation-${crypto.randomUUID()}`)
-    try {
-      const oldSessionId = await startSession(legacy)
-      const oldDraft = { id: setId(oldSessionId, 1), sessionId: oldSessionId, weight: '12', reps: '10', baseRevision: 0, updatedAt: new Date().toISOString() }
-      await confirmSet(oldSessionId, 1, oldDraft, legacy)
-      await saveDraft({ ...oldDraft, id: setId(oldSessionId, 2), weight: '16,' }, legacy)
-      const tables = [legacy.sessions, legacy.sets, legacy.drafts, legacy.outbox, legacy.workspace]
-      const before = await Promise.all(tables.map(table => table.toArray()))
-      await logSet(await draft(), session.revision, database)
-      database.close()
-      await legacy.close()
-      await legacy.open()
-      expect(await startSession(legacy)).toBe(oldSessionId)
-      expect(await Promise.all(tables.map(table => table.toArray()))).toEqual(before)
-      await database.open()
-      expect((await database.sessions.get(session.id))?.cursor).toBe(1)
-    } finally { await legacy.delete() }
   })
 })
