@@ -402,3 +402,10 @@ a.behind { color:inherit; }
 .addrow { display:flex; align-items:center; justify-content:center; gap:6px;
           min-height:44px; border:1px dashed #cfcfcf; border-radius:4px;
           background:#efefef; font-size:13px; color:#777; text-decoration:none; }
+
+/* secundaire actie is een omlijnde knop, geen onderstreepte tekst */
+.link { display:block; text-align:center; font-size:14px; color:#555;
+        text-decoration:none; padding:12px; min-height:44px;
+        border:1px dashed #b0b0b0; background:#f0f0f0; border-radius:4px; }
+.links { gap:8px; }
+.typ a { text-decoration:underline; }
