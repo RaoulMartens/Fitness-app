@@ -1,0 +1,404 @@
+/* Gedeelde wireframe-stijl. Eén bestand, alle schermen. Grijs, laag detail. */
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:#e0e0e0; color:#444; line-height:1.45;
+  display:flex; justify-content:center; padding:16px 0;
+}
+.screen {
+  width:375px; max-width:100%; min-height:667px; background:#f5f5f5;
+  border:2px dashed #ccc; display:flex; flex-direction:column;
+}
+.bar {
+  background:#e8e8e8; border-bottom:1px dashed #ccc; padding:10px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-size:14px; color:#666;
+}
+.bar .title { font-size:16px; font-weight:600; color:#444; }
+.body { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; }
+.tabs {
+  margin-top:auto; background:#e8e8e8; border-top:1px dashed #ccc;
+  display:flex; padding:8px 0;
+}
+.tabs a { flex:1; text-align:center; font-size:11px; color:#888; text-decoration:none; }
+.tabs a.on { color:#333; font-weight:600; }
+.tabs .ico {
+  width:24px; height:24px; margin:0 auto 4px; background:#ddd;
+  border:1px dashed #bbb; border-radius:4px;
+}
+
+h1 { font-size:20px; font-weight:600; }
+h2 { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:#888; }
+p { font-size:14px; color:#666; }
+.sub { font-size:13px; color:#888; }
+.muted { font-size:12px; color:#999; }
+
+.card { background:#fff; border:1px dashed #ccc; border-radius:4px; padding:14px; }
+.btn {
+  display:block; background:#ccc; border:1px dashed #999; border-radius:4px;
+  padding:14px; font-size:16px; font-weight:600; color:#444;
+  text-align:center; text-decoration:none; min-height:44px;
+}
+.btn.sec { background:transparent; color:#666; font-weight:400; }
+.row { display:flex; gap:8px; }
+.row > * { flex:1; }
+hr { border:none; border-top:1px dashed #ccc; }
+
+/* index: schermenlijst */
+ol.list, ul.list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+.item {
+  background:#fff; border:1px dashed #ccc; border-radius:4px; padding:10px 12px;
+  display:flex; gap:10px; align-items:baseline;
+}
+.item .name { font-size:14px; color:#444; font-weight:600; flex:1; }
+.item .what { font-size:12px; color:#888; flex-basis:100%; }
+.item.todo { background:#ededed; }
+.tag {
+  font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:#777;
+  border:1px dashed #bbb; background:#e6e6e6; border-radius:2px; padding:2px 6px;
+  white-space:nowrap;
+}
+.gone { text-decoration:line-through; color:#aaa; }
+.why { font-size:12px; color:#888; border-left:2px dotted #ccc; padding-left:8px; }
+
+/* --- sessie: settabel --- */
+.exhead { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.exhead .t { font-size:18px; font-weight:600; color:#444; }
+.exhead .n { font-size:12px; color:#999; white-space:nowrap; }
+.rest {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  border:1px dashed #bbb; background:#ededed; border-radius:4px;
+  padding:9px 10px; font-size:13px; color:#777; min-height:38px;
+}
+.rest.on { background:#d8d8d8; border-style:solid; border-color:#999; color:#333; }
+.rest .t { font-weight:600; font-variant-numeric:tabular-nums; }
+.set { display:grid; grid-template-columns:26px 1fr 1fr 1fr 38px; gap:5px; align-items:stretch; }
+.set > * { display:flex; align-items:center; justify-content:center; font-size:13px;
+           padding:9px 2px; text-align:center; }
+.set.head > * { font-size:10px; text-transform:uppercase; letter-spacing:.05em;
+                color:#999; padding:2px 0; }
+.set .num { color:#888; font-size:12px; }
+.set .prev { color:#aaa; }
+.set .in { background:#fff; border:1px dashed #999; border-radius:3px;
+           color:#444; font-weight:600; }
+.set .tick { border:1px dashed #999; border-radius:3px; background:#eee; color:#aaa; }
+.set.done .in { background:#e6e6e6; border-style:solid; border-color:#ccc;
+                color:#888; font-weight:400; }
+.set.done .tick { background:#c8c8c8; border-style:solid; border-color:#888; color:#333; }
+.set.now .in { border-width:2px; border-color:#777; }
+
+/* --- sheet --- */
+.behind { flex:1; padding:16px; display:flex; flex-direction:column; gap:10px; opacity:.4; }
+.sheet {
+  margin-top:auto; background:#efefef; border-top:2px dashed #aaa;
+  border-radius:12px 12px 0 0; padding:12px 16px 18px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.grip { width:44px; height:4px; border-radius:2px; background:#bbb; margin:0 auto 6px; }
+.opt {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:#fff; border:1px dashed #ccc; border-radius:4px;
+  padding:11px 12px; min-height:44px; text-decoration:none;
+}
+.opt .lbl { font-size:14px; color:#444; }
+.opt .eff { font-size:11px; color:#999; text-align:right; flex-shrink:0; max-width:48%; }
+
+/* --- diversen --- */
+.link { display:block; text-align:center; font-size:13px; color:#555;
+        text-decoration:underline; padding:10px; min-height:44px; }
+.next { font-size:12px; color:#999; }
+.foot { font-size:10px; color:#aaa; text-align:center; padding:6px;
+        border-top:1px dashed #ddd; }
+
+/* --- video --- */
+.video {
+  width:100%; aspect-ratio:16/9; background:#dcdcdc; border:1px dashed #b5b5b5;
+  border-radius:4px; display:flex; align-items:center; justify-content:center;
+  position:relative; color:#8a8a8a; font-size:30px;
+}
+.video::after { content:'\25B6'; }
+.videorow {
+  display:flex; align-items:center; gap:10px; background:#ededed;
+  border:1px dashed #bbb; border-radius:4px; padding:8px 10px;
+  min-height:44px; text-decoration:none; font-size:13px; color:#666;
+}
+.videorow .thumb {
+  width:56px; aspect-ratio:16/9; background:#dcdcdc; border:1px dashed #b5b5b5;
+  border-radius:3px; display:flex; align-items:center; justify-content:center;
+  color:#8a8a8a; font-size:13px; flex-shrink:0;
+}
+.videorow .thumb::after { content:'\25B6'; }
+.videorow .chev { margin-left:auto; color:#999; }
+
+/* vaste plek onder de video: hierna, of de lopende rust. Gelijke hoogte, geen sprong. */
+.slot { min-height:38px; display:flex; align-items:center; justify-content:space-between;
+        gap:8px; font-size:13px; color:#888; padding:0 2px; }
+
+.links { display:flex; gap:8px; }
+.links .link { flex:1; }
+
+/* --- voortgang in de kop --- */
+.segs { display:flex; gap:3px; }
+.thin { height:6px; background:#dcdcdc; border:1px dashed #c4c4c4; border-radius:1px; }
+.thin > span { display:block; height:100%; background:#8f8f8f; }
+.kop { background:#e8e8e8; border-bottom:1px dashed #ccc; padding:8px 16px 10px;
+       display:flex; flex-direction:column; gap:6px; }
+.kop .line { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.kop .big { font-size:16px; font-weight:600; color:#444; }
+.kop .sm { font-size:11px; color:#888; }
+.kop.rust { background:#d8d8d8; border-bottom-style:solid; border-bottom-color:#999; }
+.kop .line { min-height:26px; }
+
+/* Balkjes blijven 6px, aanraakgebied wordt 40px. Streep staat gecentreerd in het vlak. */
+.segs i { flex:1; height:6px; border:0; border-radius:1px; background:#dcdcdc; }
+.segs i.on { background:#8f8f8f; }
+.segs i.half { background:linear-gradient(90deg,#8f8f8f 50%,#dcdcdc 50%); }
+
+/* rondjes met oefening-icoon */
+.dots { display:flex; gap:6px; justify-content:space-between; }
+.dot { width:38px; height:38px; border-radius:50%; background:#dcdcdc; border:1px dashed #bbb;
+       display:flex; align-items:center; justify-content:center; font-size:10px; color:#8a8a8a;
+       flex-shrink:0; }
+.dot.done { background:#9a9a9a; border-style:solid; border-color:#808080; color:#f0f0f0; }
+.dot.now { background:#fff; border:2px solid #666; color:#333; font-weight:600; }
+
+/* verandering ten opzichte van vorige keer */
+.head2 { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.delta { font-size:11px; color:#555; border:1px dashed #b0b0b0; background:#e4e4e4;
+         border-radius:2px; padding:2px 7px; white-space:nowrap; }
+.delta.up { border-style:solid; border-color:#888; background:#d4d4d4; color:#333;
+            font-weight:600; }
+.delta.down { border-style:solid; border-color:#aaa; background:#ededed; }
+.was { font-size:15px; color:#444; }
+.was s { color:#a5a5a5; text-decoration:line-through; }
+
+/* oefeningscherm */
+.facts { display:flex; gap:6px; }
+.facts div { flex:1; background:#fff; border:1px dashed #ccc; border-radius:4px;
+             padding:8px 6px; text-align:center; }
+.facts b { display:block; font-size:15px; color:#333; }
+.facts span { font-size:10px; color:#999; text-transform:uppercase; letter-spacing:.04em; }
+.muscle { display:flex; gap:12px; align-items:center; background:#fff;
+          border:1px dashed #ccc; border-radius:4px; padding:12px; }
+.figure { width:70px; height:110px; background:#e2e2e2; border:1px dashed #bbb;
+          border-radius:34px 34px 8px 8px; position:relative; flex-shrink:0; }
+.figure::before { content:''; position:absolute; left:12px; right:12px; top:22px; height:26px;
+                  background:#999; border-radius:4px; }
+ul.pts { list-style:none; display:flex; flex-direction:column; gap:6px; }
+ul.pts li { font-size:14px; color:#666; padding-left:14px; position:relative; line-height:1.4; }
+ul.pts li::before { content:'—'; position:absolute; left:0; color:#aaa; }
+
+/* --- invoer met toetsenbord --- */
+.pad { background:#e4e4e4; border-top:1px dashed #bbb; padding:8px 10px 12px; }
+.padbar { display:flex; gap:6px; margin-bottom:8px; }
+.padbar a { flex:1; background:#eee; border:1px dashed #999; border-radius:4px; text-align:center;
+            padding:10px 0; font-size:14px; color:#555; text-decoration:none; min-height:44px; }
+.keys { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.keys span { background:#f4f4f4; border:1px dashed #bbb; border-radius:4px; text-align:center;
+             padding:12px 0; font-size:18px; color:#444; }
+.set .in.edit { border:2px solid #555; background:#fff; color:#111; }
+
+/* --- status en notities --- */
+.status { font-size:11px; color:#999; text-align:center; padding:4px 0; }
+.note { font-size:12px; color:#777; background:#ececec; border:1px dashed #c8c8c8;
+        border-radius:4px; padding:8px 10px; }
+.tap { padding:6px 8px; margin:-6px -8px; border-radius:4px; }
+.item .name { flex:1 1 55%; }
+.item .what { color:#8f8f8f; }
+.info { display:inline-flex; width:19px; height:19px; border-radius:50%; border:1px solid #999;
+        color:#777; font-size:12px; font-weight:400; font-family:Georgia, serif;
+        align-items:center; justify-content:center; margin-left:7px; vertical-align:2px; }
+
+/* sheet ademt: grip los, knop los van de tekst, meer lucht onderaan */
+.sheet { padding:14px 16px 24px; gap:10px; }
+.grip { margin:0 auto 12px; }
+.sheet h1 { margin-top:2px; }
+.sheet .sub { margin-bottom:4px; }
+.sheet .btn { margin-top:6px; }
+
+/* weekstrook: zeven dagen vanaf vandaag */
+.week { display:flex; gap:4px; }
+.day { flex:1; border:1px dashed #c4c4c4; border-radius:4px; padding:7px 0 6px;
+       text-align:center; background:#f0f0f0; }
+.day b { display:block; font-size:12px; color:#666; font-weight:600; }
+.day span { display:block; font-size:9px; color:#a5a5a5; text-transform:uppercase;
+            letter-spacing:.04em; margin-top:2px; }
+.day.train { background:#d2d2d2; border-style:solid; border-color:#9a9a9a; }
+.day.train b { color:#333; }
+.day.today { border:2px solid #555; background:#fff; }
+.day.train.today { background:#d2d2d2; border:2px solid #555; }
+a.behind { color:inherit; }
+
+/* rij die ergens heen gaat: geen onderstreping, titel boven, uitleg eronder */
+.nav { display:flex; align-items:center; gap:10px; background:#fff; border:1px dashed #ccc;
+       border-radius:4px; padding:12px 14px; min-height:44px; text-decoration:none;
+       color:inherit; }
+.nav div { flex:1; }
+.nav b { display:block; font-size:15px; color:#333; font-weight:600; }
+.nav span { display:block; font-size:13px; color:#8f8f8f; margin-top:2px; }
+.nav::after { content:'\203A'; color:#aaa; font-size:18px; }
+.quiet { background:#ededed; border:1px dashed #cfcfcf; border-radius:4px; padding:12px 14px; }
+.quiet b { font-size:14px; color:#666; }
+.quiet span { display:block; font-size:13px; color:#999; margin-top:2px; }
+
+/* genummerde lijst: één kader, dunne scheidingen */
+.list2 { background:#fff; border:1px dashed #ccc; border-radius:4px; }
+.list2 a { display:flex; align-items:center; gap:10px; padding:10px 12px; min-height:44px;
+           text-decoration:none; color:inherit; border-top:1px dashed #e6e6e6; }
+.list2 a:first-child { border-top:0; }
+.list2 .n { width:14px; font-size:12px; color:#aaa; flex-shrink:0; }
+.list2 .nm { flex:1; font-size:14px; color:#333; }
+.list2 .mt { font-size:12px; color:#9a9a9a; white-space:nowrap; }
+.list2 a::after { content:'\203A'; color:#bbb; font-size:16px; }
+.list2 .two { text-align:right; white-space:nowrap; }
+.list2 .two b { display:block; font-size:14px; color:#333; }
+.list2 .two i { display:block; font-size:11px; color:#a0a0a0; font-style:normal; margin-top:1px; }
+.list2 .two s { color:#b0b0b0; font-size:11px; }
+.list2 span.row { display:flex; align-items:center; gap:10px; padding:10px 12px;
+                  border-top:1px dashed #e6e6e6; }
+.list2 span.row:first-child { border-top:0; }
+.tabs a { display:block; padding:2px 0 0; }
+.tabs .ico { display:block; width:22px; height:22px; margin:0 auto 4px;
+             background:#dcdcdc; border:1px dashed #b8b8b8; border-radius:5px; }
+.tabs a.on .ico { background:#b8b8b8; border-style:solid; border-color:#8f8f8f; }
+.list2 .nm b { display:block; font-size:14px; color:#333; font-weight:600; }
+.list2 .nm i { display:block; font-size:12px; color:#9a9a9a; font-style:normal; margin-top:2px; }
+.list2 span.row { align-items:flex-start; }
+.list2 .two.mid { align-self:center; }
+
+/* kalender: meerdere weken onder elkaar */
+.calhead { display:flex; gap:4px; }
+.calhead span { flex:1; text-align:center; font-size:10px; color:#a5a5a5;
+                text-transform:uppercase; letter-spacing:.04em; }
+.cal { display:flex; flex-direction:column; gap:5px; }
+.cal .lbl { font-size:11px; color:#a0a0a0; margin:6px 0 1px; }
+.day.done { background:#9a9a9a; border-style:solid; border-color:#808080; }
+.day.done b { color:#f2f2f2; }
+.day.done span { color:#e0e0e0; }
+.week.compact .day { padding:9px 0; }
+.week.compact .day span { display:none; }
+
+/* kalender als één blok */
+.calbox { background:#fff; border:1px dashed #ccc; border-radius:4px; padding:10px;
+          display:flex; flex-direction:column; gap:5px; }
+.calrow { display:flex; gap:5px; }
+.calrow > * { flex:1 1 0; min-width:0; }
+.calrow.head span { text-align:center; font-size:10px; color:#aaa;
+                    text-transform:uppercase; letter-spacing:.04em; padding-bottom:2px; }
+.cday { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+        font-size:12px; color:#8a8a8a; background:#f4f4f4; border:1px dashed #d8d8d8;
+        border-radius:4px; }
+.cday.plan { background:#d6d6d6; border-style:solid; border-color:#aeaeae; color:#3f3f3f;
+             font-weight:600; }
+.cday.done { background:#8f8f8f; border-style:solid; border-color:#7a7a7a; color:#f5f5f5;
+             font-weight:600; }
+.cday.today { border:2px solid #555; background:#fff; color:#222; font-weight:600; }
+.callegend { display:flex; gap:14px; font-size:11px; color:#999; padding-top:2px; }
+.callegend i { display:inline-block; width:10px; height:10px; border-radius:2px;
+               margin-right:5px; vertical-align:-1px; }
+.callegend i.d { background:#8f8f8f; }
+.callegend i.p { background:#d6d6d6; border:1px solid #aeaeae; }
+/* titel echt in het midden, ongeacht de breedte van links en rechts */
+.bar { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }
+.bar > :first-child { justify-self:start; }
+.bar > :last-child { justify-self:end; }
+.bar .title { justify-self:center; }
+/* cijferrij binnen een witte kaart */
+.facts.inset div { background:#f4f4f4; border-color:#dcdcdc; }
+
+/* klein label en fijne regels binnen een kaart */
+.lab { font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:#a8a8a8; }
+.mini { display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+        font-size:13px; color:#777; padding:6px 0; border-top:1px dashed #ededed; }
+.mini b { color:#333; font-weight:600; }
+.mini .ar { display:inline-block; width:16px; font-style:normal; font-size:13px; color:#888; }
+.mini .ar.up { color:#4a4a4a; }
+.mini .ar.down { color:#a8a8a8; }
+
+/* --- varianten voor progressie --- */
+.prow { display:flex; align-items:center; gap:10px; padding:9px 0;
+        border-top:1px dashed #e6e6e6; }
+.prow:first-child { border-top:0; }
+.prow .pn { width:104px; font-size:13px; color:#444; flex-shrink:0; }
+.prow .pv { font-size:13px; color:#333; font-weight:600; white-space:nowrap; }
+.pbar { flex:1; height:8px; background:#e8e8e8; border:1px dashed #d0d0d0; border-radius:2px;
+        position:relative; }
+.pbar > span { display:block; height:100%; background:#8f8f8f; border-radius:1px; }
+.pbar > em { position:absolute; top:-4px; width:2px; height:14px; background:#555; }
+.steps { display:flex; gap:3px; flex:1; }
+.steps i { width:13px; height:13px; border-radius:2px; background:#e8e8e8;
+           border:1px dashed #d0d0d0; }
+.steps i.on { background:#8f8f8f; border-style:solid; border-color:#7a7a7a; }
+.steps i.next { background:#fff; border:2px solid #777; }
+.spark { display:flex; align-items:flex-end; gap:4px; height:30px; flex:1; }
+.spark i { width:9px; background:#b4b4b4; border-radius:1px 1px 0 0; }
+.spark i.last { background:#6f6f6f; }
+
+/* progressierij: naam + nu boven, start-blokjes-doel eronder */
+.p2 { padding:10px 12px; border-top:1px dashed #e6e6e6; display:block;
+      text-decoration:none; color:inherit; }
+.p2:first-child { border-top:0; }
+.p2 .top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+.p2 .top b { font-size:14px; color:#333; font-weight:600; }
+.p2 .top .now { font-size:14px; color:#333; font-weight:600; white-space:nowrap; }
+.p2 .bot { display:flex; align-items:center; gap:8px; margin-top:7px;
+           font-size:11px; color:#a0a0a0; }
+.p2 .bot .steps { flex:0 0 auto; }
+.p2 .bot .doel { margin-left:auto; }
+.list2 a.p2 { display:block; padding:10px 12px; min-height:0; }
+.list2 a.p2::after { content:none; }
+.p2 .top .now { margin-left:auto; }
+.steps .meer { font-size:11px; color:#999; align-self:center; margin-right:2px; }
+.periode { display:flex; gap:6px; }
+.periode a { flex:1; text-align:center; font-size:12px; color:#777; text-decoration:none;
+             border:1px dashed #c8c8c8; background:#efefef; border-radius:4px; padding:8px 0;
+             min-height:44px; display:flex; align-items:center; justify-content:center; }
+.periode a.on { background:#d4d4d4; border-style:solid; border-color:#999; color:#333;
+                font-weight:600; }
+.list2 .mt { margin-left:auto; text-align:right; }
+.steps i.new { background:#6f6f6f; border:2px solid #3d3d3d; }
+.steps i.back { background:#fff; border:1px dashed #b0b0b0; }
+.p2 .top .now .ar { margin-right:2px; }
+.plus { font-size:12px; color:#999; padding:8px 0 0; border-top:1px dashed #ededed;
+        margin-top:2px; }
+.calbreak { text-align:center; font-size:11px; color:#a5a5a5; padding:3px 0;
+            letter-spacing:.08em; }
+
+/* correctiebalk boven het toetsenbord */
+.editbar { display:flex; align-items:center; justify-content:space-between; gap:10px;
+           background:#e0e0e0; border-top:1px dashed #bbb; padding:9px 14px;
+           font-size:13px; color:#555; }
+.editbar a { color:#555; text-decoration:underline; }
+.set.edit { background:#ededed; border-radius:4px; }
+/* settabel zonder de kolom Vorige, voor historie */
+.set.hist { grid-template-columns:1fr 1fr 1fr; }
+
+/* stappers in plaats van een toetsenbord */
+.stepbar { background:#e4e4e4; border-top:1px dashed #bbb; padding:10px 12px 12px;
+           display:flex; flex-direction:column; gap:8px; }
+.stepper { display:flex; align-items:stretch; gap:8px; }
+.stepper .k { width:38px; display:flex; align-items:center; font-size:11px; color:#8f8f8f;
+              text-transform:uppercase; letter-spacing:.04em; }
+.stepper a { width:56px; min-height:48px; display:flex; align-items:center;
+             justify-content:center; border:1px dashed #999; background:#efefef;
+             border-radius:4px; font-size:20px; color:#555; text-decoration:none; }
+.stepper .val { flex:1; display:flex; align-items:center; justify-content:center;
+                background:#fff; border:1px dashed #bbb; border-radius:4px;
+                font-size:20px; font-weight:600; color:#222; }
+.typ { text-align:center; font-size:12px; }
+.typ a { color:#666; }
+
+/* actieve rij met stappers erin */
+.set.inline { grid-template-columns:52px 40px 1fr 40px 40px 1fr 40px; gap:4px;
+              background:#ededed; border-radius:4px; padding:4px 2px; }
+.set.inline .num { font-size:11px; }
+.set.inline a { display:flex; align-items:center; justify-content:center; min-height:44px;
+                border:1px dashed #999; background:#efefef; border-radius:4px;
+                font-size:18px; color:#555; text-decoration:none; }
+.set.inline .val { display:flex; align-items:center; justify-content:center;
+                   background:#fff; border:2px solid #666; border-radius:4px;
+                   font-size:16px; font-weight:600; color:#222; }
+/* rij om iets toe te voegen */
+.addrow { display:flex; align-items:center; justify-content:center; gap:6px;
+          min-height:44px; border:1px dashed #cfcfcf; border-radius:4px;
+          background:#efefef; font-size:13px; color:#777; text-decoration:none; }

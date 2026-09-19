@@ -26,9 +26,9 @@ export default defineConfig({
     },
     workbox: {
       globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
-      globIgnores: ['m2-voorstel/**', 'm3-voorstel/**', 'm4-voorstel/**'],
+      globIgnores: ['m2-voorstel/**', 'm3-voorstel/**', 'm4-voorstel/**', 'proto/**'],
       navigateFallback: `${base}index.html`,
-      navigateFallbackDenylist: [/^\/ux-flows\//, /\/m[234]-voorstel(?:\/|$)/],
+      navigateFallbackDenylist: [/^\/ux-flows\//, /\/m[234]-voorstel(?:\/|$)/, /\/proto(?:\/|$)/],
       cleanupOutdatedCaches: true,
     },
   })],
