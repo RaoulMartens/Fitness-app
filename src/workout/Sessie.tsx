@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { addExtraSet, adjustWorkout, changeWorkout, correctSet, logSet, workoutDb, writeDraft, type AdjustmentCommand } from './db'
+import { addExtraSet, adjustWorkout, changeWorkout, correctSet, logSet, removeSet, workoutDb, writeDraft, type AdjustmentCommand } from './db'
 import { findExercise } from './exercises'
 import { finishWorkout } from './finish'
 import {
@@ -113,6 +113,11 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
     catch (error) { onFout(error instanceof Error ? error.message : 'Er kon geen set bij.') }
   }
 
+  async function setEraf() {
+    try { await removeSet(session.id, session.revision, slot!.id) }
+    catch (error) { onFout(error instanceof Error ? error.message : 'Er kon geen set af.') }
+  }
+
   async function rustOverslaan() {
     try { await changeWorkout(session.id, session.revision, 'next-set') }
     catch (error) { onFout(error instanceof Error ? error.message : 'Er ging iets mis.') }
@@ -122,6 +127,11 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
   // eerstvolgende set op een ander apparaat staat; de set die je nu nog moet doen
   // staat vooraan in de rij, dus die mag niet uit de vergelijking vallen.
   const naarAnderApparaat = Boolean(session.rest) && restSlot(session)?.id !== slot.id
+  // Een geplande werkset weghalen kort de oefening in; de laatste mag niet weg,
+  // want zonder werkset valt er niets te vergelijken.
+  const laatsteOpen = open.filter(item => item.slot.id === slot.id).at(-1)?.target
+  const magEraf = Boolean(laatsteOpen) && (laatsteOpen!.kind === 'extra'
+    || slot.sets.filter(target => target.kind === 'work').length > 1)
   const rustDuur = restTotal(session)
   const deelRust = rustDuur > 0 ? Math.min(100, Math.max(0, (rust / rustDuur) * 100)) : 0
 
@@ -207,7 +217,10 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
         })}
 
         {!session.rest && !corrigeert && (
-          <button className="addrow" onClick={setErbij}>+ Set toevoegen</button>
+          <div className="setrij">
+            <button className="addrow" onClick={setEraf} disabled={!magEraf}>− Set weghalen</button>
+            <button className="addrow" onClick={setErbij}>+ Set toevoegen</button>
+          </div>
         )}
 
         <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>

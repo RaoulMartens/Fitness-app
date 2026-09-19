@@ -145,6 +145,10 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
   font-size: 13px; color: #5e5e5e; text-decoration: none; width: 100%; cursor: pointer;
 }
 .addrow:active { background: #e2e2e2; }
+.addrow:disabled { opacity: .5; cursor: default; }
+/* Set erbij en set eraf staan naast elkaar: het is dezelfde soort ingreep. */
+.setrij { display: flex; gap: 8px; }
+.setrij .addrow { flex: 1; }
 
 /* --- kaartinhoud --------------------------------------------------------- */
 .facts { display: flex; gap: 6px; }

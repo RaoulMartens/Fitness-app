@@ -230,6 +230,46 @@ export async function addExtraSet(sessionId: string, revision: number, slotId: s
   })
 }
 
+/**
+ * De laatste openstaande set van deze oefening weghalen. Een extra set verdwijnt gewoon;
+ * een geplande werkset kort de oefening voor vandaag in, en dan is 'afgerond' het
+ * ingekorte aantal (sectie 4.0). Vastgelegde sets blijven: die heb je gedaan, en
+ * corrigeren is daar het gereedschap voor.
+ *
+ * Er moet altijd minstens één werkset overblijven. Zonder werkset valt er niets te
+ * vergelijken en zou de oefening stilzwijgend uit de progressie vallen.
+ */
+export async function removeSet(sessionId: string, revision: number, slotId: string, database = workoutDb) {
+  return database.transaction('rw', database.sessions, database.sets, database.drafts, database.outbox, async () => {
+    const session = await database.sessions.get(sessionId)
+    if (!session || session.revision !== revision || !isRunning(session)) throw changed()
+    const slot = session.snapshot.slots.find(item => item.id === slotId)
+    if (!slot) throw changed()
+    const open = pendingIds(session)
+    const eigen = open.filter(id => id.startsWith(`${sessionId}:${slotId}:`))
+    const laatste = eigen.at(-1)
+    if (!laatste) throw new Error('Er staat geen set meer open om weg te halen.')
+    const number = Number(laatste.slice(laatste.lastIndexOf(':') + 1))
+    const target = slot.sets.find(item => item.number === number)
+    if (!target) throw changed()
+    if (target.kind !== 'extra' && slot.sets.filter(item => item.kind === 'work').length <= 1) {
+      throw new Error(`${slot.name} moet minstens één werkset houden.`)
+    }
+    slot.sets = slot.sets.filter(item => item.number !== number)
+    session.pendingIds = open.filter(id => id !== laatste)
+    if (session.skipped?.[laatste]) {
+      session.skipped = Object.fromEntries(Object.entries(session.skipped).filter(([key]) => key !== laatste))
+    }
+    if (session.todayWeights?.[laatste]) {
+      session.todayWeights = Object.fromEntries(Object.entries(session.todayWeights).filter(([key]) => key !== laatste))
+    }
+    await database.drafts.delete(laatste)
+    session.revision++
+    await queueSession(session, database)
+    return session
+  })
+}
+
 export type SessionAction = 'begin-exercise' | 'pause' | 'resume' | 'next-set' | 'extra-rest' | 'complete' | 'abort' | 'warmup-on' | 'warmup-off'
 export async function changeWorkout(id: string, revision: number, action: SessionAction, draftRevision?: number | DraftVersions, database = workoutDb) {
   return database.transaction('rw', database.sessions, database.drafts, database.outbox, database.appointments, database.workspace, async () => {

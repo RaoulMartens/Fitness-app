@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, removeSet, updateWeekend, WorkoutDatabase, writeDraft } from './db'
 import { exercise } from './exercises'
 import { plannedSlot } from './finish'
 import { pendingTargets, recordId, restRemaining, restSlot, starterProgram, targets, type Workout } from './model'
@@ -188,5 +188,44 @@ describe('waar de lopende rust bij hoort', () => {
     nu = (await database.sessions.get(session.id))!
     expect(restSlot(nu)?.id).toBe(eerste.id)
     expect(pendingTargets(nu)[0].slot.id).not.toBe(eerste.id)
+  })
+})
+
+describe('een set weghalen', () => {
+  it('haalt eerst de toegevoegde set weg, daarna een geplande, en stopt bij de laatste', async () => {
+    const eerste = targets(session.snapshot)[0].slot
+    let nu = await addExtraSet(session.id, session.revision, eerste.id, database)
+    const metExtra = nu.snapshot.slots[0].sets.length
+
+    nu = await removeSet(session.id, nu.revision, eerste.id, database)
+    expect(nu.snapshot.slots[0].sets.length).toBe(metExtra - 1)
+    expect(nu.snapshot.slots[0].sets.some(target => target.kind === 'extra')).toBe(false)
+    // De geplande werksets staan er nog, dus het aantal is terug bij af.
+    expect(plannedSlot(nu, eerste.id)?.plannedSets).toBe(2)
+
+    nu = await removeSet(session.id, nu.revision, eerste.id, database)
+    expect(plannedSlot(nu, eerste.id)?.plannedSets).toBe(1)
+    await expect(removeSet(session.id, nu.revision, eerste.id, database))
+      .rejects.toThrow('minstens één werkset')
+  })
+  it('neemt de conceptinvoer van de weggehaalde set mee', async () => {
+    const eerste = targets(session.snapshot)[0].slot
+    // Doorwerken tot alleen de laatste werkset nog openstaat: alleen de set die aan
+    // de beurt is neemt conceptinvoer aan, en weghalen pakt de laatste openstaande.
+    for (let index = 0; index < 2; index++) {
+      await logSet(await draft(), session.revision, database)
+      session = (await database.sessions.get(session.id))!
+      session = await changeWorkout(session.id, session.revision, 'next-set', undefined, database)
+    }
+    const huidig = pendingTargets(session)[0]
+    expect(huidig.slot.id).toBe(eerste.id)
+    await writeDraft({ id: huidig.id, sessionId: session.id, weight: '30', reps: '9', revision: 0, updatedAt: new Date().toISOString() }, 0, database)
+
+    const na = await removeSet(session.id, session.revision, eerste.id, database)
+    expect(await database.drafts.get(huidig.id)).toBeUndefined()
+    expect(na.pendingIds).not.toContain(huidig.id)
+    // Wat al vastligt blijft staan, en telt als de volledige oefening van vandaag.
+    expect(plannedSlot(na, eerste.id)?.plannedSets).toBe(1)
+    expect(await database.sets.where('sessionId').equals(session.id).count()).toBe(2)
   })
 })
