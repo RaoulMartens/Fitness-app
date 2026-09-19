@@ -32,7 +32,11 @@ function beginwaarden(exerciseId: string, target: { weight: number | null; repsM
 export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
   const open = pendingTargets(session)
   const huidig = open[0]
-  const slot = huidig?.slot
+  // Tijdens rust blijf je op het apparaat waar je net stond: de rust hoort bij de
+  // set die je net deed. Vooruitspringen naar de volgende oefening zou de sets die
+  // je zojuist neerzette uit beeld halen, en een set erbij aan het verkeerde
+  // apparaat hangen.
+  const slot = (session.rest ? restSlot(session) : undefined) ?? huidig?.slot
   const alle = targets(session.snapshot)
   const rust = restRemaining(session)
 
@@ -73,8 +77,9 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
 
   const exercise = findExercise(slot.exerciseId)
   const gedaanPerOefening = new Set(sets.map(item => item.slotId))
-  const index = session.snapshot.slots.findIndex(item => item.id === slot.id)
-  const hierna = session.snapshot.slots[index + 1]
+  // Wat hierna komt volgt uit de rij, niet uit de schemavolgorde: na 'Later doen'
+  // staan die twee niet meer gelijk.
+  const hierna = open.find(item => item.slot.id !== slot.id)?.slot
 
   async function vastleggen() {
     if (!magVastleggen(weight, reps)) return onFout('Vul een gewicht en een heel aantal herhalingen in.')
@@ -123,15 +128,16 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
     catch (error) { onFout(error instanceof Error ? error.message : 'Er ging iets mis.') }
   }
 
-  // De rust hoort bij de set die je net deed. Die oefening is pas klaar als de
-  // eerstvolgende set op een ander apparaat staat; de set die je nu nog moet doen
-  // staat vooraan in de rij, dus die mag niet uit de vergelijking vallen.
-  const naarAnderApparaat = Boolean(session.rest) && restSlot(session)?.id !== slot.id
+  // Je bent met deze oefening klaar zodra de eerstvolgende set op een ander
+  // apparaat staat. De set die je nu nog moet doen staat vooraan in de rij, dus
+  // die mag niet uit de vergelijking vallen.
+  const naarAnderApparaat = Boolean(session.rest) && huidig.slot.id !== slot.id
   // Een geplande werkset weghalen kort de oefening in; de laatste mag niet weg,
   // want zonder werkset valt er niets te vergelijken.
   const laatsteOpen = open.filter(item => item.slot.id === slot.id).at(-1)?.target
   const magEraf = Boolean(laatsteOpen) && (laatsteOpen!.kind === 'extra'
     || slot.sets.filter(target => target.kind === 'work').length > 1)
+  const bereik = slot.sets.find(target => target.kind === 'work') ?? slot.sets[0]
   const rustDuur = restTotal(session)
   const deelRust = rustDuur > 0 ? Math.min(100, Math.max(0, (rust / rustDuur) * 100)) : 0
 
@@ -158,7 +164,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
 
         <div className="set head">
           <span>Set</span><span>Vorige</span><span>Kg</span>
-          <span>Herh {huidig.target.repsMin}–{huidig.target.repsMax}</span><span />
+          <span>Herh {bereik.repsMin}–{bereik.repsMax}</span><span />
         </div>
 
         {slot.sets.map(target => {
@@ -216,7 +222,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           )
         })}
 
-        {!session.rest && !corrigeert && (
+        {!corrigeert && (
           <div className="setrij">
             <button className="addrow" onClick={setEraf} disabled={!magEraf}>− Set weghalen</button>
             <button className="addrow" onClick={setErbij}>+ Set toevoegen</button>
@@ -228,7 +234,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
             ? <button className="btn" onClick={correctieOpslaan}>Correctie opslaan</button>
             : session.rest
               ? <button className="btn" onClick={rustOverslaan}>
-                  {naarAnderApparaat ? `Verder met ${slot.name}` : 'Verder'}
+                  {naarAnderApparaat ? `Verder met ${huidig.slot.name}` : 'Verder'}
                 </button>
               : <button className="btn" onClick={vastleggen}>Set vastleggen</button>}
           <div className="links">
