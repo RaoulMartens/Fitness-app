@@ -378,34 +378,21 @@ zijn dat jouw bestanden en kun je ze gewoon in `public/video/` zetten.
 
 ### 6.5 De app afschermen
 
-De app staat op een openbaar adres. Zolang er alleen wireframes op staan is dat niets, maar
-zodra er video's en je trainingsgegevens in zitten hoort er een slot op.
+**Staat niet in v1.** Een eerdere poging met eigen middleware en HTTP-basisauthenticatie is
+teruggedraaid: die zette de app per ongeluk helemaal op slot, omdat hij in productie dichtging
+zodra het wachtwoord niet was ingesteld.
 
-`middleware.ts` doet dat met HTTP-basisauthenticatie op Vercel. `scripts/check-middleware.mts`
-test de randgevallen; draai dat voor elke wijziging.
+Wat er te kiezen valt wanneer dit wel nodig wordt:
 
-- **Productie zonder `APP_PASSWORD` blijft dicht.** Een vergeten instelling zet de app niet
-  stilzwijgend open. Lokaal en in previews valt het slot weg.
-- **`/proto/` blijft open.** Geen persoonlijke gegevens, geen video's, en zo kun je het
-  ontwerp blijven delen.
-- De uitzonderingen staan als exacte patronen in de code, niet in de matcher. Een matcher met
-  `(?!proto)` laat ook `/prototype-iets` door.
-- Het gebruikersnaamveld wordt genegeerd: vul in wat je wil, alleen het wachtwoord telt.
+| Weg | Waar het op stukloopt |
+| --- | --- |
+| Vercel Password Protection | alleen op Enterprise |
+| Eigen middleware met basisauthenticatie | werkt op elk plan, maar je moet het wachtwoord zelf beheren en een vergeten instelling kan de app buitensluiten |
+| Helemaal niet publiceren | app alleen lokaal of via je eigen netwerk draaien |
 
-**Wat dit wel en niet beschermt.** Het slot beschermt de bestanden die Vercel uitlevert: de
-app, de video's. Het beschermt **niet** wat al op een toestel staat. Je trainingsgegevens
-zitten in IndexedDB op jouw telefoon; iemand anders die de URL opent krijgt zijn eigen lege
-opslag, niet die van jou. En een geïnstalleerde app kan via de service worker antwoorden
-zonder Vercel te bereiken.
-
-**Twee dingen om te testen vóór de praktijktest, niet erna:**
-
-1. Het PWA-manifest wordt standaard zonder inloggegevens opgehaald en krijgt dan een 401.
-   Zet `useCredentials: true` in de PWA-instelling van `vite.config.ts`.
-2. Of Safari het wachtwoord onthoudt in de **geïnstalleerde** app, niet alleen in de browser.
-   Dat is niet hetzelfde.
-
-Dit is een slot, geen kluis. Genoeg om toevallige bezoekers en zoekmachines buiten te houden.
+Zolang er alleen wireframes en een leeg schema op staan valt er niets te beschermen: je
+trainingsgegevens staan in IndexedDB op je eigen telefoon, niet op de server. Iemand die de
+URL opent ziet een lege app. Dat verandert zodra er video's bij komen die niet van jou zijn.
 
 ## 7 · Bouwvolgorde
 

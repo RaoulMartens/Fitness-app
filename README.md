@@ -39,7 +39,6 @@ Gebruik bij terugkomen hetzelfde adres: `localhost` en `127.0.0.1` hebben elk hu
 
 ```sh
 npm test                          # model, regels en opslag
-npx tsx scripts/check-middleware.mts   # het wachtwoordslot
 npm run test:e2e                  # Playwright op mobiel formaat
 ```
 
@@ -53,9 +52,7 @@ Elke push naar `main` rolt uit naar Vercel:
 - **App:** https://fitnessapp-rose-zeta.vercel.app
 - **Prototype:** https://fitnessapp-rose-zeta.vercel.app/proto/index.html
 
-De app kan achter een wachtwoord via `middleware.ts`; het prototype blijft open. Zet
-`APP_PASSWORD` in Vercel om het slot te activeren. In productie blijft de app dicht als die
-variabele ontbreekt.
+De app staat open. Afschermen is teruggedraaid: zie sectie 6.5 van het bouwdocument.
 
 GitHub Pages staat niet aan voor deze repo; de workflow `Publish test app` faalt daarom.
 Vercel is het werkende kanaal.
