@@ -205,6 +205,17 @@ export function restRemaining(session: Workout, now = Date.now()) {
   if (!session.rest) return 0
   return session.status === 'paused' ? session.rest.remainingMs : Math.max(0, session.rest.endAt - now)
 }
+/**
+ * Hoe lang de rust die nu loopt in totaal duurt. Er staat alleen een eindtijd
+ * opgeslagen, zodat de klok het sluiten van de app overleeft; voor een balk die
+ * leegloopt is de duur ook nodig. Die hoort bij de oefening van de set die net
+ * is vastgelegd, en dat is na de laatste set niet de oefening die hierna komt.
+ */
+export function restTotal(session: Workout) {
+  if (!session.rest) return 0
+  const slot = session.snapshot.slots.find(item => session.rest!.afterSetId.includes(`:${item.id}:`))
+  return (slot?.restSeconds ?? 0) * 1000
+}
 export function resultLabel(session: Workout) {
   return session.status === 'aborted' ? 'Sessie afgebroken' : session.cursor === targets(session.snapshot).length ? 'Sessie afgerond' : 'Sessie deels afgerond'
 }

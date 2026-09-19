@@ -3,7 +3,7 @@ import { changeWorkout, logSet, workoutDb, writeDraft } from './db'
 import { findExercise } from './exercises'
 import { finishWorkout } from './finish'
 import {
-  draftVersions, formatWeight, pendingTargets, recordId, restRemaining, targets, timerLabel,
+  draftVersions, formatWeight, pendingTargets, recordId, restRemaining, restTotal, targets, timerLabel,
   type Workout, type WorkoutDraft, type WorkoutSet,
 } from './model'
 import { magVastleggen } from './rules'
@@ -92,17 +92,21 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
   }
 
   const laatsteVanOefening = !open.slice(1).some(item => item.slot.id === slot.id)
+  const rustDuur = restTotal(session)
+  const deelRust = rustDuur > 0 ? Math.min(100, Math.max(0, (rust / rustDuur) * 100)) : 0
 
   return (
     <div className="screen">
       <div className={session.rest ? 'kop rust' : 'kop'}>
-        <div className="segs">
-          {session.snapshot.slots.map(item => {
-            const klaar = !open.some(open => open.slot.id === item.id)
-            const bezig = gedaanPerOefening.has(item.id) && !klaar
-            return <i key={item.id} className={klaar ? 'on' : bezig ? 'half' : ''} />
-          })}
-        </div>
+        {session.rest
+          ? <div className="rustbalk"><i style={{ width: `${deelRust}%` }} /></div>
+          : <div className="segs">
+              {session.snapshot.slots.map(item => {
+                const klaar = !open.some(open => open.slot.id === item.id)
+                const bezig = gedaanPerOefening.has(item.id) && !klaar
+                return <i key={item.id} className={klaar ? 'on' : bezig ? 'half' : ''} />
+              })}
+            </div>}
         <div className="line">
           <span className="big">{session.rest ? `Rust · ${timerLabel(rust)}` : slot.name}</span>
           <span className="sm">{session.rest ? slot.name : hierna ? `Hierna: ${hierna.name}` : 'Laatste oefening'}</span>
