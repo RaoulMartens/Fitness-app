@@ -78,10 +78,12 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
 .kop .big { font-size: 16px; font-weight: 600; color: #222; }
 .kop .sm { font-size: 11px; color: #6b6b6b; }
 
-.segs { display: flex; gap: 3px; height: 6px; }
-.segs i { flex: 1; border-radius: 1px; background: #dcdcdc; }
-.segs i.on { background: #8f8f8f; }
-.segs i.half { background: linear-gradient(90deg, #8f8f8f 50%, #dcdcdc 50%); }
+.segs { display: flex; gap: 3px; height: 6px; --seg-leeg: #dcdcdc; --seg-vol: #8f8f8f; }
+.segs i { flex: 1; border-radius: 1px; background: var(--seg-leeg); }
+.segs i.on { background: var(--seg-vol); }
+.segs i.half { background: linear-gradient(90deg, var(--seg-vol) 50%, var(--seg-leeg) 50%); }
+/* De rustbalk is donkerder; daarop vallen de standaardtinten tegen elkaar weg. */
+.kop.rust .segs { --seg-leeg: #bdbdbd; --seg-vol: #454545; }
 
 /* --- video --------------------------------------------------------------- */
 .video {
