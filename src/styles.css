@@ -31,10 +31,10 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 }
 .body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 /*
- * Veilige zones. Sinds viewport-fit niet meer op cover staat zijn deze insets op een
- * iPhone meestal nul: iOS zet de pagina zelf onder de statusbalk en boven de
- * home-indicator. De regels blijven staan als vangnet; max() en calc() houden de
- * gewone marge aan als de inset wegvalt.
+ * Veilige zones. viewport-fit staat op cover, dus env(safe-area-inset-*) geeft de echte
+ * ruimte van statusbalk en home-indicator. Onderin is dat 34pt op een iPhone zonder
+ * thuisknop; zonder die ruimte liggen knoppen en tabs tegen de indicator aan en tik je
+ * er makkelijk langs. max() en calc() houden de gewone marge aan waar geen inset is.
  */
 .screen > .kop:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 2px); }
 .screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
@@ -78,7 +78,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   position: sticky; bottom: 0; margin-top: auto;
   display: flex; flex-direction: column; gap: 8px;
   margin-left: -16px; margin-right: -16px;
-  padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+  /* Iets lucht boven de home-indicator: dit is de knop die je na elke set indrukt. */
+  padding: 10px 16px max(10px, calc(env(safe-area-inset-bottom) + 6px));
   background: var(--paper); border-top: 1px dashed var(--line);
   /* Boven de plakkende kop: de sheets van Afronden en Aanpassen wonen in deze strook, en
      sticky maakt een eigen stapellaag, dus hun z-index telt alleen hierbinnen. */
@@ -317,7 +318,7 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
 .sheet-wrap { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(60, 60, 60, .35); }
 .sheet {
   background: #efefef; border-top: 2px dashed #aaa; border-radius: 12px 12px 0 0;
-  padding: 14px 16px max(24px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px max(24px, calc(env(safe-area-inset-bottom) + 10px)); display: flex; flex-direction: column; gap: 10px;
   max-width: 430px; width: 100%; margin: 0 auto;
 }
 .grip { width: 44px; height: 4px; border-radius: 2px; background: #bbb; margin: 0 auto 12px; }
