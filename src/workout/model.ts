@@ -231,6 +231,8 @@ export function restTotal(session: Workout) {
 export function resultLabel(session: Workout) {
   return session.status === 'aborted' ? 'Sessie afgebroken' : session.cursor === targets(session.snapshot).length ? 'Sessie afgerond' : 'Sessie deels afgerond'
 }
+/** "1 minuut", "5 minuten". */
+export const minutenLabel = (aantal: number) => `${aantal} ${aantal === 1 ? 'minuut' : 'minuten'}`
 export function timerLabel(milliseconds: number) {
   const seconds = Math.ceil(milliseconds / 1000)
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`

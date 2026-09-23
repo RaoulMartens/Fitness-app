@@ -1,5 +1,5 @@
 import { findExercise } from './exercises'
-import { formatWeight, type ExerciseState, type Proposal, type SessionOutcome, type Workout, type WorkoutSet } from './model'
+import { formatWeight, minutenLabel, type ExerciseState, type Proposal, type SessionOutcome, type Workout, type WorkoutSet } from './model'
 
 interface Props {
   outcome: SessionOutcome
@@ -35,7 +35,7 @@ export function Klaar({ outcome, session, sets, voorstellen, toestanden, onTerug
 
   return (
     <div className="body">
-      <p className="muted">{datum} · {duur} minuten</p>
+      <p className="muted">{datum} · {minutenLabel(duur)}</p>
       <h1>{outcome.finishedPartially ? `${session.snapshot.name}, eerder gestopt` : `${session.snapshot.name} afgerond`}</h1>
 
       <div className="segs">

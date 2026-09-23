@@ -1,9 +1,10 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState } from 'react'
-import { addExtraSet, adjustWorkout, changeWorkout, correctSet, logSet, removeSet, workoutDb, writeDraft, type AdjustmentCommand } from './db'
-import { findExercise } from './exercises'
+import { addExercise, addExtraSet, adjustWorkout, changeWorkout, correctSet, logSet, removeSet, workoutDb, writeDraft, type AdjustmentCommand } from './db'
+import { exercises, findExercise, type Exercise } from './exercises'
 import { finishWorkout } from './finish'
 import {
-  draftVersions, formatWeight, pendingTargets, recordId, restRemaining, restSlot, restTotal, targets, timerLabel,
+  draftVersions, formatWeight, minutenLabel, pendingTargets, recordId, restRemaining, restSlot, restTotal, targets, timerLabel,
   type Workout, type WorkoutDraft, type WorkoutSet,
 } from './model'
 import { magVastleggen } from './rules'
@@ -498,6 +499,9 @@ function Afronden({ session, drafts, onFout, onKlaar }: {
 
 /** Alles gedaan, maar nog niet afgerond. */
 function Afgerond({ session, onFout, onKlaar }: { session: Workout; onFout: (m: string) => void; onKlaar: () => void }) {
+  const [kiest, setKiest] = useState(false)
+  const minuten = Math.max(1, Math.round((Date.now() - Date.parse(session.startedAt)) / 60_000))
+
   async function afronden() {
     try {
       await finishWorkout({ sessionId: session.id })
@@ -506,6 +510,16 @@ function Afgerond({ session, onFout, onKlaar }: { session: Workout; onFout: (m: 
       onFout(error instanceof Error ? error.message : 'Afronden lukte niet.')
     }
   }
+
+  async function toevoegen(exerciseId: string) {
+    try {
+      await addExercise(session.id, session.revision, exerciseId)
+      setKiest(false)
+    } catch (error) {
+      onFout(error instanceof Error ? error.message : 'De oefening is niet toegevoegd.')
+    }
+  }
+
   return (
     <div className="screen">
       <div className="kop">
@@ -513,10 +527,50 @@ function Afgerond({ session, onFout, onKlaar }: { session: Workout; onFout: (m: 
         <div className="line"><span className="big">Alles gedaan</span><span className="sm">{session.snapshot.name}</span></div>
       </div>
       <div className="body">
-        <p>Je hebt alle oefeningen gehad.</p>
-        <div style={{ marginTop: 'auto' }}>
+        <p>{session.snapshot.slots.length} oefeningen · {minutenLabel(minuten)}</p>
+        <div className="acties">
           <button className="btn" onClick={afronden}>Afronden</button>
+          <button className="opt" onClick={() => setKiest(true)}>
+            <span className="lbl">Nog een oefening erbij</span>
+          </button>
         </div>
+      </div>
+      {kiest && <OefeningKiezen session={session} onKies={toevoegen} onSluit={() => setKiest(false)} />}
+    </div>
+  )
+}
+
+/**
+ * Welke oefening erbij. Wat je eerder hebt gedaan staat bovenaan: aan het eind van
+ * een sessie kies je meestal iets bekends. Oefeningen die al in deze sessie zitten
+ * staan er niet in.
+ */
+function OefeningKiezen({ session, onKies, onSluit }: {
+  session: Workout
+  onKies: (exerciseId: string) => void
+  onSluit: () => void
+}) {
+  const eerder = useLiveQuery(async () => new Set(await workoutDb.exerciseStates.toCollection().primaryKeys()), [])
+  const inSessie = new Set(session.snapshot.slots.map(slot => slot.exerciseId))
+  const beschikbaar = exercises.filter(item => !inSessie.has(item.id))
+  const vaker = beschikbaar.filter(item => eerder?.has(item.id))
+  const rest = beschikbaar.filter(item => !eerder?.has(item.id))
+
+  const rij = (item: Exercise) => (
+    <button className="kies" key={item.id} onClick={() => onKies(item.id)}>
+      <span className="nm">{item.name}</span>
+      <span className="mt">{item.muscles.toLowerCase()}</span>
+    </button>
+  )
+
+  return (
+    <div className="sheet-wrap" onClick={onSluit}>
+      <div className="sheet" onClick={event => event.stopPropagation()}>
+        <div className="grip" />
+        <h1>Oefening toevoegen</h1>
+        {vaker.length > 0 && <><h2>Vaker gedaan</h2><div className="list2">{vaker.map(rij)}</div></>}
+        {rest.length > 0 && <>{vaker.length > 0 && <h2>Alle oefeningen</h2>}<div className="list2">{rest.map(rij)}</div></>}
+        <p className="next">De oefening komt achteraan deze sessie, met twee sets. Je schema verandert er niet van.</p>
       </div>
     </div>
   )

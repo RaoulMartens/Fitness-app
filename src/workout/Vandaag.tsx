@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { findExercise } from './exercises'
 import { verdiendeVerhogingen } from './finish'
-import { formatWeight, localDate, targets, type Proposal, type Workout, type WorkoutSet } from './model'
+import { formatWeight, localDate, minutenLabel, targets, type Proposal, type Workout, type WorkoutSet } from './model'
 import { dagenTussen, type VandaagToestand } from './rules'
 
 interface Props {
@@ -218,10 +218,12 @@ function Voortgang({ session, sets }: { session: Workout; sets: WorkoutSet[] }) 
 
 function hoelang(vanaf: string) {
   const minuten = Math.round((Date.now() - Date.parse(vanaf)) / 60_000)
-  if (minuten < 60) return `${minuten} minuten geleden`
+  if (minuten < 1) return 'net'
+  if (minuten < 60) return `${minutenLabel(minuten)} geleden`
   const uren = Math.round(minuten / 60)
   if (uren < 24) return `${uren} uur geleden`
-  return `${Math.round(uren / 24)} dagen geleden`
+  const dagen = Math.round(uren / 24)
+  return `${dagen} ${dagen === 1 ? 'dag' : 'dagen'} geleden`
 }
 
 function beschrijfOver(vandaag: string, dag: string) {

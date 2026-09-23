@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import { findExercise } from './exercises'
 import { isPauzeSessie, startgewicht } from './rules'
-import { parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
+import { parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Slot, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
 
 export class WorkoutDatabase extends Dexie {
   sessions!: Table<Workout, string>
@@ -319,6 +319,42 @@ export async function discardWorkout(id: string, revision: number, database = wo
         }
       }
     })
+}
+
+/**
+ * Een oefening achteraan deze sessie, voor als het schema op is en je nog wat wil
+ * doen. Het schema verandert niet. De sets zijn gewone werksets en geen extra's: dan
+ * bouwt de oefening eigen historie op, en begint hij de volgende keer dat je hem
+ * toevoegt op zijn eigen voorstel. Geen warming-up; je bent op dat moment warm.
+ *
+ * Het bereik van 10 tot 15 is een aanname. De catalogus kent geen bereik per
+ * oefening, en een oefening die je achteraan toevoegt is doorgaans een kleine.
+ */
+export async function addExercise(sessionId: string, revision: number, exerciseId: string, database = workoutDb) {
+  return database.transaction('rw', [database.sessions, database.outbox, database.exerciseStates], async () => {
+    const session = await database.sessions.get(sessionId)
+    if (!session || session.revision !== revision || !isRunning(session)) throw changed()
+    const oefening = findExercise(exerciseId)
+    if (!oefening) throw new Error('Die oefening staat niet in je lijst.')
+    if (session.snapshot.slots.some(slot => slot.exerciseId === exerciseId)) {
+      throw new Error(`${oefening.name} zit al in deze sessie.`)
+    }
+    const slot: Slot = {
+      id: `toegevoegd-${exerciseId}`, exerciseId, name: oefening.name,
+      restSeconds: oefening.restSeconds, step: oefening.step, minWeight: oefening.minWeight,
+      sets: [1, 2].map(number => ({
+        number, repsMin: 10, repsMax: 15, weight: null, rir: { min: 2, max: 3 }, kind: 'work' as const,
+      })),
+    }
+    const begin = startgewicht(await database.exerciseStates.get(exerciseId), Boolean(session.pauzeSessie), slot)
+    if (begin.pauzeVan !== undefined) slot.pauzeVan = begin.pauzeVan
+    slot.sets = slot.sets.map(target => ({ ...target, weight: begin.weight }))
+    session.snapshot.slots = [...session.snapshot.slots, slot]
+    session.pendingIds = [...pendingIds(session), ...slot.sets.map(target => recordId(session.id, slot.id, target.number))]
+    session.revision++
+    await queueSession(session, database)
+    return session
+  })
 }
 
 export type SessionAction = 'begin-exercise' | 'pause' | 'resume' | 'next-set' | 'extra-rest' | 'complete' | 'abort' | 'warmup-on' | 'warmup-off'

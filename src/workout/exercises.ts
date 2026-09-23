@@ -171,7 +171,7 @@ export const exercises: Exercise[] = [
   {
     id: 'incline-press',
     name: 'Incline press',
-    muscles: 'Borst, bovenste deel, en voorste schouder',
+    muscles: 'Bovenste borst en schouder',
     helper: 'Je triceps helpt mee.',
     why: 'Zelfde duwbeweging onder een andere hoek.',
     cues: ['Rug tegen de leuning', 'Ellebogen iets naar binnen'],

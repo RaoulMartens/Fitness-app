@@ -251,6 +251,8 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
   max-width: 430px; width: 100%; margin: 0 auto;
 }
 .grip { width: 44px; height: 4px; border-radius: 2px; background: #bbb; margin: 0 auto 12px; }
+/* Een lange keuzelijst scrolt in de sheet, zodat de sheet zelf niet boven het scherm uitsteekt. */
+.sheet { max-height: 88dvh; overflow-y: auto; }
 .sheet h1 { margin-top: 2px; }
 .sheet .sub { margin-bottom: 4px; }
 .sheet .btn { margin-top: 6px; }

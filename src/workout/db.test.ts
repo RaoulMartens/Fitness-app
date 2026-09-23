@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, discardWorkout, logSet, openWorkspace, removeSet, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { addExercise, addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, discardWorkout, logSet, openWorkspace, removeSet, updateWeekend, WorkoutDatabase, writeDraft } from './db'
 import { exercise } from './exercises'
 import { plannedSlot } from './finish'
-import { pendingTargets, recordId, restRemaining, restSlot, starterProgram, targets, type Workout } from './model'
+import { pendingIds, pendingTargets, recordId, restRemaining, restSlot, starterProgram, targets, type Workout } from './model'
 
 let database: WorkoutDatabase
 let session: Workout
@@ -255,5 +255,26 @@ describe('een open sessie weggooien', () => {
     await discardWorkout(session.id, session.revision, database)
     await discardWorkout(session.id, session.revision, database)
     expect(await database.sessions.count()).toBe(0)
+  })
+})
+
+describe('een oefening toevoegen', () => {
+  it('zet hem achteraan met twee werksets en laat het schema staan', async () => {
+    const voor = pendingIds(session).length
+    const na = await addExercise(session.id, session.revision, 'hammer-curl', database)
+    const slot = na.snapshot.slots.at(-1)!
+    expect(slot.exerciseId).toBe('hammer-curl')
+    expect(slot.sets.map(target => target.kind)).toEqual(['work', 'work'])
+    expect(na.pendingIds!.length).toBe(voor + 2)
+    expect(na.pendingIds!.slice(-2).every(id => id.includes(`:${slot.id}:`))).toBe(true)
+    expect(starterProgram.slots.some(item => item.exerciseId === 'hammer-curl')).toBe(false)
+  })
+  it('weigert een oefening die al in de sessie zit', async () => {
+    await expect(addExercise(session.id, session.revision, 'leg-press', database)).rejects.toThrow('zit al')
+  })
+  it('begint op zijn eigen voorstel als hij eerder is gedaan', async () => {
+    await database.exerciseStates.put({ exerciseId: 'hammer-curl', currentWeight: 12.5, lastUsedWeight: 10, startWeight: 10, preBreakWeight: null, increases: 1, stalls: 0, lastWorkedDay: '2026-09-20' })
+    const na = await addExercise(session.id, session.revision, 'hammer-curl', database)
+    expect(na.snapshot.slots.at(-1)!.sets.map(target => target.weight)).toEqual([12.5, 12.5])
   })
 })
