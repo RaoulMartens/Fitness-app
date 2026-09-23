@@ -530,11 +530,24 @@ Push-up en pull-up zijn geschrapt: elke set heeft hier een gewicht. Elke oefenin
 `verschil`, omdat in een lijst van vervangers de spiergroep per definitie niets onderscheidt.
 Alle `step` en `minWeight` blijven een aanname tot ze in de sportschool zijn nagelopen.
 
-### 12.4 Nog open
+### 12.4 Stap 5
 
-- Een plateauvraag die je niet beantwoordt omdat je de app sluit op het Klaar-scherm, komt
-  pas terug bij de volgende stilstand. Vandaag toont hem niet.
-- Een vervanging in het schema is nog niet terug te draaien. Dat hoort op het
-  Programma-scherm in stap 5.
+| Onderwerp | Beslissing | Waarom |
+| --- | --- | --- |
+| Gegevens | Programma en Voortgang tonen echte cijfers, geen vaste | die bestaan nu; verzonnen getallen zouden misleiden |
+| Kalender | vorige, deze en volgende week | vanaf deze week had je op maandag nooit een gedane sessie in beeld |
+| Periodeknoppen | weggelaten | ze zouden niets doen |
+| Historie | alleen lezen | achteraf aanpassen blijft buiten v1, zie sectie 11 |
+| Instellingen | de vaste regels als uitleg, en Alles wissen | een rij die eruitziet als een knop en niets doet is erger dan geen rij |
+| Vervanging terugdraaien | op het oefeningscherm van de vervanger | daar zie je dat hij op een andere plek staat |
+| Navigatie | schermen in de hash van het adres | terugknop en iOS-veegbeweging werken, en Klaar overleeft verversen |
+| Omleiden naar Vandaag | pas na een verse lezing uit de opslag | de livequery loopt vlak na starten achter en stuurde je terug uit een net begonnen sessie |
+
+### 12.5 Nog open
+
+- Een plateauvraag blijft staan zolang je op het Klaar-scherm bent, ook na verversen. Ga je
+  weg zonder te antwoorden, dan komt hij pas terug bij de volgende stilstand.
 - Na een verhoging begint het herhalingenveld op wat je vorige keer deed, niet op de
   onderkant van je bereik.
+- `step` en `minWeight` per apparaat, de teksten van de oefeningen en de video's staan nog
+  op aannames (sectie 10).
