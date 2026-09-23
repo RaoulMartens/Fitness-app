@@ -1,4 +1,4 @@
-import { exercise as catalogue } from './exercises'
+import { exercise as catalogue, findExercise } from './exercises'
 export interface Target {
   number: number
   repsMin: number
@@ -205,6 +205,24 @@ export const starterProgram: Program = {
   } }),
 }
 
+/**
+ * Het schema zoals het nu geldt: het startschema met de blijvende vervangingen erin.
+ * Eén plek, zodat een nieuwe sessie en het Programma-scherm hetzelfde schema zien.
+ */
+export function huidigSchema(vervangingen: Record<string, string> = {}): Program {
+  const schema = structuredClone(starterProgram)
+  for (const slot of schema.slots) {
+    const vervanger = findExercise(vervangingen[slot.id] ?? '')
+    if (!vervanger) continue
+    Object.assign(slot, {
+      exerciseId: vervanger.id, name: vervanger.name, step: vervanger.step,
+      minWeight: vervanger.minWeight, restSeconds: vervanger.restSeconds,
+    })
+  }
+  return schema
+}
+/** Een oefening die je achteraan toevoegt: twee werksets van 10 tot 15. Zie addExercise. */
+export const TOEGEVOEGD = { sets: 2, repsMin: 10, repsMax: 15 } as const
 export const targets = (program: Program) => program.slots.flatMap(slot => slot.sets.map(target => ({ slot, target })))
 export const recordId = (sessionId: string, slotId: string, number: number) => `${sessionId}:${slotId}:${number}`
 export const pendingIds = (session: Workout) => session.pendingIds ?? targets(session.snapshot).slice(session.cursor).map(({ slot, target }) => recordId(session.id, slot.id, target.number))

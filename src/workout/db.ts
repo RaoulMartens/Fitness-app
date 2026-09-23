@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import { findExercise } from './exercises'
 import { isPauzeSessie, startgewicht } from './rules'
-import { parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Slot, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
+import { huidigSchema, TOEGEVOEGD, parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Slot, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
 
 export class WorkoutDatabase extends Dexie {
   sessions!: Table<Workout, string>
@@ -129,12 +129,10 @@ export async function beginWorkout(database = workoutDb, now = new Date()) {
     // begon elke sessie op wat je vorige keer tilde en kwam een verhoging nooit aan.
     const laatste = await database.outcomes.orderBy('finishedAt').last()
     const pauzeSessie = isPauzeSessie(laatste?.sessionDay ?? null, localDate(now))
-    const snapshot = structuredClone(starterProgram)
+    // Een vervanging na een plateau geldt voor het schema, niet voor één sessie. De
+    // slot-id blijft gelijk, zodat de plek in de volgorde niet verandert.
+    const snapshot = huidigSchema(workspace.vervangingen)
     for (const slot of snapshot.slots) {
-      // Een vervanging na een plateau geldt voor het schema, niet voor één sessie. De
-      // slot-id blijft gelijk, zodat de plek in de volgorde niet verandert.
-      const vervanger = findExercise(workspace.vervangingen?.[slot.id] ?? '')
-      if (vervanger) zetOefening(slot, vervanger)
       const begin = startgewicht(await database.exerciseStates.get(slot.exerciseId), pauzeSessie, slot)
       if (begin.pauzeVan !== undefined) slot.pauzeVan = begin.pauzeVan
       // Alleen de werksets: de warming-up is bewust lichter en volgt je vorige warming-up.
@@ -355,8 +353,9 @@ export async function addExercise(sessionId: string, revision: number, exerciseI
     const slot: Slot = {
       id: `toegevoegd-${exerciseId}`, exerciseId, name: oefening.name,
       restSeconds: oefening.restSeconds, step: oefening.step, minWeight: oefening.minWeight,
-      sets: [1, 2].map(number => ({
-        number, repsMin: 10, repsMax: 15, weight: null, rir: { min: 2, max: 3 }, kind: 'work' as const,
+      sets: Array.from({ length: TOEGEVOEGD.sets }, (_, index) => ({
+        number: index + 1, repsMin: TOEGEVOEGD.repsMin, repsMax: TOEGEVOEGD.repsMax,
+        weight: null, rir: { min: 2, max: 3 }, kind: 'work' as const,
       })),
     }
     const begin = startgewicht(await database.exerciseStates.get(exerciseId), Boolean(session.pauzeSessie), slot)
@@ -368,6 +367,27 @@ export async function addExercise(sessionId: string, revision: number, exerciseI
     await queueSession(session, database)
     return session
   })
+}
+
+/** Een vervanging in het schema ongedaan maken. Geldt vanaf de volgende sessie. */
+export async function herstelOefening(slotId: string, database = workoutDb) {
+  return database.transaction('rw', database.workspace, async () => {
+    const workspace = await database.workspace.get('main')
+    if (!workspace?.vervangingen?.[slotId]) return
+    const { [slotId]: _weg, ...rest } = workspace.vervangingen
+    await database.workspace.put({ ...workspace, vervangingen: rest })
+  })
+}
+
+/**
+ * Alles wissen en opnieuw beginnen alsof de app net is geïnstalleerd. Elke tabel leeg in
+ * één transactie, daarna een verse werkruimte: zonder die werkruimte kan er niets starten.
+ */
+export async function wisAlles(database = workoutDb) {
+  await database.transaction('rw', database.tables, async () => {
+    for (const table of database.tables) await table.clear()
+  })
+  await openWorkspace(database)
 }
 
 export type SessionAction = 'begin-exercise' | 'pause' | 'resume' | 'next-set' | 'extra-rest' | 'complete' | 'abort' | 'warmup-on' | 'warmup-off'

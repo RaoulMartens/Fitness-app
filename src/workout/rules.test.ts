@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   bereikGehaald, dagenTussen, isPauzeSessie, isVergeten, magTrainenOp, magVastleggen,
-  naPauzeSessie, naPlateau, pauzeGewicht, plateauBereikt, stap, startgewicht, vandaagToestand, voorstel,
+  geplandeDagen, naPauzeSessie, naPlateau, pauzeGewicht, plateauBereikt, stap, startgewicht, vandaagToestand, voorstel,
   type LoggedSet, type PlannedSlot,
 } from './rules'
 
@@ -210,5 +210,17 @@ describe('startgewicht', () => {
   })
   it('geeft een meegedragen korting ook buiten een pauzesessie, vanaf het oude gewicht', () => {
     expect(startgewicht({ currentWeight: 40, preBreakWeight: 45 }, false, slot)).toEqual({ weight: 42.5, pauzeVan: 45 })
+  })
+})
+
+describe('geplandeDagen', () => {
+  it('volgt het ritme vanaf de laatste sessie', () => {
+    expect(geplandeDagen('2026-09-18', '2026-09-19', '2026-09-30')).toEqual(['2026-09-21', '2026-09-24', '2026-09-27', '2026-09-30'])
+  })
+  it('begint vandaag als de geplande dag al voorbij is', () => {
+    expect(geplandeDagen('2026-09-01', '2026-09-19', '2026-09-25')).toEqual(['2026-09-19', '2026-09-22', '2026-09-25'])
+  })
+  it('begint vandaag zonder eerdere sessie', () => {
+    expect(geplandeDagen(null, '2026-09-19', '2026-09-22')).toEqual(['2026-09-19', '2026-09-22'])
   })
 })

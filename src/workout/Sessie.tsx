@@ -9,6 +9,7 @@ import {
 } from './model'
 import { magVastleggen } from './rules'
 import { useWakeLock } from './useWakeLock'
+import { Video } from './Video'
 
 interface Props {
   session: Workout
@@ -445,21 +446,6 @@ function typen(huidig: number, zet: (value: number) => void) {
   if (antwoord === null) return
   const waarde = Number(antwoord.replace(',', '.'))
   if (Number.isFinite(waarde) && waarde >= 0) zet(waarde)
-}
-
-function Video({ url }: { url?: string }) {
-  const [speelt, setSpeelt] = useState(false)
-  if (!url) return <div className="video" aria-label="Nog geen video" />
-  if (!speelt) return <button className="video" onClick={() => setSpeelt(true)} aria-label="Video afspelen" />
-  if (url.endsWith('.mp4')) {
-    return <div className="video speelt"><video src={url} autoPlay muted playsInline controls /></div>
-  }
-  return (
-    <div className="video speelt">
-      <iframe src={`${url}${url.includes('?') ? '&' : '?'}autoplay=1&mute=1&playsinline=1`}
-        title="Uitvoering" allow="autoplay; encrypted-media" />
-    </div>
-  )
 }
 
 function Afronden({ session, drafts, onFout, onKlaar }: {

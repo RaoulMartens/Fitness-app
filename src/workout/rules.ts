@@ -182,6 +182,22 @@ export function volgendeTrainingsdag(laatsteSessieDag: string, ritmeDagen = 3): 
 }
 
 /**
+ * De trainingsdagen die nog komen, tot en met `tot`. Vanaf de dag na de laatste
+ * afgeronde sessie volgens het ritme; is die dag al voorbij zonder dat je trainde, dan
+ * is vandaag de eerstvolgende. Zonder sessie is vandaag de eerste dag.
+ */
+export function geplandeDagen(laatsteSessieDag: string | null, vandaag: string, tot: string): string[] {
+  const dagen: string[] = []
+  let dag = laatsteSessieDag ? volgendeTrainingsdag(laatsteSessieDag) : vandaag
+  if (dag < vandaag) dag = vandaag
+  while (dag <= tot) {
+    dagen.push(dag)
+    dag = volgendeTrainingsdag(dag)
+  }
+  return dagen
+}
+
+/**
  * Sectie 4.5. Een sessie is vergeten als de sessiedag voorbij is én er meer dan zes uur
  * sinds de laatste set is verstreken. Die tweede voorwaarde spaart de sessie die om
  * 23.50 begint en na middernacht doorloopt.

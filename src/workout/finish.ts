@@ -252,6 +252,14 @@ export async function kiesPlateau(sessionId: string, exerciseId: string, besluit
     })
 }
 
+/** Hoeveel oefeningen van een sessie helemaal gedaan zijn, volgens dezelfde regel als afronden. */
+export function afgerondeOefeningen(session: Workout, sets: WorkoutSet[]) {
+  return session.snapshot.slots.filter(slot => {
+    const plan = plannedSlot(session, slot.id)
+    return plan !== null && oefeningAfgerond(toLogged(sets.filter(item => item.slotId === slot.id)), plan)
+  }).length
+}
+
 /** Of de eerstvolgende sessie de pauzekorting draagt. */
 export async function pauzeSessieNodig(vandaag: string, database: WorkoutDatabase = workoutDb) {
   const laatste = await database.outcomes.orderBy('finishedAt').last()
