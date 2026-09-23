@@ -316,9 +316,11 @@ function Aanpassen({ session, slot, sets, drafts, onFout }: {
   const begonnen = sets.some(item => item.slotId === slot.id)
   const andereOpen = pendingTargets(session).some(item => item.slot.id !== slot.id)
   const exercise = findExercise(slot.exerciseId)
+  // Wat al in de sessie zit valt af: een tweede Zittende row naast de eerste is geen vervanging.
   const alternatieven = (exercise?.alternatives ?? [])
     .map(findExercise)
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .filter(item => !session.snapshot.slots.some(other => other.exerciseId === item.id))
 
   function sluit() { setOpen(false); setStap('keuze') }
 

@@ -110,6 +110,7 @@ export function WorkoutApp() {
           outcome={data.laatste} session={data.sessieVoorKlaar} sets={data.sets}
           voorstellen={data.voorstellen} toestanden={data.toestanden}
           onTerug={() => { setKlaarVoorSessie(null); setScherm('vandaag') }}
+          onFout={setFout}
         />
         <Tabs />
       </div>

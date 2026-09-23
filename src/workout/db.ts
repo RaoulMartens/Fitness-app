@@ -56,6 +56,15 @@ export class WorkoutDatabase extends Dexie {
   }
 }
 export const workoutDb = new WorkoutDatabase()
+
+/** Een slot een andere oefening geven: naam, stap, laagste gewicht en rust gaan mee. */
+function zetOefening(slot: Slot, exercise: NonNullable<ReturnType<typeof findExercise>>) {
+  slot.exerciseId = exercise.id
+  slot.name = exercise.name
+  slot.step = exercise.step
+  slot.minWeight = exercise.minWeight
+  slot.restSeconds = exercise.restSeconds
+}
 export async function readLegacyChanges(database = workoutDb) {
   const baseline = (await database.migration.get('m2'))?.baseline ?? {}
   const changes: string[] = []
@@ -122,6 +131,10 @@ export async function beginWorkout(database = workoutDb, now = new Date()) {
     const pauzeSessie = isPauzeSessie(laatste?.sessionDay ?? null, localDate(now))
     const snapshot = structuredClone(starterProgram)
     for (const slot of snapshot.slots) {
+      // Een vervanging na een plateau geldt voor het schema, niet voor één sessie. De
+      // slot-id blijft gelijk, zodat de plek in de volgorde niet verandert.
+      const vervanger = findExercise(workspace.vervangingen?.[slot.id] ?? '')
+      if (vervanger) zetOefening(slot, vervanger)
       const begin = startgewicht(await database.exerciseStates.get(slot.exerciseId), pauzeSessie, slot)
       if (begin.pauzeVan !== undefined) slot.pauzeVan = begin.pauzeVan
       // Alleen de werksets: de warming-up is bewust lichter en volgt je vorige warming-up.
@@ -489,13 +502,12 @@ export async function adjustWorkout(id: string, revision: number, operationId: s
         if (gedaan.some(item => item.slotId === slot.id)) {
           throw new Error(`Je hebt al een set op ${slot.name} vastgelegd. Vervangen kan alleen voordat je begint.`)
         }
+        if (session.snapshot.slots.some(item => item.id !== slot.id && item.exerciseId === vervanger.id)) {
+          throw new Error(`${vervanger.name} zit al in deze sessie.`)
+        }
         const oud = slot.name
         slot.originalExerciseId = slot.originalExerciseId ?? slot.exerciseId
-        slot.exerciseId = vervanger.id
-        slot.name = vervanger.name
-        slot.step = vervanger.step
-        slot.minWeight = vervanger.minWeight
-        slot.restSeconds = vervanger.restSeconds
+        zetOefening(slot, vervanger)
         // Het gewicht van het oude apparaat zegt niets over het nieuwe, en de korting
         // die het oude apparaat meekreeg ook niet: die rekent de vervanger zelf uit.
         const begin = startgewicht(await database.exerciseStates.get(vervanger.id), Boolean(session.pauzeSessie), slot)

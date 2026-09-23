@@ -98,7 +98,7 @@ export const plateauBereikt = (stalls: number) => stalls >= PLATEAU_GRENS
 export type PlateauKeuze = 'terug' | 'vervangen' | 'laten'
 
 /** Elke uitkomst zet de teller op nul; terugzetten gaat twee stappen omlaag. */
-export function naPlateau(keuze: PlateauKeuze, gewicht: number, slot: PlannedSlot) {
+export function naPlateau(keuze: PlateauKeuze, gewicht: number, slot: Pick<PlannedSlot, 'step' | 'minWeight'>) {
   const weight = keuze === 'terug'
     ? Math.max(slot.minWeight, afronden(gewicht - slot.step * 2))
     : gewicht

@@ -6,9 +6,10 @@
  * Zie bouwdocument-v1.md sectie 4 en 8.
  */
 import { changeWorkout, workoutDb, type WorkoutDatabase } from './db'
-import { draftVersions, localDate, type ExerciseState, type Proposal, type SessionOutcome, type Workout, type WorkoutSet } from './model'
+import { findExercise } from './exercises'
+import { draftVersions, localDate, starterProgram, type ExerciseState, type Proposal, type SessionOutcome, type Workout, type WorkoutSet } from './model'
 import {
-  bereikGehaald, isPauzeSessie, naPauzeSessie, oefeningAfgerond, voorstel,
+  bereikGehaald, isPauzeSessie, naPauzeSessie, naPlateau, oefeningAfgerond, plateauBereikt, voorstel,
   type LoggedSet, type PlannedSlot,
 } from './rules'
 
@@ -191,6 +192,64 @@ export function verdiendeVerhogingen(session: Workout, sets: WorkoutSet[]) {
     if (omhoog) namen.push(slot.name)
   }
   return namen
+}
+
+/**
+ * Sectie 4.2: oefeningen uit deze sessie die stilstaan en waarover nog niet beslist is.
+ * Na een keuze staat de teller op nul en is de keuze vastgelegd. Dat tweede is nodig
+ * omdat een herberekening de teller anders weer op drie zou zetten, en dan kwam de
+ * vraag terug over iets wat je al besloten had.
+ */
+export function vastgelopen(outcome: SessionOutcome, voorstellen: Proposal[], toestanden: ExerciseState[]) {
+  return voorstellen
+    .filter(item => item.sessionId === outcome.sessionId && item.reason === 'vasthouden')
+    .filter(item => !outcome.plateauChoice?.[item.exerciseId])
+    .filter(item => plateauBereikt(toestanden.find(state => state.exerciseId === item.exerciseId)?.stalls ?? 0))
+    .map(item => item.exerciseId)
+}
+
+export type PlateauBesluit = { keuze: 'terug' } | { keuze: 'vervangen'; door: string } | { keuze: 'laten' }
+
+/** Of een oefening een vaste plek in het schema heeft, en dus voorgoed te vervangen is. */
+export const inSchema = (slotId: string) => starterProgram.slots.some(slot => slot.id === slotId)
+
+/**
+ * Het besluit bij een plateau, in één transactie: teller op nul en keuze vastgelegd,
+ * met het gevolg van de keuze erbij. Terugzetten past ook het voorstel van deze sessie
+ * aan, zodat het Klaar-scherm meteen het nieuwe gewicht toont. Vervangen geldt vanaf
+ * de volgende sessie en wordt in de werkruimte bewaard, op de plek in het schema.
+ */
+export async function kiesPlateau(sessionId: string, exerciseId: string, besluit: PlateauBesluit, database: WorkoutDatabase = workoutDb) {
+  return database.transaction('rw',
+    [database.outcomes, database.exerciseStates, database.proposals, database.sessions, database.workspace],
+    async () => {
+      const outcome = await database.outcomes.get(sessionId)
+      if (!outcome) throw new Error('Deze sessie is nog niet afgerond.')
+      if (outcome.plateauChoice?.[exerciseId]) return outcome
+      const state = await database.exerciseStates.get(exerciseId)
+      const slot = (await database.sessions.get(sessionId))?.snapshot.slots.find(item => item.exerciseId === exerciseId)
+      if (!state || !slot) throw new Error('Deze oefening zat niet in de sessie.')
+
+      let volgende: ExerciseState = { ...state, stalls: 0 }
+      if (besluit.keuze === 'terug' && state.currentWeight !== null) {
+        const uitkomst = naPlateau('terug', state.currentWeight, slot)
+        volgende = { ...volgende, currentWeight: uitkomst.weight, deloadFrom: uitkomst.deloadFrom ?? null }
+        const voorstel = await database.proposals.get(`${sessionId}:${exerciseId}`)
+        if (voorstel) await database.proposals.put({ ...voorstel, to: uitkomst.weight, reason: 'plateau' })
+      }
+      if (besluit.keuze === 'vervangen') {
+        const door = findExercise(besluit.door)
+        if (!door) throw new Error('Die oefening staat niet in je lijst.')
+        if (!inSchema(slot.id)) throw new Error(`${slot.name} staat niet in je schema; die voeg je zelf toe.`)
+        const workspace = await database.workspace.get('main')
+        if (!workspace) throw new Error('Open de app opnieuw om je planning te laden.')
+        await database.workspace.put({ ...workspace, vervangingen: { ...workspace.vervangingen, [slot.id]: door.id } })
+      }
+      await database.exerciseStates.put(volgende)
+      const bijgewerkt: SessionOutcome = { ...outcome, plateauChoice: { ...outcome.plateauChoice, [exerciseId]: besluit.keuze } }
+      await database.outcomes.put(bijgewerkt)
+      return bijgewerkt
+    })
 }
 
 /** Of de eerstvolgende sessie de pauzekorting draagt. */

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { beginWorkout, changeWorkout, logSet, openWorkspace, WorkoutDatabase, writeDraft } from './db'
-import { finishWorkout, pauzeSessieNodig, verdiendeVerhogingen } from './finish'
+import { finishWorkout, kiesPlateau, pauzeSessieNodig, vastgelopen, verdiendeVerhogingen } from './finish'
 import { pendingTargets, recordId, targets, type Workout } from './model'
 
 let database: WorkoutDatabase
@@ -234,5 +234,66 @@ describe('wat je kwijtraakt bij weggooien', () => {
     await log('20', '12')                         // chest press: alleen warming-up
     const sets = await database.sets.where('sessionId').equals(session.id).toArray()
     expect(verdiendeVerhogingen(session, sets)).toEqual(['Leg press'])
+  })
+})
+
+/** Drie sessies leg press binnen het bereik maar nooit bij de bovenkant: het plateau. */
+async function drieKeerVast() {
+  for (let keer = 0; keer < 3; keer++) {
+    if (keer > 0) await nieuweSessie()
+    await oefening('80', ['10', '9'])
+    await finishWorkout({ sessionId: session.id }, database)
+  }
+  return (await database.outcomes.get(session.id))!
+}
+const openPlateaus = async (sessionId: string) => vastgelopen(
+  (await database.outcomes.get(sessionId))!,
+  (await database.proposals.toArray()).filter(item => !item.superseded),
+  await database.exerciseStates.toArray())
+
+describe('plateau', () => {
+  it('meldt zich pas na de derde keer vasthouden, en alleen voor deze sessie', async () => {
+    await oefening('80', ['10', '9'])
+    await finishWorkout({ sessionId: session.id }, database)
+    expect(await openPlateaus(session.id)).toEqual([])
+    await nieuweSessie()
+    await oefening('80', ['10', '9'])
+    await finishWorkout({ sessionId: session.id }, database)
+    expect(await openPlateaus(session.id)).toEqual([])
+    await nieuweSessie()
+    await oefening('80', ['10', '9'])
+    await finishWorkout({ sessionId: session.id }, database)
+    expect(await openPlateaus(session.id)).toEqual(['leg-press'])
+  })
+
+  it('zet bij terugzetten twee stappen omlaag en past het voorstel van deze sessie aan', async () => {
+    await drieKeerVast()
+    await kiesPlateau(session.id, 'leg-press', { keuze: 'terug' }, database)
+    const state = (await database.exerciseStates.get('leg-press'))!
+    expect(state).toMatchObject({ currentWeight: 70, deloadFrom: 80, stalls: 0 })
+    expect(await database.proposals.get(`${session.id}:leg-press`)).toMatchObject({ to: 70, reason: 'plateau' })
+    expect(await openPlateaus(session.id)).toEqual([])
+    await nieuweSessie()
+    expect(werkgewicht('leg-press')).toEqual([70, 70])
+  })
+
+  it('vervangt de oefening vanaf de volgende sessie, op dezelfde plek, met eigen historie', async () => {
+    await drieKeerVast()
+    await kiesPlateau(session.id, 'leg-press', { keuze: 'vervangen', door: 'hack-squat' }, database)
+    expect((await database.workspace.get('main'))?.vervangingen).toEqual({ 'leg-press': 'hack-squat' })
+    await nieuweSessie()
+    const slot = session.snapshot.slots[0]
+    expect(slot).toMatchObject({ id: 'leg-press', exerciseId: 'hack-squat', name: 'Hack squat' })
+    expect(werkgewicht('leg-press')).toEqual([null, null])   // geen historie op het nieuwe apparaat
+  })
+
+  it('laat bij zo laten het gewicht staan, legt het vast en vraagt het niet nog eens', async () => {
+    await drieKeerVast()
+    const eerste = await kiesPlateau(session.id, 'leg-press', { keuze: 'laten' }, database)
+    const tweede = await kiesPlateau(session.id, 'leg-press', { keuze: 'terug' }, database)
+    expect(tweede).toEqual(eerste)
+    expect(eerste.plateauChoice).toEqual({ 'leg-press': 'laten' })
+    expect((await database.exerciseStates.get('leg-press'))).toMatchObject({ currentWeight: 80, stalls: 0 })
+    expect(await openPlateaus(session.id)).toEqual([])
   })
 })

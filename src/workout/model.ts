@@ -150,6 +150,8 @@ export interface ExerciseState {
   increases: number
   stalls: number
   lastWorkedDay: string | null
+  /** Het gewicht waar je bij een plateau vanaf teruggezet bent. Sectie 4.2. */
+  deloadFrom?: number | null
 }
 
 /** Keuzes die geen set veranderen en dus anders bij herberekening zouden verdwijnen. */
@@ -168,6 +170,14 @@ export interface WorkoutWorkspace {
   revision: number
   planDraft?: { weekend: 'Zaterdag' | 'Zondag' | null; baseRevision: number }
   appointmentId?: string
+  /**
+   * Plekken in het schema die voorgoed een andere oefening hebben, van slot-id naar
+   * oefening-id. Op de plek en niet op de oefening: vervang je de vervanger later weer,
+   * dan blijft het de plek van de oorspronkelijke oefening.
+   * Het schema zelf is in v1 een vaste constante; dit is de enige plek waar een
+   * wijziging eraan blijft staan. beginWorkout past het toe op elke nieuwe sessie.
+   */
+  vervangingen?: Record<string, string>
 }
 export type PendingChange = { id: string; entityId: string; status: 'local'; createdAt: string } & (
   { entity: 'session'; payload: Workout } | { entity: 'set'; payload: WorkoutSet } | { entity: 'planning'; payload: WorkoutWorkspace } | { entity: 'appointment'; payload: Appointment }
