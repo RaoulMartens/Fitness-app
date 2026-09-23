@@ -188,7 +188,13 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
 
   return (
     <div className="screen">
+      {/* Titel boven, balkjes onder: de dunne balkjes zijn het gevoeligst voor de
+          vervaagde band aan de bovenrand van iOS, dus die staan er het verst vandaan. */}
       <div className={session.rest ? 'kop rust' : 'kop'}>
+        <div className="line">
+          <span className="big">{session.rest ? `Rust · ${timerLabel(rust)}` : slot.name}</span>
+          <span className="sm">{session.rest ? slot.name : hierna ? `Hierna: ${hierna.name}` : 'Laatste oefening'}</span>
+        </div>
         {session.rest
           ? <div className="rustbalk"><i style={{ width: `${deelRust}%` }} /></div>
           : <div className="segs">
@@ -198,10 +204,6 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
                 return <i key={item.id} className={klaar ? 'on' : bezig ? 'half' : ''} />
               })}
             </div>}
-        <div className="line">
-          <span className="big">{session.rest ? `Rust · ${timerLabel(rust)}` : slot.name}</span>
-          <span className="sm">{session.rest ? slot.name : hierna ? `Hierna: ${hierna.name}` : 'Laatste oefening'}</span>
-        </div>
       </div>
 
       <div className="body">
@@ -511,8 +513,8 @@ function Afgerond({ session, onFout, onKlaar }: { session: Workout; onFout: (m: 
   return (
     <div className="screen">
       <div className="kop">
-        <div className="segs">{session.snapshot.slots.map(slot => <i key={slot.id} className="on" />)}</div>
         <div className="line"><span className="big">Alles gedaan</span><span className="sm">{session.snapshot.name}</span></div>
+        <div className="segs">{session.snapshot.slots.map(slot => <i key={slot.id} className="on" />)}</div>
       </div>
       <div className="body">
         <p>{session.snapshot.slots.length} oefeningen · {minutenLabel(minuten)}</p>

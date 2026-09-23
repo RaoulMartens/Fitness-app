@@ -46,14 +46,15 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
  * mee en er is geen schakelaar om hem uit te zetten. Wat helpt: in die band niets
  * zetten dan een egale kleur, want een vervaagde egale kleur blijft dezelfde kleur.
  *
- * De hoogte is afgelezen van een screenshot: de balkjes op 5pt waren onleesbaar, de
- * titel op 26pt nog zacht, de lijn op 49pt scherp. Blijft de bovenkant zacht, dan is
- * --glasrand de ene waarde om bij te stellen.
+ * De band is een verloop, afgelezen van screenshots: op 5pt onleesbaar, op 26pt nog
+ * wat zacht, op 49pt scherp. 34px was helemaal scherp maar liet veel lege ruimte. Op
+ * 24px staat de vette titel in de staart van het verloop, en de dunne voortgangs-
+ * balkjes, het gevoeligst, eronder. --glasrand is de ene waarde om bij te stellen.
  *
  * Alleen op iOS, te herkennen aan -webkit-touch-callout; elders zou het lege ruimte zijn.
  */
 @supports (-webkit-touch-callout: none) {
-  :root { --glasrand: 34px; }
+  :root { --glasrand: 24px; }
   .screen > .kop:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + var(--glasrand)); }
   .screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + var(--glasrand)); }
   .screen > .bar:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + var(--glasrand)); }
