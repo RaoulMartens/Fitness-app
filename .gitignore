@@ -14,3 +14,4 @@ output/playwright/
 # Lokaal bronmateriaal; niet nodig om de app te bouwen en deels te groot voor GitHub.
 *.pdf
 *.xlsx
+scripts/pdf-videos.json
