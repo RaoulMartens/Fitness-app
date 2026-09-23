@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   bereikGehaald, dagenTussen, isPauzeSessie, isVergeten, magTrainenOp, magVastleggen,
-  naPauzeSessie, naPlateau, pauzeGewicht, plateauBereikt, stap, vandaagToestand, voorstel,
+  naPauzeSessie, naPlateau, pauzeGewicht, plateauBereikt, stap, startgewicht, vandaagToestand, voorstel,
   type LoggedSet, type PlannedSlot,
 } from './rules'
 
@@ -195,5 +195,20 @@ describe('invoer', () => {
 
   it('gaat met de stapper niet onder het apparaat', () => {
     expect(stap(10, -1, 'chest-press')).toBe(10)
+  })
+})
+
+describe('startgewicht', () => {
+  const slot = { step: 2.5, minWeight: 10 }
+  it('is het voorstel, of niets zonder historie', () => {
+    expect(startgewicht({ currentWeight: 40, preBreakWeight: null }, false, slot)).toEqual({ weight: 40 })
+    expect(startgewicht(undefined, true, slot)).toEqual({ weight: null })
+  })
+  it('gaat in een pauzesessie een stap omlaag, nooit onder het apparaat', () => {
+    expect(startgewicht({ currentWeight: 40, preBreakWeight: null }, true, slot)).toEqual({ weight: 37.5, pauzeVan: 40 })
+    expect(startgewicht({ currentWeight: 10, preBreakWeight: null }, true, slot)).toEqual({ weight: 10, pauzeVan: 10 })
+  })
+  it('geeft een meegedragen korting ook buiten een pauzesessie, vanaf het oude gewicht', () => {
+    expect(startgewicht({ currentWeight: 40, preBreakWeight: 45 }, false, slot)).toEqual({ weight: 42.5, pauzeVan: 45 })
   })
 })

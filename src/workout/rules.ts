@@ -115,12 +115,37 @@ export const isPauzeSessie = (laatsteSessieDag: string | null, vandaag: string) 
 }
 
 /** Eén stap lager, met het oude gewicht bewaard zodat je er na de sessie op terug kunt. */
-export function pauzeGewicht(gewicht: number | null, slot: PlannedSlot) {
+export function pauzeGewicht(gewicht: number | null, slot: Pick<PlannedSlot, 'step' | 'minWeight'>) {
   if (gewicht === null) return { weight: null, preBreakWeight: null }
   return {
     weight: Math.max(slot.minWeight, afronden(gewicht - slot.step)),
     preBreakWeight: gewicht,
   }
+}
+
+/**
+ * Sectie 4.1 en 4.3: met welk gewicht een oefening vandaag begint.
+ *
+ * Normaal is dat het voorstel van de vorige keer. In een pauzesessie één stap lager,
+ * en `pauzeVan` onthoudt waarvandaan, zodat afronden weet waar je naar terug kunt.
+ * Een oefening die in de vorige pauzesessie is overgeslagen draagt zijn
+ * `preBreakWeight` nog mee en krijgt de korting ook buiten een pauzesessie: die
+ * blijft staan tot de oefening een keer gedaan is.
+ *
+ * Zonder historie is er niets om vanaf te rekenen. Dan geen gewicht en geen korting;
+ * de sessie valt terug op het laagste gewicht van het apparaat.
+ */
+export function startgewicht(
+  state: { currentWeight: number | null; preBreakWeight: number | null } | undefined,
+  pauzeSessie: boolean,
+  slot: Pick<PlannedSlot, 'step' | 'minWeight'>,
+): { weight: number | null; pauzeVan?: number } {
+  const basis = state?.preBreakWeight ?? state?.currentWeight ?? null
+  if (basis === null) return { weight: null }
+  if (pauzeSessie || state?.preBreakWeight != null) {
+    return { weight: pauzeGewicht(basis, slot).weight, pauzeVan: basis }
+  }
+  return { weight: basis }
 }
 
 /**

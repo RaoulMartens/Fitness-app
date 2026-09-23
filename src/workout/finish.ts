@@ -8,7 +8,7 @@
 import { changeWorkout, workoutDb, type WorkoutDatabase } from './db'
 import { draftVersions, localDate, type ExerciseState, type Proposal, type SessionOutcome, type Workout, type WorkoutSet } from './model'
 import {
-  isPauzeSessie, naPauzeSessie, oefeningAfgerond, pauzeGewicht, voorstel,
+  isPauzeSessie, naPauzeSessie, oefeningAfgerond, voorstel,
   type LoggedSet, type PlannedSlot,
 } from './rules'
 
@@ -46,8 +46,6 @@ const getild = (logged: LoggedSet[]) => {
 
 export interface FinishInput {
   sessionId: string
-  /** Gezet wanneer deze sessie de pauzekorting droeg. */
-  wasBreakSession?: boolean
   /** 'abort' bij vroeg stoppen; de berekening is verder gelijk. */
   action?: 'complete' | 'abort'
   now?: Date
@@ -97,9 +95,11 @@ export async function finishWorkout(input: FinishInput, database: WorkoutDatabas
         const vorig = state.currentWeight
         const nuGetild = getild(logged)
 
-        if (input.wasBreakSession) {
-          // Tijdens een pauzesessie gaat de pauzeregel voor op gewone progressie en plateau.
-          const uitkomst = naPauzeSessie(logged, slot, state.preBreakWeight)
+        // Welke oefeningen met korting begonnen staat bij de sessie zelf. Voor die
+        // oefeningen gaat de pauzeregel voor op gewone progressie en plateau.
+        const pauzeVan = session.snapshot.slots.find(item => item.id === slotId)?.pauzeVan
+        if (pauzeVan !== undefined) {
+          const uitkomst = naPauzeSessie(logged, slot, pauzeVan)
           await database.exerciseStates.put({
             ...state,
             currentWeight: uitkomst.weight,
@@ -141,12 +141,23 @@ export async function finishWorkout(input: FinishInput, database: WorkoutDatabas
         })
       }
 
+      // Een oefening die met korting begon maar niet is gedaan houdt die korting tot
+      // hij wel een keer gedaan is (sectie 4.3). De pauzesessie zelf is met afronden
+      // verbruikt, dus zonder deze aantekening zou hij de volgende keer vol beginnen.
+      for (const item of session.snapshot.slots) {
+        if (item.pauzeVan === undefined || perSlot.has(item.id)) continue
+        const state = (await database.exerciseStates.get(item.exerciseId)) ?? leegState(item.exerciseId)
+        if (state.preBreakWeight === null) {
+          await database.exerciseStates.put({ ...state, preBreakWeight: item.pauzeVan })
+        }
+      }
+
       const outcome: SessionOutcome = {
         sessionId: session.id,
         sessionDay,
         finishedAt: now.toISOString(),
         finishedPartially: afgerond < alleGepland,
-        wasBreakSession: Boolean(input.wasBreakSession),
+        wasBreakSession: Boolean(session.pauzeSessie),
       }
       await database.outcomes.put(outcome)
       return outcome
@@ -162,13 +173,6 @@ async function schrijfVoorstel(database: WorkoutDatabase, proposal: Proposal) {
     }
   }
   await database.proposals.put(proposal)
-}
-
-/** Het gewicht waarmee een oefening vandaag begint. */
-export async function gewichtVoorVandaag(exerciseId: string, pauze: boolean, slot: PlannedSlot, database: WorkoutDatabase = workoutDb) {
-  const state = await database.exerciseStates.get(exerciseId)
-  if (!state?.currentWeight) return { weight: null, preBreakWeight: null }
-  return pauze ? pauzeGewicht(state.currentWeight, slot) : { weight: state.currentWeight, preBreakWeight: state.preBreakWeight }
 }
 
 /** Of de eerstvolgende sessie de pauzekorting draagt. */

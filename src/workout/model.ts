@@ -19,6 +19,12 @@ export interface Slot {
   minWeight: number
   /** Gevuld zodra je deze oefening vandaag hebt vervangen; het schema zelf blijft gelijk. */
   originalExerciseId?: string
+  /**
+   * Het gewicht van vóór de pauze, als deze oefening vandaag met korting begon.
+   * Bewaard bij de sessie en niet in ExerciseState: alleen starten mag geen sporen
+   * nalaten (sectie 4.3), pas afronden verbruikt de korting.
+   */
+  pauzeVan?: number
   sets: Target[]
 }
 export interface Program {
@@ -39,6 +45,8 @@ export interface Workout {
   revision: number
   snapshot: Program
   rest: { afterSetId: string; endAt: number; remainingMs: number } | null
+  /** Meer dan tien dagen na de vorige afgeronde sessie gestart. Sectie 4.3. */
+  pauzeSessie?: boolean
   appointmentId?: string
   pendingIds?: string[]
   skipped?: Record<string, { reason: string; at: string }>

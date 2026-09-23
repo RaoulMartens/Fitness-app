@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import { findExercise } from './exercises'
+import { isPauzeSessie, startgewicht } from './rules'
 import { parseInput, isRunning, recordId, restRemaining, starterProgram, targets, pendingIds, pendingTargets, localDate, lastUndoable, draftVersions, type Appointment, type AdjustmentState, type DraftVersions, type PendingChange, type Workout, type WorkoutDraft, type WorkoutSet, type WorkoutWorkspace, type Proposal, type ExerciseState, type SessionOutcome } from './model'
 
 export class WorkoutDatabase extends Dexie {
@@ -98,8 +99,10 @@ async function queueSession(session: Workout, database: WorkoutDatabase) {
   await database.outbox.put({ id: `${session.id}:v${session.revision}`, entityId: session.id, entity: 'session', payload: session, status: 'local', createdAt: new Date().toISOString() })
 }
 
-export async function beginWorkout(database = workoutDb) {
-  return database.transaction('rw', database.workspace, database.sessions, database.appointments, database.outbox, async () => {
+export async function beginWorkout(database = workoutDb, now = new Date()) {
+  return database.transaction('rw',
+    [database.workspace, database.sessions, database.appointments, database.outbox, database.exerciseStates, database.outcomes],
+    async () => {
     const workspace = await database.workspace.get('main')
     if (!workspace) throw new Error('Open de app opnieuw om je planning te laden.')
     if (workspace.sessionId) {
@@ -113,7 +116,18 @@ export async function beginWorkout(database = workoutDb) {
       appointment = makeAppointment(workspace.weekend, appointment.date)
       workspace.appointmentId = appointment.id
     }
-    const session: Workout = { id: crypto.randomUUID(), startedAt: new Date().toISOString(), status: 'active', phase: 'warmup', warmed: false, cursor: 0, revision: 1, snapshot: structuredClone(starterProgram), rest: null, appointmentId: appointment.id }
+    // Het voorstel van de vorige keer wordt het gewicht van vandaag; zonder deze stap
+    // begon elke sessie op wat je vorige keer tilde en kwam een verhoging nooit aan.
+    const laatste = await database.outcomes.orderBy('finishedAt').last()
+    const pauzeSessie = isPauzeSessie(laatste?.sessionDay ?? null, localDate(now))
+    const snapshot = structuredClone(starterProgram)
+    for (const slot of snapshot.slots) {
+      const begin = startgewicht(await database.exerciseStates.get(slot.exerciseId), pauzeSessie, slot)
+      if (begin.pauzeVan !== undefined) slot.pauzeVan = begin.pauzeVan
+      // Alleen de werksets: de warming-up is bewust lichter en volgt je vorige warming-up.
+      slot.sets = slot.sets.map(target => target.kind === 'work' ? { ...target, weight: begin.weight } : target)
+    }
+    const session: Workout = { id: crypto.randomUUID(), startedAt: now.toISOString(), status: 'active', phase: 'warmup', warmed: false, cursor: 0, revision: 1, snapshot, rest: null, appointmentId: appointment.id, pauzeSessie }
     session.pendingIds = pendingIds(session)
     if (appointment.omittedSlots.length) {
       const before = adjustmentState(session)
@@ -409,9 +423,12 @@ export async function adjustWorkout(id: string, revision: number, operationId: s
         slot.step = vervanger.step
         slot.minWeight = vervanger.minWeight
         slot.restSeconds = vervanger.restSeconds
-        // Het gewicht van het oude apparaat zegt niets over het nieuwe.
-        const eigen = await database.exerciseStates.get(vervanger.id)
-        slot.sets = slot.sets.map(target => ({ ...target, weight: eigen?.currentWeight ?? null }))
+        // Het gewicht van het oude apparaat zegt niets over het nieuwe, en de korting
+        // die het oude apparaat meekreeg ook niet: die rekent de vervanger zelf uit.
+        const begin = startgewicht(await database.exerciseStates.get(vervanger.id), Boolean(session.pauzeSessie), slot)
+        delete slot.pauzeVan
+        if (begin.pauzeVan !== undefined) slot.pauzeVan = begin.pauzeVan
+        slot.sets = slot.sets.map(target => target.kind === 'work' ? { ...target, weight: begin.weight } : { ...target, weight: null })
         session.todayWeights = Object.fromEntries(
           Object.entries(session.todayWeights ?? {}).filter(([key]) => !key.startsWith(`${id}:${slot.id}:`)))
         label = `${vervanger.name} in plaats van ${oud}, alleen vandaag.`

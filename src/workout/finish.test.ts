@@ -110,22 +110,6 @@ describe('afronden', () => {
     expect(alle.find(item => !item.superseded)?.to).toBe(90)
   })
 
-  it('volgt tijdens een pauzesessie de pauzeregel en niet de gewone progressie', async () => {
-    await oefening('80', ['12', '12'])
-    await finishWorkout({ sessionId: session.id }, database)   // staat nu op 85
-    await database.exerciseStates.update('leg-press', { preBreakWeight: 85, currentWeight: 80 })
-
-    session = await beginWorkout(database)
-    session = await changeWorkout(session.id, session.revision, 'begin-exercise', undefined, database)
-    await oefening('80', ['12', '12'])   // bovenkant gehaald, maar het is een pauzesessie
-    await finishWorkout({ sessionId: session.id, wasBreakSession: true }, database)
-
-    const state = (await database.exerciseStates.get('leg-press'))!
-    expect(state.currentWeight).toBe(85)        // terug naar het oude gewicht, niet 82,5
-    expect(state.preBreakWeight).toBeNull()
-    expect((await database.proposals.where('exerciseId').equals('leg-press').filter(item => !item.superseded).first())?.reason).toBe('pauze')
-  })
-
   it('meldt een pauze pas na tien dagen zonder afgeronde sessie', async () => {
     await oefening('80', ['12', '12'])
     await finishWorkout({ sessionId: session.id, now: new Date('2026-09-01T18:00:00') }, database)
@@ -154,5 +138,91 @@ describe('afronden', () => {
     await oefening('80', ['12', '12'])
     await finishWorkout({ sessionId: session.id }, database)
     expect(await database.proposals.where('exerciseId').equals('leg-curl').count()).toBe(0)
+  })
+})
+
+/** Start een nieuwe sessie op een gegeven moment en zet hem klaar voor invoer. */
+async function nieuweSessie(now?: Date) {
+  session = await beginWorkout(database, now)
+  session = await changeWorkout(session.id, session.revision, 'begin-exercise', undefined, database)
+}
+const werkgewicht = (id: string) =>
+  session.snapshot.slots.find(slot => slot.id === id)!.sets.filter(target => target.kind === 'work').map(target => target.weight)
+
+/**
+ * De open sessie laten hebben plaatsgevonden op 1 september en afronden, zodat de
+ * volgende een pauzesessie is. De starttijd zelf verzetten en niet een afgeleide
+ * datum: uitkomst, voorstel en toestand lezen hun dag alle drie uit startedAt.
+ */
+async function langGeleden() {
+  await database.sessions.update(session.id, { startedAt: new Date('2026-09-01T17:00:00').toISOString() })
+  await finishWorkout({ sessionId: session.id, now: new Date('2026-09-01T18:00:00') }, database)
+}
+
+describe('met welk gewicht de volgende sessie begint', () => {
+  it('neemt het voorstel over als gewicht van de werksets, niet wat je vorige keer tilde', async () => {
+    await oefening('80', ['12', '12'])          // bovenkant: voorstel 85
+    await finishWorkout({ sessionId: session.id }, database)
+    await nieuweSessie()
+    expect(werkgewicht('leg-press')).toEqual([85, 85])
+    expect(session.snapshot.slots[0].sets.find(target => target.kind === 'warmup')?.weight).toBeNull()
+    expect(session.pauzeSessie).toBe(false)
+    // Een oefening zonder historie heeft niets om vanaf te rekenen.
+    expect(werkgewicht('leg-curl')).toEqual([null, null])
+  })
+
+  it('begint na meer dan tien dagen één stap lager en onthoudt waarvandaan', async () => {
+    await oefening('80', ['12', '12'])
+    await langGeleden()
+    await nieuweSessie(new Date('2026-09-15T10:00:00'))
+    expect(session.pauzeSessie).toBe(true)
+    expect(werkgewicht('leg-press')).toEqual([80, 80])     // 85 min een stap van 5
+    expect(session.snapshot.slots[0].pauzeVan).toBe(85)
+    // Starten alleen laat geen sporen na: de toestand staat nog op 85.
+    expect((await database.exerciseStates.get('leg-press'))?.currentWeight).toBe(85)
+  })
+
+  it('zet je na een geslaagde pauzesessie terug op je oude gewicht', async () => {
+    await oefening('80', ['12', '12'])
+    await langGeleden()
+    await nieuweSessie(new Date('2026-09-15T10:00:00'))
+    await oefening('80', ['12', '12'])           // bovenkant, maar de pauzeregel gaat voor
+    const uitkomst = await finishWorkout({ sessionId: session.id, now: new Date('2026-09-15T11:00:00') }, database)
+
+    const state = (await database.exerciseStates.get('leg-press'))!
+    expect(state.currentWeight).toBe(85)          // terug, niet 85 plus een stap
+    expect(state.preBreakWeight).toBeNull()
+    expect(uitkomst.wasBreakSession).toBe(true)
+    const voorstel = await database.proposals.where('exerciseId').equals('leg-press').filter(item => !item.superseded).first()
+    expect(voorstel?.reason).toBe('pauze')
+  })
+
+  it('houdt het verlaagde gewicht aan als je je bereik niet haalt', async () => {
+    await oefening('80', ['12', '12'])
+    await langGeleden()
+    await nieuweSessie(new Date('2026-09-15T10:00:00'))
+    await oefening('80', ['7', '7'])             // onder 8
+    await finishWorkout({ sessionId: session.id, now: new Date('2026-09-15T11:00:00') }, database)
+    const state = (await database.exerciseStates.get('leg-press'))!
+    expect(state.currentWeight).toBe(80)
+    expect(state.preBreakWeight).toBeNull()
+  })
+
+  it('laat een overgeslagen oefening zijn korting houden tot hij gedaan is', async () => {
+    await oefening('80', ['12', '12'])            // leg press naar 85
+    await oefening('30', ['15', '15'])            // leg curl naar 32,5
+    await langGeleden()
+
+    await nieuweSessie(new Date('2026-09-15T10:00:00'))
+    await oefening('80', ['12', '12'])            // alleen leg press, leg curl overgeslagen
+    await finishWorkout({ sessionId: session.id, action: 'abort', now: new Date('2026-09-15T11:00:00') }, database)
+    expect((await database.exerciseStates.get('leg-curl'))?.preBreakWeight).toBe(32.5)
+
+    // Drie dagen later: geen pauzesessie meer, maar leg curl begint nog met korting.
+    await nieuweSessie(new Date('2026-09-18T10:00:00'))
+    expect(session.pauzeSessie).toBe(false)
+    expect(werkgewicht('leg-press')).toEqual([85, 85])
+    expect(werkgewicht('leg-curl')).toEqual([30, 30])
+    expect(session.snapshot.slots.find(slot => slot.id === 'leg-curl')?.pauzeVan).toBe(32.5)
   })
 })
