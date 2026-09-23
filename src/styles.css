@@ -40,6 +40,21 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
 /* Zonder tabbalk raakt de onderste knop de rand van het scherm. */
 .screen > .body:last-child { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+/*
+ * De knoppen blijven onderin in beeld, ook als de settabel langer wordt dan het
+ * scherm. Anders verdwijnt 'Set vastleggen' onder de vouw zodra je er een paar sets
+ * bij zet, terwijl dat de knop is waar je na elke set naartoe gaat. De strook loopt
+ * tot de schermrand door, zodat er geen rijen langs de zijkant onderdoor schuiven.
+ */
+.acties {
+  position: sticky; bottom: 0; margin-top: auto;
+  display: flex; flex-direction: column; gap: 8px;
+  margin-left: -16px; margin-right: -16px;
+  padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+  background: var(--paper); border-top: 1px dashed var(--line);
+}
+/* De strook draagt zelf de veilige zone; anders staat er nog ruimte onder. */
+.screen > .body:last-child:has(.acties) { padding-bottom: 0; }
 .bar {
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   background: #e8e8e8; border-bottom: 1px dashed var(--line);

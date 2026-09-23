@@ -272,7 +272,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           </div>
         )}
 
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="acties">
           {corrigeert
             ? <button className="btn" data-correctie onClick={correctieOpslaan}>Correctie opslaan</button>
             : session.rest
