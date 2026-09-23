@@ -487,3 +487,54 @@ Twee dingen uit de beoordeling zijn bewust **niet** overgenomen: een historische
 oude sessies blijft buiten v1, en het datummodel gebruikt lokale kalenderdatums in plaats van
 tijdstempels met tijdzone — dat laatste is eenvoudiger en past bij een app die op één toestel
 in één land draait.
+
+## 12 · Wat de bouw van stap 3 en 4 heeft toegevoegd
+
+Stap 4 is af. Onderweg kwamen beslissingen boven die dit document nog niet nam, en één
+gat in stap 3. Hier vastgelegd zodat ze niet opnieuw ter discussie komen.
+
+### 12.1 Het gat in stap 3
+
+Het voorstel werd berekend, opgeslagen en op Vandaag getoond, maar **nooit gebruikt**.
+Elke sessie begon op wat je vorige keer tilde. De pauzeregels waren geschreven en getest,
+maar niets riep ze aan. Het klaar-criterium van stap 3 controleerde of het voorstel te
+zien was, niet of de sessie ermee begon.
+
+Nu is `startgewicht()` in `rules.ts` de enige regel voor het gewicht waarmee een oefening
+begint. `beginWorkout` vult elke werkset ermee. Welke oefening met pauzekorting begon, en
+vanaf welk gewicht, staat op het slot van de sessie (`pauzeVan`), niet in `ExerciseState`:
+alleen starten mag geen sporen nalaten (4.3).
+
+### 12.2 Beslissingen tijdens stap 4
+
+| Onderwerp | Beslissing | Waarom |
+| --- | --- | --- |
+| Tijdens rust | het scherm blijft op de oefening van de set die je net deed | zo liet het prototype het zien; set erbij tijdens rust landt dan op het apparaat waar je staat |
+| Rust afgelopen | gaat vanzelf door, behalve tijdens een correctie | je staat bij het apparaat, niet met de telefoon in je hand |
+| Corrigeren | tik op een vastgelegde waarde; ergens anders tikken bewaart | het getal staat al zichtbaar op de nieuwe waarde |
+| Set erbij | `kind: 'extra'`, telt niet mee voor progressie | 4.0 |
+| Set eraf | haalt de laatste openstaande set weg; een geplande werkset kort de oefening in | dit is meteen "ik heb minder tijd" |
+| Laatste werkset | mag niet weg | zonder werkset valt de oefening stil uit de progressie |
+| Nummering | doorlopend op positie, niet het opgeslagen nummer | dat nummer wordt nooit hergebruikt en krijgt gaten |
+| Vervangen voor vandaag | kan alleen vóór de eerste set op dat apparaat | sets worden per slot gegroepeerd; halverwege wisselen boekt ze onder het verkeerde apparaat |
+| Oefening toevoegen | twee gewone werksets, bereik 10–15, geen warming-up | eigen historie; het bereik is een aanname |
+| Weggooien | ook de verwijzing in de werkruimte | anders weigert `beginWorkout` elke volgende start |
+| Plateau terugzetten | uit op het laagste gewicht van het apparaat | "terug naar 20 kg" terwijl je op 20 staat doet niets |
+| Plateau vervangen | vanaf de volgende sessie, bewaard in `workspace.vervangingen`, per slot | het schema is in v1 een constante; per slot zodat een tweede vervanging op dezelfde plek blijft |
+| Klaar-scherm | toont alleen voorstellen uit deze sessie | het toonde ook oude voorstellen van oefeningen die je vandaag niet deed |
+
+### 12.3 Catalogus
+
+De `alternatives` verwezen naar acht oefeningen die niet bestonden; die zijn toegevoegd.
+Push-up en pull-up zijn geschrapt: elke set heeft hier een gewicht. Elke oefening heeft een
+`verschil`, omdat in een lijst van vervangers de spiergroep per definitie niets onderscheidt.
+Alle `step` en `minWeight` blijven een aanname tot ze in de sportschool zijn nagelopen.
+
+### 12.4 Nog open
+
+- Een plateauvraag die je niet beantwoordt omdat je de app sluit op het Klaar-scherm, komt
+  pas terug bij de volgende stilstand. Vandaag toont hem niet.
+- Een vervanging in het schema is nog niet terug te draaien. Dat hoort op het
+  Programma-scherm in stap 5.
+- Na een verhoging begint het herhalingenveld op wat je vorige keer deed, niet op de
+  onderkant van je bereik.
