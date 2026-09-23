@@ -35,6 +35,10 @@ npm run preview -- --port 4173 --strictPort
 
 Gebruik bij terugkomen hetzelfde adres: `localhost` en `127.0.0.1` hebben elk hun eigen opslag.
 
+De zes gekoppelde oefenvideo's (samen ongeveer 10 MB) worden bij de eerste online
+laadbeurt van de PWA opgeslagen. Daarna spelen ze offline; het wissen van browseropslag
+verwijdert ook de video's.
+
 ## Testen
 
 ```sh

@@ -16,7 +16,7 @@ export interface Exercise {
   helper?: string
   why: string
   cues: string[]
-  /** Leeg, een pad naar public/video/, of een youtube-nocookie insluiting. */
+  /** Leeg of een lokaal videopad binnen de PWA. */
   videoUrl?: string
   /** Kleinste verhoging op dit apparaat, in kilogram. */
   step: number
@@ -38,7 +38,7 @@ export const exercises: Exercise[] = [
     helper: 'Je kuiten helpen mee.',
     why: 'De zwaarste beenoefening in je schema. Staat vooraan omdat je er fris voor moet zijn.',
     cues: ['Voeten op schouderbreedte', 'Knieën niet helemaal strekken', 'Onderrug tegen de leuning'],
-    videoUrl: 'https://www.youtube-nocookie.com/embed/1yKAQLVV_XI',
+    videoUrl: `${import.meta.env.BASE_URL}video/1yKAQLVV_XI.mp4`,
     step: 5,
     minWeight: 20,
     restSeconds: 120,
@@ -64,7 +64,7 @@ export const exercises: Exercise[] = [
     helper: 'Je triceps helpt mee.',
     why: 'De grootste duwbeweging in je schema, en de oefening die je aandachtspunt bovenlichaam draagt.',
     cues: ['Rug tegen de leuning', 'Ellebogen niet verder naar achteren dan je schouders', 'Laatste stukje niet doorstrekken'],
-    videoUrl: 'https://www.youtube-nocookie.com/embed/zDecGJLyVm8',
+    videoUrl: `${import.meta.env.BASE_URL}video/zDecGJLyVm8.mp4`,
     step: 2.5,
     minWeight: 10,
     restSeconds: 120,
@@ -126,7 +126,7 @@ export const exercises: Exercise[] = [
     muscles: 'Bovenbenen en billen',
     why: 'Zelfde werk als de leg press, met je rug tegen een schuine steun.',
     cues: ['Voeten iets naar voren', 'Knieën in lijn met je tenen'],
-    videoUrl: 'https://www.youtube-nocookie.com/embed/TWUnnDK8rck',
+    videoUrl: `${import.meta.env.BASE_URL}video/TWUnnDK8rck.mp4`,
     step: 5,
     minWeight: 20,
     restSeconds: 120,
@@ -140,7 +140,7 @@ export const exercises: Exercise[] = [
     helper: 'Je romp werkt mee om rechtop te blijven.',
     why: 'Met een losse halter, voor als beide beenapparaten bezet zijn.',
     cues: ['Halter tegen je borst', 'Rechtop blijven', 'Hakken op de grond'],
-    videoUrl: 'https://www.youtube-nocookie.com/embed/S2agsLlUSII',
+    videoUrl: `${import.meta.env.BASE_URL}video/S2agsLlUSII.mp4`,
     step: 2.5,
     minWeight: 5,
     restSeconds: 120,
@@ -166,7 +166,7 @@ export const exercises: Exercise[] = [
     helper: 'Je triceps helpt mee.',
     why: 'Losse gewichten, dus elke kant doet zijn eigen werk.',
     cues: ['Polsen recht boven je ellebogen', 'Niet tegen elkaar tikken bovenin'],
-    videoUrl: 'https://www.youtube-nocookie.com/embed/zGXvPjlgVkk',
+    videoUrl: `${import.meta.env.BASE_URL}video/zGXvPjlgVkk.mp4`,
     step: 2.5,
     minWeight: 5,
     restSeconds: 120,
@@ -204,7 +204,7 @@ export const exercises: Exercise[] = [
     muscles: 'Biceps en onderarm',
     why: 'Zelfde beweging met je duimen omhoog, waardoor je onderarm meer werk krijgt.',
     cues: ['Ellebogen op hun plek', 'Rustig laten zakken'],
-    videoUrl: 'https://www.youtube-nocookie.com/embed/xY3sQXYhk7A',
+    videoUrl: `${import.meta.env.BASE_URL}video/xY3sQXYhk7A.mp4`,
     step: 2.5,
     minWeight: 5,
     restSeconds: 90,

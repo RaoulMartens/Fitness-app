@@ -7,6 +7,9 @@ const base = process.env.GITHUB_PAGES === '1' ? '/Fitness-app/' : '/'
 export default defineConfig({
   base,
   plugins: [react(), VitePWA({
+    strategies: 'injectManifest',
+    srcDir: 'src',
+    filename: 'sw.ts',
     // De app vernieuwt zichzelf. Met 'prompt' bleef een oude service worker de
     // vorige build serveren zolang niemand op een bijwerkknop drukte, en die
     // knop bestaat niet meer.
@@ -28,16 +31,10 @@ export default defineConfig({
         { src: `${base}icon-512.png`, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
       ],
     },
-    workbox: {
-      globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+    injectManifest: {
+      globPatterns: ['**/*.{js,css,html,png,svg,woff2,mp4}'],
       globIgnores: ['proto/**'],
-      navigateFallback: `${base}index.html`,
-      navigateFallbackDenylist: [/^\/ux-flows\//, /\/proto(?:\/|$)/],
-      cleanupOutdatedCaches: true,
-      // Een nieuwe worker wacht niet op het sluiten van het laatste tabblad,
-      // en neemt meteen de openstaande pagina over.
-      skipWaiting: true,
-      clientsClaim: true,
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
     },
   })],
   test: { include: ['src/**/*.test.ts'], setupFiles: ['tests/setup.ts'] },
