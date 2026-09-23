@@ -34,6 +34,7 @@ export function WorkoutApp() {
       voorstellen: (await workoutDb.proposals.toArray()).filter(item => !item.superseded),
       toestanden: await workoutDb.exerciseStates.toArray(),
       vervangingen: (await workoutDb.workspace.get('main'))?.vervangingen ?? {},
+      laatsteBackup: (await workoutDb.workspace.get('main'))?.laatsteBackup,
     }
   }, [])
 
@@ -200,7 +201,7 @@ export function WorkoutApp() {
             sessions={data!.sessions} sets={data!.sets} ga={ga} />
         )
       case 'instellingen':
-        return <Instellingen ga={ga} onFout={setFout} />
+        return <Instellingen ga={ga} onFout={setFout} laatsteBackup={data!.laatsteBackup} />
       default:
         return (
           <Vandaag

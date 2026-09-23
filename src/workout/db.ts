@@ -390,6 +390,14 @@ export async function wisAlles(database = workoutDb) {
   await openWorkspace(database)
 }
 
+/** Onthouden dat er een back-up is bewaard, zodat Instellingen kan zeggen hoe oud die is. */
+export async function markeerBackup(tijd: string, database = workoutDb) {
+  return database.transaction('rw', database.workspace, async () => {
+    const workspace = await database.workspace.get('main')
+    if (workspace) await database.workspace.put({ ...workspace, laatsteBackup: tijd })
+  })
+}
+
 export type SessionAction = 'begin-exercise' | 'pause' | 'resume' | 'next-set' | 'extra-rest' | 'complete' | 'abort' | 'warmup-on' | 'warmup-off'
 export async function changeWorkout(id: string, revision: number, action: SessionAction, draftRevision?: number | DraftVersions, database = workoutDb) {
   return database.transaction('rw', database.sessions, database.drafts, database.outbox, database.appointments, database.workspace, async () => {

@@ -178,6 +178,8 @@ export interface WorkoutWorkspace {
    * wijziging eraan blijft staan. beginWorkout past het toe op elke nieuwe sessie.
    */
   vervangingen?: Record<string, string>
+  /** Wanneer je voor het laatst een back-up hebt bewaard. Zie backup.ts. */
+  laatsteBackup?: string
 }
 export type PendingChange = { id: string; entityId: string; status: 'local'; createdAt: string } & (
   { entity: 'session'; payload: Workout } | { entity: 'set'; payload: WorkoutSet } | { entity: 'planning'; payload: WorkoutWorkspace } | { entity: 'appointment'; payload: Appointment }
