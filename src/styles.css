@@ -30,6 +30,14 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   background: var(--paper); display: flex; flex-direction: column;
 }
 .body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+/*
+ * De pagina loopt door tot achter de statusbalk en de home-indicator (viewport-fit
+ * staat op cover, zodat de kopbalk zijn kleur tot de rand doortrekt). Wat daar staat
+ * wordt door iOS vervaagd en verduisterd, dus het bovenste element houdt die strook
+ * leeg: blijft er alleen een egale achtergrond over, dan valt er niets te vervagen.
+ */
+.screen > .kop:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 2px); }
+.screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
 /* Zonder tabbalk raakt de onderste knop de rand van het scherm. */
 .screen > .body:last-child { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 .bar {
