@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { beginWorkout, changeWorkout, logSet, openWorkspace, WorkoutDatabase, writeDraft } from './db'
-import { finishWorkout, pauzeSessieNodig } from './finish'
+import { finishWorkout, pauzeSessieNodig, verdiendeVerhogingen } from './finish'
 import { pendingTargets, recordId, targets, type Workout } from './model'
 
 let database: WorkoutDatabase
@@ -224,5 +224,15 @@ describe('met welk gewicht de volgende sessie begint', () => {
     expect(werkgewicht('leg-press')).toEqual([85, 85])
     expect(werkgewicht('leg-curl')).toEqual([30, 30])
     expect(session.snapshot.slots.find(slot => slot.id === 'leg-curl')?.pauzeVan).toBe(32.5)
+  })
+})
+
+describe('wat je kwijtraakt bij weggooien', () => {
+  it('noemt alleen de oefeningen die omhoog zouden gaan', async () => {
+    await oefening('80', ['12', '12'])            // leg press: bovenkant
+    await oefening('30', ['11', '11'])            // leg curl: binnen bereik, vasthouden
+    await log('20', '12')                         // chest press: alleen warming-up
+    const sets = await database.sets.where('sessionId').equals(session.id).toArray()
+    expect(verdiendeVerhogingen(session, sets)).toEqual(['Leg press'])
   })
 })

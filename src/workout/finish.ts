@@ -8,7 +8,7 @@
 import { changeWorkout, workoutDb, type WorkoutDatabase } from './db'
 import { draftVersions, localDate, type ExerciseState, type Proposal, type SessionOutcome, type Workout, type WorkoutSet } from './model'
 import {
-  isPauzeSessie, naPauzeSessie, oefeningAfgerond, voorstel,
+  bereikGehaald, isPauzeSessie, naPauzeSessie, oefeningAfgerond, voorstel,
   type LoggedSet, type PlannedSlot,
 } from './rules'
 
@@ -173,6 +173,24 @@ async function schrijfVoorstel(database: WorkoutDatabase, proposal: Proposal) {
     }
   }
   await database.proposals.put(proposal)
+}
+
+/**
+ * Welke oefeningen bij afronden omhoog zouden gaan. Voor de waarschuwing bij
+ * weggooien: "vijf sets" zegt weinig, "de verhoging van Leg press" wel.
+ */
+export function verdiendeVerhogingen(session: Workout, sets: WorkoutSet[]) {
+  const namen: string[] = []
+  for (const slot of session.snapshot.slots) {
+    const plan = plannedSlot(session, slot.id)
+    if (!plan) continue
+    const logged = toLogged(sets.filter(item => item.slotId === slot.id))
+    const omhoog = slot.pauzeVan !== undefined
+      ? oefeningAfgerond(logged, plan) && bereikGehaald(logged, plan)
+      : voorstel(logged, plan)?.reason === 'boven-bereik'
+    if (omhoog) namen.push(slot.name)
+  }
+  return namen
 }
 
 /** Of de eerstvolgende sessie de pauzekorting draagt. */

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, logSet, openWorkspace, removeSet, updateWeekend, WorkoutDatabase, writeDraft } from './db'
+import { addExtraSet, adjustWorkout, beginWorkout, changeWorkout, correctSet, discardWorkout, logSet, openWorkspace, removeSet, updateWeekend, WorkoutDatabase, writeDraft } from './db'
 import { exercise } from './exercises'
 import { plannedSlot } from './finish'
 import { pendingTargets, recordId, restRemaining, restSlot, starterProgram, targets, type Workout } from './model'
@@ -227,5 +227,33 @@ describe('een set weghalen', () => {
     // Wat al vastligt blijft staan, en telt als de volledige oefening van vandaag.
     expect(plannedSlot(na, eerste.id)?.plannedSets).toBe(1)
     expect(await database.sets.where('sessionId').equals(session.id).count()).toBe(2)
+  })
+})
+
+describe('een open sessie weggooien', () => {
+  it('laat geen sets, concepten of wachtrij achter en laat je daarna gewoon opnieuw beginnen', async () => {
+    await logSet(await draft(), session.revision, database)
+    session = (await database.sessions.get(session.id))!
+    session = await changeWorkout(session.id, session.revision, 'next-set', undefined, database)
+    await draft('25', '9')                        // concept op de volgende set
+
+    await discardWorkout(session.id, session.revision, database)
+    expect(await database.sessions.get(session.id)).toBeUndefined()
+    expect(await database.sets.where('sessionId').equals(session.id).count()).toBe(0)
+    expect(await database.drafts.where('sessionId').equals(session.id).count()).toBe(0)
+    expect(await database.outbox.where('entityId').equals(session.id).count()).toBe(0)
+    expect(await database.outcomes.count()).toBe(0)
+    expect(await database.proposals.count()).toBe(0)
+    expect((await database.workspace.get('main'))?.sessionId).toBeNull()
+
+    // Zonder die laatste stap zou dit falen met 'Je training ontbreekt'.
+    const nieuw = await beginWorkout(database)
+    expect(nieuw.id).not.toBe(session.id)
+  })
+  it('is herhaalbaar en weigert een verouderde revisie', async () => {
+    await expect(discardWorkout(session.id, session.revision - 1, database)).rejects.toThrow()
+    await discardWorkout(session.id, session.revision, database)
+    await discardWorkout(session.id, session.revision, database)
+    expect(await database.sessions.count()).toBe(0)
   })
 })

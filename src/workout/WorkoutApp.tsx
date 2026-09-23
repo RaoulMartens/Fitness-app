@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
-import { beginWorkout, changeWorkout, openWorkspace, workoutDb } from './db'
+import { beginWorkout, changeWorkout, discardWorkout, openWorkspace, workoutDb } from './db'
 import { finishWorkout } from './finish'
 import { Klaar } from './Klaar'
 import { isRunning, localDate, type Workout } from './model'
@@ -77,6 +77,12 @@ export function WorkoutApp() {
     }
   }
 
+  async function weggooien() {
+    if (!data?.actief) return
+    try { await discardWorkout(data.actief.id, data.actief.revision) }
+    catch (error) { setFout(error instanceof Error ? error.message : 'Weggooien lukte niet. Er is niets verwijderd.') }
+  }
+
   const melding = fout && (
     <div className="body" style={{ paddingBottom: 0, flex: '0 0 auto' }}>
       <p className="fout" onClick={() => setFout(null)}>{fout}</p>
@@ -124,6 +130,7 @@ export function WorkoutApp() {
         onFout={setFout}
         onStart={naarSessie}
         onAfronden={afrondenVanuitVandaag}
+        onWeggooien={weggooien}
       />
       <Tabs />
     </div>

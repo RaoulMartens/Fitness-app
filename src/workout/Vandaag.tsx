@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { findExercise } from './exercises'
+import { verdiendeVerhogingen } from './finish'
 import { formatWeight, localDate, targets, type Proposal, type Workout, type WorkoutSet } from './model'
 import { dagenTussen, type VandaagToestand } from './rules'
 
@@ -13,6 +15,7 @@ interface Props {
   onFout: (melding: string) => void
   onStart: () => void
   onAfronden: () => void
+  onWeggooien: () => void
 }
 
 const WEEKDAG = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']
@@ -75,6 +78,7 @@ export function Vandaag(props: Props) {
             <Voortgang session={session} sets={sets} />
             <div style={{ height: 12 }} />
             <button className="btn" onClick={props.onAfronden}>Afronden zoals het was</button>
+            <Weggooien session={session} sets={sets} onWeggooien={props.onWeggooien} />
           </div>
           <p className="next">
             Verder trainen kan niet meer: tussen die sessie en nu zit te veel tijd om dit
@@ -123,6 +127,47 @@ export function Vandaag(props: Props) {
       )}
     </div>
   )
+}
+
+/**
+ * Weggooien kan niet terug, dus eerst zeggen wat er verdwijnt. Het aantal sets zegt
+ * weinig; een verhoging die je al verdiend had is wat je echt kwijtraakt.
+ */
+function Weggooien({ session, sets, onWeggooien }: { session: Workout; sets: WorkoutSet[]; onWeggooien: () => void }) {
+  const [vraagt, setVraagt] = useState(false)
+  const eigen = sets.filter(item => item.sessionId === session.id)
+  const verhogingen = verdiendeVerhogingen(session, eigen)
+  const aantal = eigen.length
+  const tekst = aantal === 0
+    ? 'Er staat nog niets vastgelegd.'
+    : `${aantal} vastgelegde ${aantal === 1 ? 'set verdwijnt' : 'sets verdwijnen'}`
+      + (verhogingen.length
+        ? `, ook de verhoging die ${opsomming(verhogingen)} ${verhogingen.length === 1 ? 'had' : 'hadden'} verdiend`
+        : '')
+      + '. Dit kun je niet terugdraaien.'
+
+  return (
+    <>
+      <button className="link" onClick={() => setVraagt(true)}>Weggooien</button>
+      {vraagt && (
+        <div className="sheet-wrap" onClick={() => setVraagt(false)}>
+          <div className="sheet" onClick={event => event.stopPropagation()}>
+            <div className="grip" />
+            <h1>Weggooien?</h1>
+            <p className="sub">{tekst}</p>
+            <button className="btn" onClick={() => { setVraagt(false); onWeggooien() }}>Weggooien</button>
+            <button className="link" onClick={() => setVraagt(false)}>Toch afronden</button>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+/** "A", "A en B", "A, B en C". */
+function opsomming(namen: string[]) {
+  if (namen.length < 2) return namen.join('')
+  return `${namen.slice(0, -1).join(', ')} en ${namen.at(-1)}`
 }
 
 /** Wat er sinds je vorige sessie is veranderd aan de gewichten. */

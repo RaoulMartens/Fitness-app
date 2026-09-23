@@ -284,6 +284,43 @@ export async function removeSet(sessionId: string, revision: number, slotId: str
   })
 }
 
+/**
+ * Een open sessie weggooien. Sectie 4.4: geen sporen, dus geen sets, geen voorstel en
+ * geen invloed op de pauzeteller. Dat de planning terugvalt op de sessie daarvoor
+ * gaat vanzelf: planning en pauze lezen alleen afgeronde sessies, en deze is nooit
+ * afgerond. Een afgeronde sessie gooi je niet weg; die heeft al een voorstel
+ * geschreven dat een latere sessie misschien al gebruikt heeft.
+ *
+ * De werkruimte wijst naar de open sessie, en beginWorkout weigert te starten als die
+ * verwijzing nergens meer heen gaat. Die moet dus mee, anders blokkeert weggooien
+ * elke volgende training.
+ */
+export async function discardWorkout(id: string, revision: number, database = workoutDb) {
+  return database.transaction('rw',
+    [database.sessions, database.sets, database.drafts, database.outbox, database.workspace, database.appointments],
+    async () => {
+      const session = await database.sessions.get(id)
+      if (!session) return
+      if (session.revision !== revision || !isRunning(session)) throw changed()
+      const setIds = await database.sets.where('sessionId').equals(id).primaryKeys()
+      await database.sets.bulkDelete(setIds)
+      await database.drafts.where('sessionId').equals(id).delete()
+      await database.outbox.where('entityId').anyOf([id, ...setIds]).delete()
+      await database.sessions.delete(id)
+      const workspace = await database.workspace.get('main')
+      if (workspace?.sessionId === id) await database.workspace.put({ ...workspace, sessionId: null })
+      if (session.appointmentId) {
+        const appointment = await database.appointments.get(session.appointmentId)
+        if (appointment?.sessionId === id) {
+          appointment.status = 'planned'
+          delete appointment.sessionId
+          appointment.revision++
+          await queueAppointment(appointment, database)
+        }
+      }
+    })
+}
+
 export type SessionAction = 'begin-exercise' | 'pause' | 'resume' | 'next-set' | 'extra-rest' | 'complete' | 'abort' | 'warmup-on' | 'warmup-off'
 export async function changeWorkout(id: string, revision: number, action: SessionAction, draftRevision?: number | DraftVersions, database = workoutDb) {
   return database.transaction('rw', database.sessions, database.drafts, database.outbox, database.appointments, database.workspace, async () => {
