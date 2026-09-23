@@ -31,10 +31,10 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 }
 .body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 /*
- * De pagina loopt door tot achter de statusbalk en de home-indicator (viewport-fit
- * staat op cover, zodat de kopbalk zijn kleur tot de rand doortrekt). Wat daar staat
- * wordt door iOS vervaagd en verduisterd, dus het bovenste element houdt die strook
- * leeg: blijft er alleen een egale achtergrond over, dan valt er niets te vervagen.
+ * Veilige zones. Sinds viewport-fit niet meer op cover staat zijn deze insets op een
+ * iPhone meestal nul: iOS zet de pagina zelf onder de statusbalk en boven de
+ * home-indicator. De regels blijven staan als vangnet; max() en calc() houden de
+ * gewone marge aan als de inset wegvalt.
  */
 .screen > .kop:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 2px); }
 .screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }

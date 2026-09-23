@@ -2,8 +2,15 @@
 <html lang="nl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#e8e8e8" />
+    <!--
+      Geen viewport-fit=cover. Daarmee liep de pagina door tot achter de statusbalk, en
+      vanaf iOS 26 vervaagt het systeem alles wat daar onder schuift. Met de gewone,
+      dichte statusbalk staat de pagina eronder en valt er niets te vervagen. De balk
+      neemt de kleur van theme-color aan; WorkoutApp zet die per scherm.
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f5f5" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Training" />
     <link rel="icon" href="%BASE_URL%icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />

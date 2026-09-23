@@ -21,7 +21,8 @@ export default defineConfig({
       scope: base,
       display: 'standalone',
       background_color: '#f5f5f5',
-      theme_color: '#e8e8e8',
+      // Kleur bij het opstarten, voordat WorkoutApp hem per scherm zet. De app opent op Vandaag.
+      theme_color: '#f5f5f5',
       icons: [
         { src: `${base}icon-192.png`, sizes: '192x192', type: 'image/png' },
         { src: `${base}icon-512.png`, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },

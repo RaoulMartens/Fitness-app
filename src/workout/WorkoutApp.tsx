@@ -62,6 +62,21 @@ export function WorkoutApp() {
     return () => { geldig = false }
   }, [lijktLeeg])
 
+  /*
+   * De statusbalk kleurt mee met de bovenkant van het scherm. iOS tint die dichte balk
+   * met theme-color; staat daar een andere kleur dan de kop eronder, dan zie je een
+   * rand. De kleur komt uit de stylesheet zelf, van het bovenste element of anders het
+   * scherm, zodat de grijze kop, de donkere rustbalk en de lichte pagina elk hun eigen
+   * kleur krijgen zonder dat die hier nog eens staan.
+   */
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]')
+    const kleur = [document.querySelector('.screen > :first-child'), document.querySelector('.screen')]
+      .map(element => element && getComputedStyle(element).backgroundColor)
+      .find(waarde => waarde && waarde !== 'rgba(0, 0, 0, 0)' && waarde !== 'transparent')
+    if (meta && kleur && meta.getAttribute('content') !== kleur) meta.setAttribute('content', kleur)
+  })
+
   if (!data) return <div className="screen"><div className="body"><p>Bezig met laden…</p></div></div>
 
   const vanSessie = (id?: string) => id ? data.sets.filter(item => item.sessionId === id) : []
