@@ -7,7 +7,7 @@ import {
   draftVersions, formatWeight, minutenLabel, pendingTargets, recordId, restRemaining, restSlot, restTotal, targets, timerLabel,
   type Workout, type WorkoutDraft, type WorkoutSet,
 } from './model'
-import { magVastleggen } from './rules'
+import { beginHerhalingen, magVastleggen } from './rules'
 import { useWakeLock } from './useWakeLock'
 import { Video } from './Video'
 
@@ -25,10 +25,8 @@ interface Props {
  */
 function beginwaarden(exerciseId: string, target: { weight: number | null; repsMin: number }, vorige?: WorkoutSet) {
   const minWeight = findExercise(exerciseId)?.minWeight ?? 0
-  return {
-    weight: target.weight ?? vorige?.weight ?? minWeight,
-    reps: vorige?.reps ?? target.repsMin,
-  }
+  const weight = target.weight ?? vorige?.weight ?? minWeight
+  return { weight, reps: beginHerhalingen(weight, vorige, target.repsMin) }
 }
 
 export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {

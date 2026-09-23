@@ -229,6 +229,17 @@ export function vandaagToestand(input: {
 
 // --- invoer, sectie 4.6 ----------------------------------------------------------
 
+/**
+ * Waar het herhalingenveld begint. Hetzelfde gewicht als vorige keer: je aantal van
+ * toen, want daar zit je nu ongeveer. Een ander gewicht: de onderkant van je bereik.
+ * Na een verhoging haal je je oude aantal zelden, en na een verlaging mik je op het
+ * bereik, niet op het tekort van vorige keer.
+ */
+export function beginHerhalingen(gewicht: number, vorige: { weight: number; reps: number } | undefined, repsMin: number) {
+  if (!vorige) return repsMin
+  return gewicht === vorige.weight ? vorige.reps : repsMin
+}
+
 export function magVastleggen(weight: number | null, reps: number | null) {
   if (weight === null || reps === null) return false
   if (!Number.isInteger(reps) || reps < 1) return false

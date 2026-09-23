@@ -115,7 +115,7 @@ export function Klaar({ outcome, session, sets, voorstellen, toestanden, onTerug
  * Sectie 4.2. Dichttikken geldt als zo laten, met dezelfde vastlegging: anders komt
  * de vraag na een herberekening terug over iets waar je al overheen stapte.
  */
-function Plateau({ session, exerciseId, state, onFout }: {
+export function Plateau({ session, exerciseId, state, onFout }: {
   session: Workout
   exerciseId: string
   state?: ExerciseState

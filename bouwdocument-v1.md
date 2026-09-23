@@ -543,11 +543,17 @@ Alle `step` en `minWeight` blijven een aanname tot ze in de sportschool zijn nag
 | Navigatie | schermen in de hash van het adres | terugknop en iOS-veegbeweging werken, en Klaar overleeft verversen |
 | Omleiden naar Vandaag | pas na een verse lezing uit de opslag | de livequery loopt vlak na starten achter en stuurde je terug uit een net begonnen sessie |
 
-### 12.5 Nog open
+### 12.5 Na stap 5 opgelost
 
-- Een plateauvraag blijft staan zolang je op het Klaar-scherm bent, ook na verversen. Ga je
-  weg zonder te antwoorden, dan komt hij pas terug bij de volgende stilstand.
-- Na een verhoging begint het herhalingenveld op wat je vorige keer deed, niet op de
-  onderkant van je bereik.
+- Een onbeantwoorde plateauvraag staat op Vandaag, boven de training, tot je kiest. Niet
+  tijdens een lopende sessie: dan liggen de gewichten van die dag al vast.
+- Het herhalingenveld begint op je aantal van vorige keer als het gewicht gelijk is, en op
+  de onderkant van je bereik als het gewicht veranderde.
+- iOS 26 vervaagt de bovenrand van de pagina, onder de statusbalk; de inset groeit niet
+  mee. Bovenaan staat daarom een egale strook (`--glasrand`, 24px, alleen op iOS), de kop
+  blijft bovenaan staan, en de voortgangsbalkjes staan onder de titel.
+
+### 12.6 Nog open
+
 - `step` en `minWeight` per apparaat, de teksten van de oefeningen en de video's staan nog
   op aannames (sectie 10).

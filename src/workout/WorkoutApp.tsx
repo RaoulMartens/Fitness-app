@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { beginWorkout, changeWorkout, discardWorkout, openWorkspace, workoutDb } from './db'
-import { finishWorkout } from './finish'
+import { finishWorkout, vastgelopen } from './finish'
 import { Instellingen } from './Instellingen'
 import { Klaar } from './Klaar'
 import { huidigSchema, isRunning, localDate, type Workout } from './model'
@@ -83,6 +83,12 @@ export function WorkoutApp() {
   const schema = huidigSchema(data.vervangingen)
   const laatsteSessieDag = data.laatste?.sessionDay ?? null
   const actieveSets = vanSessie(data.actief?.id)
+  // Een plateauvraag die op Klaar bleef liggen. Niet tijdens een sessie: dan staan de
+  // gewichten van vandaag al vast en komt de keuze pas de keer daarna aan bod.
+  const openPlateau = !data.actief && data.laatste
+    ? vastgelopen(data.laatste, data.voorstellen, data.toestanden)[0]
+    : undefined
+  const plateauSessie = openPlateau ? data.sessions.find(item => item.id === data.laatste!.sessionId) : undefined
   const toestand = vandaagToestand({
     openSessie: data.actief
       ? { sessieDag: localDate(new Date(data.actief.startedAt)), laatsteActiviteit: laatsteActiviteit(data.actief, actieveSets) }
@@ -209,6 +215,9 @@ export function WorkoutApp() {
             onStart={naarSessie}
             onAfronden={afrondenVanuitVandaag}
             onWeggooien={weggooien}
+            plateau={openPlateau && plateauSessie
+              ? { session: plateauSessie, exerciseId: openPlateau, state: data!.toestanden.find(item => item.exerciseId === openPlateau) }
+              : undefined}
           />
         )
     }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   bereikGehaald, dagenTussen, isPauzeSessie, isVergeten, magTrainenOp, magVastleggen,
-  geplandeDagen, naPauzeSessie, naPlateau, pauzeGewicht, plateauBereikt, stap, startgewicht, vandaagToestand, voorstel,
+  beginHerhalingen, geplandeDagen, naPauzeSessie, naPlateau, pauzeGewicht, plateauBereikt, stap, startgewicht, vandaagToestand, voorstel,
   type LoggedSet, type PlannedSlot,
 } from './rules'
 
@@ -222,5 +222,18 @@ describe('geplandeDagen', () => {
   })
   it('begint vandaag zonder eerdere sessie', () => {
     expect(geplandeDagen(null, '2026-09-19', '2026-09-22')).toEqual(['2026-09-19', '2026-09-22'])
+  })
+})
+
+describe('beginHerhalingen', () => {
+  it('neemt je aantal van vorige keer over op hetzelfde gewicht', () => {
+    expect(beginHerhalingen(80, { weight: 80, reps: 11 }, 8)).toBe(11)
+  })
+  it('begint onderaan je bereik als het gewicht omhoog of omlaag ging', () => {
+    expect(beginHerhalingen(85, { weight: 80, reps: 12 }, 8)).toBe(8)
+    expect(beginHerhalingen(75, { weight: 80, reps: 6 }, 8)).toBe(8)
+  })
+  it('begint onderaan zonder vorige keer', () => {
+    expect(beginHerhalingen(20, undefined, 10)).toBe(10)
   })
 })

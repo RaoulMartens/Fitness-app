@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { findExercise } from './exercises'
 import { verdiendeVerhogingen } from './finish'
-import { formatWeight, localDate, minutenLabel, targets, type Proposal, type Workout, type WorkoutSet } from './model'
+import { Plateau } from './Klaar'
+import { formatWeight, localDate, minutenLabel, targets, type ExerciseState, type Proposal, type Workout, type WorkoutSet } from './model'
 import { dagenTussen, type VandaagToestand } from './rules'
 
 interface Props {
@@ -16,6 +17,8 @@ interface Props {
   onStart: () => void
   onAfronden: () => void
   onWeggooien: () => void
+  /** Een plateauvraag die op Klaar niet beantwoord is. */
+  plateau?: { session: Workout; exerciseId: string; state?: ExerciseState }
 }
 
 const WEEKDAG = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za']
@@ -56,6 +59,8 @@ export function Vandaag(props: Props) {
     <div className="body">
       <p className="sub">{datumTekst}</p>
       <Weekstrook vandaag={vandaag} trainingsdagen={trainingsdagen} />
+
+      {props.plateau && <PlateauKaart plateau={props.plateau} onFout={props.onFout} />}
 
       {toestand === 'hervatten' && session && (
         <div className="card">
@@ -125,6 +130,29 @@ export function Vandaag(props: Props) {
           </p>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Een plateauvraag die je op Klaar liet liggen. Hier, boven de training, omdat de keuze
+ * het gewicht van je volgende sessie bepaalt: na het starten is die al vastgelegd.
+ * Het sheet is hetzelfde als op Klaar, ook in wat dichttikken betekent.
+ */
+function PlateauKaart({ plateau, onFout }: {
+  plateau: NonNullable<Props['plateau']>
+  onFout: (melding: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const naam = plateau.session.snapshot.slots.find(slot => slot.exerciseId === plateau.exerciseId)?.name
+  return (
+    <div className="card">
+      <div className="lab">Nog te beslissen</div>
+      <h1>{naam} staat stil</h1>
+      <p className="sub">Het gewicht van je volgende sessie hangt af van wat je kiest.</p>
+      <div style={{ height: 12 }} />
+      <button className="link" onClick={() => setOpen(true)}>Kiezen</button>
+      {open && <Plateau session={plateau.session} exerciseId={plateau.exerciseId} state={plateau.state} onFout={onFout} />}
     </div>
   )
 }
