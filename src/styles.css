@@ -39,6 +39,32 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .screen > .kop:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 2px); }
 .screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
 .screen > .bar:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + 10px); }
+
+/*
+ * iOS 26 legt een vervagingsband over de bovenrand van de pagina, onder de statusbalk,
+ * in Safari en als app op het startscherm. De safe-area-inset groeit daar niet voor
+ * mee en er is geen schakelaar om hem uit te zetten. Wat helpt: in die band niets
+ * zetten dan een egale kleur, want een vervaagde egale kleur blijft dezelfde kleur.
+ *
+ * De hoogte is afgelezen van een screenshot: de balkjes op 5pt waren onleesbaar, de
+ * titel op 26pt nog zacht, de lijn op 49pt scherp. Blijft de bovenkant zacht, dan is
+ * --glasrand de ene waarde om bij te stellen.
+ *
+ * Alleen op iOS, te herkennen aan -webkit-touch-callout; elders zou het lege ruimte zijn.
+ */
+@supports (-webkit-touch-callout: none) {
+  :root { --glasrand: 34px; }
+  .screen > .kop:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + var(--glasrand)); }
+  .screen > .body:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + var(--glasrand)); }
+  .screen > .bar:first-child { padding-top: calc(env(safe-area-inset-top, 0px) + var(--glasrand)); }
+}
+
+/*
+ * De sessiekop en de terugbalk blijven bovenaan staan terwijl de inhoud eronder
+ * doorschuift. Anders scrollen de voortgangsbalkjes zelf de vervaagde band in, en is
+ * precies dat wat je tijdens een lange sessie wilt zien het eerste dat verdwijnt.
+ */
+.screen > .kop:first-child, .screen > .bar:first-child { position: sticky; top: 0; z-index: 5; }
 /* Zonder tabbalk raakt de onderste knop de rand van het scherm. */
 .screen > .body:last-child { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 /*
@@ -53,6 +79,9 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   margin-left: -16px; margin-right: -16px;
   padding: 10px 16px max(10px, env(safe-area-inset-bottom));
   background: var(--paper); border-top: 1px dashed var(--line);
+  /* Boven de plakkende kop: de sheets van Afronden en Aanpassen wonen in deze strook, en
+     sticky maakt een eigen stapellaag, dus hun z-index telt alleen hierbinnen. */
+  z-index: 6;
 }
 /* De strook draagt zelf de veilige zone; anders staat er nog ruimte onder. */
 .screen > .body:last-child:has(.acties) { padding-bottom: 0; }
@@ -284,7 +313,7 @@ p { font-size: 14px; color: #545454; line-height: 1.45; }
 .tabs button.on .ico { background: #b8b8b8; border-style: solid; border-color: #8f8f8f; }
 
 /* --- sheets -------------------------------------------------------------- */
-.sheet-wrap { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(60, 60, 60, .35); }
+.sheet-wrap { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(60, 60, 60, .35); }
 .sheet {
   background: #efefef; border-top: 2px dashed #aaa; border-radius: 12px 12px 0 0;
   padding: 14px 16px max(24px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px;
