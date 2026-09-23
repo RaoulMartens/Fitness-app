@@ -210,11 +210,15 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           <span>Herh {bereik.repsMin}–{bereik.repsMax}</span><span />
         </div>
 
-        {slot.sets.map(target => {
+        {slot.sets.map((target, _index, rijen) => {
+          const genummerd = rijen.filter(item => item.kind !== 'warmup')
           const id = recordId(session.id, slot.id, target.number)
           const record = sets.find(item => item.id === id)
           const eerder = vorigeSets.find(item => item.number === target.number)
-          const label = target.kind === 'warmup' ? 'warming-up' : target.kind === 'extra' ? 'extra' : String(target.number)
+          // Doorlopend genummerd in beeld. Het opgeslagen nummer is een kenmerk, geen
+          // telling: haal je set 2 weg en zet je er een bij, dan slaat die 2 over.
+          const label = target.kind === 'warmup' ? 'warming-up' : String(genummerd.indexOf(target) + 1)
+          const naam = target.kind === 'warmup' ? 'de warming-up' : `set ${label}`
           // Alleen een geplande werkset heeft een tegenhanger in de vorige sessie.
           const vorigeTekst = target.kind === 'work' && eerder ? `${formatWeight(eerder.weight)} × ${eerder.reps}` : '—'
 
@@ -222,7 +226,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
             return (
               <Stappers
                 key={target.number} corrigeert
-                label={label} smal={target.kind !== 'work'} vorige={vorigeTekst}
+                label={label} smal={target.kind === 'warmup'} vorige={vorigeTekst}
                 exerciseId={slot.exerciseId}
                 weight={correctieWeight} reps={correctieReps}
                 onWeight={setCorrectieWeight} onReps={setCorrectieReps}
@@ -232,12 +236,12 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           if (record) {
             return (
               <div className="set done" key={target.number}>
-                <span className={target.kind !== 'work' ? 'num w' : 'num'}>{label}</span>
+                <span className={target.kind === 'warmup' ? 'num w' : 'num'}>{label}</span>
                 <span className="prev">{vorigeTekst}</span>
-                <button className="in" onClick={() => openCorrectie(record)} aria-label={`Gewicht van ${label} aanpassen`}>
+                <button className="in" onClick={() => openCorrectie(record)} aria-label={`Gewicht van ${naam} aanpassen`}>
                   {formatWeight(record.weight)}
                 </button>
-                <button className="in" onClick={() => openCorrectie(record)} aria-label={`Herhalingen van ${label} aanpassen`}>
+                <button className="in" onClick={() => openCorrectie(record)} aria-label={`Herhalingen van ${naam} aanpassen`}>
                   {record.reps}
                 </button>
                 <span className="tick">✓</span>
@@ -247,7 +251,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           if (id !== huidig.id || session.rest || corrigeert) {
             return (
               <div className="set" key={target.number}>
-                <span className={target.kind !== 'work' ? 'num w' : 'num'}>{label}</span>
+                <span className={target.kind === 'warmup' ? 'num w' : 'num'}>{label}</span>
                 <span className="prev">{vorigeTekst}</span>
                 <span className="in">—</span><span className="in">—</span>
                 <span className="tick">○</span>
@@ -257,7 +261,7 @@ export function Sessie({ session, sets, drafts, onFout, onKlaar }: Props) {
           return (
             <Stappers
               key={target.number}
-              label={label} smal={target.kind !== 'work'} vorige={vorigeTekst}
+              label={label} smal={target.kind === 'warmup'} vorige={vorigeTekst}
               exerciseId={slot.exerciseId}
               weight={weight} reps={reps}
               onWeight={setWeight} onReps={setReps}
